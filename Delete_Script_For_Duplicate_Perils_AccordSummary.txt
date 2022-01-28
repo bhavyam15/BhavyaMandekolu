@@ -1,0 +1,9 @@
+delete from Accord_SCM_Summary 
+where ClaimMovement_Key in (
+select ClaimMovement_Key from (
+select
+ ClaimMovement_UUID,ClaimMovement_Key, --ClaimID,ClaimMovement_ContractSection_PolicyPerilsConditionsDescription, ClaimMovement_Key,
+row_number() over(partition by ClaimMovement_UUID order by ClaimMovement_key) as Rnk
+from Accord_SCM_Summary
+)A
+where Rnk >1)
