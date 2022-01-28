@@ -1,0 +1,1398 @@
+#__AW_Repository_Version '14.2.11.0000';
+#__AW_Product_Version '14.2.11.2138';
+#__AW_ATL_Locale 'eng_gb.utf-8';
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'263\', y = \'-3788\',ObjectDesc=\'Modification History:
+=============
+
+Version	 Date		By                	Description
+------------------------------------------------------------------------------------------------------------------------------------------
+1.000         20/10/2009	D Lloyd	Initial Version                                                                                                    
+1.001         04/11/2009                J Sandell  Applied changes to Qry_Construct to use global variable  $G_JOB_NAME  for Job name and hard coded the  workflow and dataflow names as per the standards document for performance                                                          
+1.002      06/11/200    J Sandell    Added Catastrophe code  
+1.003      06/11/200    J Sandell                  Amended validation logic and removed pivot
+1.004      01/04/2010  D Lloyd   JIRA ECLR-72 - As part of this fix it was noticed that records with a trust_fund_repos_id of 0 were being sent to fail only. This has been now set to both
+1.005      20/04/2010 D Lloyd    JIRA ECLR-157 - amended QRY_Lookup.PolicyLineRef to UPPER case as the lookups of the contract_repos_Ids were failing where these were being supplied in lower case.
+1.006        18/05/2010                 D Lloyd   ECLR-213 Added Early_RI_IND to columns taken through to Inw_USM     
+1.007        18/05/2010                 D Lloyd   ECLR-214 Amended lookup of Inw_Contract_Repos_ID in QRY_Inw_USM to use the PolicyLineID from the source data and not the contract reference also as this can sometimes be incorrect in the source data.
+
+1.008	14/12/2010	S Osmond	FORE-438 - QRY_Lookup now excludes inward transactions where they are of type ORC
+1.009 	21/07/2014	Venkata Sudheer     As Part of EUI-11, The NVL is applied to the column \\\'SIGNINGVERSIONNUM\\\' to handle Null data coming from the source.
+1.010	13/08/2014	Soujanya B	EUI-ITEM-29: Altered the datatype for the columns BrokerCode, PlacingBrokerCode from source to till 							QRY_Inw_USM,QRY_Outw_USM.\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-263</X><Y>3788</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>2743</CX><CY>1075</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ANNOTATION_1" = 'ALGUICOMMENT( x = \'1028\', y = \'-48\',ObjectDesc=\'Data Flow Name	:     DF_KDR_WRK_USM
+Created By	:     David Lloyd
+Date Created	:     20/10/2009
+
+Description
+-------------
+Dataflow reads in the Eclipse USMSigningTrans table and converts the attributes to repos IDs. The data is then split into inwards and outwards based on inwardsoutwardsind in the message
+Validation is carried out on Risk Code, 3 FIL codes, Trust Fund, Inwards and Outwards contract IDs.                                                         Excluded transactions:    Inward transaction without a policyLineID,   Syndicate 1204 - excluded on landing                                                                                                                                                                                                                                                                                                                      Modification History:
+=============
+
+Version	 Date	     By                	Description
+------------------------------------------------------------------------------------------------------------------------------------------
+1.000       16/10/2009  D Lloyd      Initial Version
+1.001       18/05/2010  D Lloyd      ECLR-213 Early_RI_IND from source has been added to be taken through to INW_USM
+1.002       14/06/2010  J Sandell    ECLR-183 Amended lookup for filcode2
+1.003       16/12/2011  Dushyant    FORE-570 /ECLR-299 - Adding Integer version of Source ID to allow proper Comparison of data during TC in DF_KDR_Build_RTL_Inw_USM.  
+1.004	21/12/2011 Aravindh   FORA-629 The columns OVERRIDING_COMMISSION_IND from source has been added to be taken through to INW_USM. Get Outw_Contract Repos_ID by looking up OUTW_CONTRACT table.
+1.005	10/12/2012	MadhaviM		As part of KMI phase3 drag and drop the newly added column DTI_Code from source to target WRK_ECL_INW_USM
+
+1.006	17/02/2014   Meena Murali  		As part of Jira KDR-1153, modified the dataflow to add the conditions on Data_Source_Repos_ID and 						Contract_Record_Type_Repos_ID in the Query Transformation, QRY_Inw_USM, while doing a lookup on 						INW_CONTRACT in lookup_ext_1
+1.007	09/04/2019     Sakthi Priya		Checked run as seperate process for lookup_ext in QRY_Lookup, QRY_INW_USM,QRY_OUTW_USM and changed Degree of Parallelism as 2 for SQL 2016 Upgrade project and Removed INT conversion in INW_USM_INT_SOURCE_ID and populated from USMSIGNINGTRANSID for SQL 2016 Upgrade project
+
+1.008       09/04/2020     Prashanth            CA540:  Split this dataflow to run the inwards and outwards in parallel. Changed bulk load to delete and load, with No of Loaders as 4, and Parallel execution degree as 2
+\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-1028</X><Y>48</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>2385</CX><CY>1452</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ANNOTATION_2" = 'ALGUICOMMENT( x = \'2341\', y = \'-1731\',ObjectDesc=\'Bulk load with Truncate\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-2341</X><Y>1731</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>440</CX><CY>116</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ANNOTATION_3" = 'ALGUICOMMENT( x = \'2397\', y = \'-2587\',ObjectDesc=\'Bulk load with Truncate\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-2397</X><Y>2587</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>409</CX><CY>116</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RSavedAfterCheckOut', "ActaName_2" = 'RDate_created', "ActaName_3" = 'RDescription', "ActaName_4" = 'RDate_modified', "ActaValue_1" = 'YES', "ActaValue_2" = 'Mon Jul 21 15:34:51 2014', "ActaValue_3" = 'Read in the landed USM data, populated repos_ids, Splits into Inw / Outw and validates repos_ids', "ActaValue_4" = 'Sun Apr 12 12:31:27 2020', "x" = '-1', "y" = '-1')
+CREATE  DATAFLOW DF_KDR_WRK_USM::'68f38d70-dfbb-4efa-a6b6-33c2c524e654'
+BEGIN
+
+ALGUIComment ("InputSchema_WidthProp" = '37', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Business_Name', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '120', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '281', "Input_Width_Type" = '85', "ObjectDesc" = 'Perform Lookups on USM Transactions 
+
+Exclude Inward transactions where PolicyLineID <= 0 ', "Output_1st_Column_Name" = 'Description', "Output_2nd_Column_Name" = 'Type', "Output_3rd_Column_Name" = 'Mapping', "Output_Column_Name_4" = 'Business_Name', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '80', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '185', "Output_Width_Mapping" = '85', "Output_Width_Name" = '384', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>231</X><Y>0</Y></LOCATION><SIZE><CX>253</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-206</Y></LOCATION><SIZE><CX>338</CX><CY>308</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '60', "ui_acta_from_schema_0" = 'TMP_ECL_LANDED_USMSIGNINGTRANS', "ui_display_name" = 'QRY_Lookup', "ui_where_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.LOAD_ID = $G_UNLOAD_ID
+# Allow all outwards transactions through
+AND INWARDSOUTWARDSIND = \'I\'	AND POLICYLINEID <> 0
+#((INWARDSOUTWARDSIND = \'O\')
+# Filter out inwards if the policylineid is not set
+ 
+
+', "x" = '50', "y" = '-1849')
+GUID::'bf7c5ad3-1c7f-4a00-aeec-fb6fa828b26f' CREATE VIEW QRY_Lookup( USM_SOURCE_ID VARCHAR(50)  KEY  SET( "ui_mapping_text" = 'CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS.USMSIGNINGTRANSID)') ,
+ DATA_SOURCE_REPOS_ID INT  SET( "ui_mapping_text" = '$G_KDR_ECLIPSE_DATA_SOURCE_REPOS_ID') ,
+ INSERTED_DT DATETIME(9)  SET( "ui_mapping_text" = '$G_UNLOAD_EXECUTION_START_DT') ,
+ LAST_UPDATED_DT DATETIME(9)  SET( "ui_mapping_text" = '$G_UNLOAD_EXECUTION_START_DT') ,
+ MARKET_REPOS_ID INT  SET( "ui_mapping_text" = '$G_MARKET_REPOS_ID') ,
+ lookup_ext AL_RFC_SCHEMA_GROUP (PROCESSING_PERIOD_REPOS_ID INT  KEY ) ,
+ lookup_ext_14 AL_RFC_SCHEMA_GROUP (TRANSACTION_REASON_REPOS_ID INT ) ,
+ lookup_ext_15 AL_RFC_SCHEMA_GROUP (QUALIFYING_CATEGORY_REPOS_ID INT ) ,
+ lookup_ext_1 AL_RFC_SCHEMA_GROUP (USM_ENTRY_TYPE_REPOS_ID INT ) ,
+ lookup_ext_2 AL_RFC_SCHEMA_GROUP (MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID INT )  SET( "Description" = 'Based on BUSINESSCATEGORY but this was not populated in the source data until 1995') ,
+ YEAR_OF_ACCOUNT INT  SET( "ui_mapping_text" = '#YOA
+TMP_ECL_LANDED_USMSIGNINGTRANS.YOA') ,
+ SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.SIGNINGDATE') ,
+ SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = '#SIGNINGNUM
+CONVERT(VARCHAR(50),TMP_ECL_LANDED_USMSIGNINGTRANS.SIGNINGNUM)') ,
+ SIGNING_VERSION VARCHAR(2)  SET( "ui_mapping_text" = '#SIGNINGVERSIONNUM
+
+# As Part of EUI-11, The NVL is applied to handle Null data coming from the source.
+NVL(CONVERT(VARCHAR(50),TMP_ECL_LANDED_USMSIGNINGTRANS.SIGNINGVERSIONNUM),\'01\')') ,
+ lookup_ext_4 AL_RFC_SCHEMA_GROUP (SETTLEMENT_CURRENCY_REPOS_ID INT ) ,
+ SETTLEMENT_TRANSACTION_AMT DECIMAL(21, 6)  SET( "Description" = 'Share in Settlement CCY - nulls set to 0.0', "ui_mapping_text" = 'NVL(SHARENETAMTSETTCCY,0.0)') ,
+ SETTLEMENT_TRANSACTION_WAR_AMT DECIMAL(21, 6)  SET( "Description" = 'Share WAR amount in Settlement CCY  - nulls set to 0.0', "ui_mapping_text" = 'NVL(TMP_ECL_LANDED_USMSIGNINGTRANS.SHAREWARAMTSETTCCY,0.0)') ,
+ SETTLEMENT_TRANSACTION_VAT_AMT DECIMAL(21, 6)  SET( "Description" = 'Share VAT amount in Settlement CCY  - nulls set to 0.0', "ui_mapping_text" = 'NVL(TMP_ECL_LANDED_USMSIGNINGTRANS.SHAREVATAMTSETTCCY,0.0)') ,
+ SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT DECIMAL(21, 6)  SET( "Description" = 'Share amount ceded to Lloyd\'s  - nulls set to 0.0', "ui_mapping_text" = 'NVL(TMP_ECL_LANDED_USMSIGNINGTRANS.SHARECEDEDTOLLOYDSSETTCCY,0.0)') ,
+ lookup_ext_5 AL_RFC_SCHEMA_GROUP (SYNDICATE_REPOS_ID INT ) ,
+ POLICYLINEREF VARCHAR(20)  SET( "ui_mapping_text" = 'UPPER(TMP_ECL_LANDED_USMSIGNINGTRANS.POLICYLINEREF)') ,
+ POLICYLINEID INT  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.POLICYLINEID') ,
+ ORIGINAL_TO_SETTLEMENT_ROE DECIMAL(18, 9)  SET( "ui_mapping_text" = 'ORIGTOSETTCCYROE') ,
+ lookup_ext_6 AL_RFC_SCHEMA_GROUP (ORIGINAL_CURRENCY_REPOS_ID INT ) ,
+ ORIGINAL_SIGNING_NUM VARCHAR(50)  SET( "ui_mapping_text" = 'CONVERT(VARCHAR(50),ORIGSIGNINGNUM)') ,
+ ORIGINAL_SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'ORIGSIGNINGDATE') ,
+ lookup_ext_7 AL_RFC_SCHEMA_GROUP (TRUST_FUND_REPOS_ID INT ) ,
+ lookup_ext_8 AL_RFC_SCHEMA_GROUP (RISK_CODE_REPOS_ID INT ) ,
+ BROKERCODE VARCHAR(6)  SET( "ui_mapping_text" = '#EUI-ITEM-29: Altered the datatype for this column from Varchar(4) to Varchar(6).
+TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERCODE') ,
+ PLACINGBROKERCODE VARCHAR(6)  SET( "ui_mapping_text" = '#EUI-ITEM-29: Altered the datatype for this column from Varchar(4) to Varchar(6).
+TMP_ECL_LANDED_USMSIGNINGTRANS.PLACINGBROKERCODE') ,
+ ENTRYTYPE VARCHAR(3)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.ENTRYTYPE') ,
+ RISKCODE VARCHAR(2)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.RISKCODE') ,
+ FILCODE1 VARCHAR(4)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.FILCODE1') ,
+ FILCODE2 VARCHAR(4)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.FILCODE2') ,
+ FILCODE VARCHAR(2)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.FILCODE') ,
+ TRUSTFUNDCODE VARCHAR(2)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.TRUSTFUNDCODE') ,
+ STATUSID INT  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.STATUSID') ,
+ lookup_ext_9 AL_RFC_SCHEMA_GROUP (MARKET_FILCODE_REPOS_ID INT ) ,
+ lookup_ext_10 AL_RFC_SCHEMA_GROUP (FILCODE1_REPOS_ID INT ) ,
+ USMSIGNINGTRANSID INT  KEY  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.USMSIGNINGTRANSID') ,
+ lookup_ext_11 AL_RFC_SCHEMA_GROUP (FILCODE2_REPOS_ID INT ) ,
+ UNIQUE_MARKET_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'CONVERT(VARCHAR(50),UNIQUEMARKETREF)') ,
+ lookup_ext_12 AL_RFC_SCHEMA_GROUP (BROKER_REPOS_ID INT ) ,
+ lookup_ext_13 AL_RFC_SCHEMA_GROUP (PLACING_BROKER_REPOS_ID INT ) ,
+ BROKERREFONE VARCHAR(50)  SET( "ui_mapping_text" = 'CONVERT(VARCHAR(50),TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERREFONE)') ,
+ BROKERREFTWO VARCHAR(50)  SET( "ui_mapping_text" = 'CONVERT(VARCHAR(50),TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERREFTWO)') ,
+ BROKERORDER1 DECIMAL(15, 8)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERORDER1') ,
+ BROKERORDER2 DECIMAL(15, 8)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERORDER2') ,
+ SIGNING_NARRATIVE VARCHAR(500)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.SIGNINGNARR') ,
+ OVERRIDINGCOMMISSIONIND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.OVERRIDINGCOMMISSIONIND') ,
+ ACTUAL_SETTLEMENT_DT DATETIME(9)  SET( "ui_mapping_text" = 'ACTUALSETTDATE') ,
+ EARLY_RI_IND VARCHAR(1)  SET( "ui_mapping_text" = 'EARLYRIIND') ,
+ RI_LEVEL INT  SET( "ui_mapping_text" = 'RILEVEL') ,
+ MESSAGE_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'CONVERT(Varchar(50),MSGREF)') ,
+ ISCONTRA VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.ISCONTRA') ,
+ HASCONTRA VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.HASCONTRA') ,
+ ISREPL VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.ISREPL') ,
+ INWARDSOUTWARDSIND VARCHAR(10)  SET( "Description" = 'I or O', "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.INWARDSOUTWARDSIND') ,
+ CATASTROPHE_CODE VARCHAR(4)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.CATCODE') ,
+ lookup_ext_16 AL_RFC_SCHEMA_GROUP (SIGNING_STATUS VARCHAR(40) ) ,
+ GENERATED_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.GENERATED_IND') ,
+ lookup_ext_3 AL_RFC_SCHEMA_GROUP (OUTW_CONTRACT_REPOS_ID INT ) ,
+ DTI_CODE VARCHAR(50)  SET( "ui_mapping_text" = '#As part of KMI Phase3 drag and drop the column from the source to target
+TMP_ECL_LANDED_USMSIGNINGTRANS.DTI_CODE')  )
+ AS
+SELECT CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS.USMSIGNINGTRANSID), $G_KDR_ECLIPSE_DATA_SOURCE_REPOS_ID, $G_UNLOAD_EXECUTION_START_DT, $G_UNLOAD_EXECUTION_START_DT, $G_MARKET_REPOS_ID, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.PERIOD_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ PERIOD_REPOS_ID ], [ 0 ], [ PERIOD_END_DT, '=', (add_months(to_date((CONVERT( INT , TMP_ECL_LANDED_USMSIGNINGTRANS.PROCESSPERIOD) + 1), 'YYYYMMDD'), 1) - num_to_interval(1, 'S')), PERIOD_TYPE, '=', 'Month' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.TRANSACTION_REASON_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ TRANSACTION_REASON_REPOS_ID ], [ 0 ], [ TRANSACTION_REASON, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.CATEGORYCODE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.QUALIFYING_CATEGORY_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ QUALIFYING_CATEGORY_REPOS_ID ], [ 0 ], [ QUALIFYING_CATEGORY, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.QUALCATEGORY, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.USM_ENTRY_TYPE_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ USM_ENTRY_TYPE_REPOS_ID ], [ 0 ], [ USM_ENTRY_TYPE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.ENTRYTYPE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.MARKET_TRANSACTION_CATEGORY_CODE_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID ], [ 0 ], [ MARKET_TRANSACTION_CATEGORY_CODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.BUSINESSCATEGORY, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, TMP_ECL_LANDED_USMSIGNINGTRANS.YOA, TMP_ECL_LANDED_USMSIGNINGTRANS.SIGNINGDATE, CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS.SIGNINGNUM), nvl(CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS.SIGNINGVERSIONNUM), '01'), __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.CURRENCY_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ CURRENCY_REPOS_ID ], [ 0 ], [ CURRENCY, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.SETTCCYISO, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, nvl(SHARENETAMTSETTCCY, 0.00000000000000e+00), nvl(TMP_ECL_LANDED_USMSIGNINGTRANS.SHAREWARAMTSETTCCY, 0.00000000000000e+00), nvl(TMP_ECL_LANDED_USMSIGNINGTRANS.SHAREVATAMTSETTCCY, 0.00000000000000e+00), nvl(TMP_ECL_LANDED_USMSIGNINGTRANS.SHARECEDEDTOLLOYDSSETTCCY, 0.00000000000000e+00), __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.SYNDICATE, 'PRE_LOAD_CACHE', 'MAX'], [ SYNDICATE_REPOS_ID ], [ 0 ], [ SYNDICATE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.SYND, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, upper(TMP_ECL_LANDED_USMSIGNINGTRANS.POLICYLINEREF), TMP_ECL_LANDED_USMSIGNINGTRANS.POLICYLINEID, ORIGTOSETTCCYROE, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.CURRENCY_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ CURRENCY_REPOS_ID ], [ 0 ], [ CURRENCY, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.ORIGCCYISO, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, CONVERT( VARCHAR(50) , ORIGSIGNINGNUM), ORIGSIGNINGDATE, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.TRUST_FUND_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ TRUST_FUND_REPOS_ID ], [ 0 ], [ TRUST_FUND, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.TRUSTFUNDCODE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.RISK_CODE_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ RISK_CODE_REPOS_ID ], [ 0 ], [ RISK_CODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.RISKCODE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERCODE, TMP_ECL_LANDED_USMSIGNINGTRANS.PLACINGBROKERCODE, TMP_ECL_LANDED_USMSIGNINGTRANS.ENTRYTYPE, TMP_ECL_LANDED_USMSIGNINGTRANS.RISKCODE, TMP_ECL_LANDED_USMSIGNINGTRANS.FILCODE1, TMP_ECL_LANDED_USMSIGNINGTRANS.FILCODE2, TMP_ECL_LANDED_USMSIGNINGTRANS.FILCODE, TMP_ECL_LANDED_USMSIGNINGTRANS.TRUSTFUNDCODE, TMP_ECL_LANDED_USMSIGNINGTRANS.STATUSID, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.FILCODE_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ FILCODE_REPOS_ID ], [ 0 ], [ FILCODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.FILCODE, FILCODE_TYPE, '=', 'FilCode', CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.FILCODE_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ FILCODE_REPOS_ID ], [ 0 ], [ FILCODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.FILCODE1, FILCODE_TYPE, '=', 'FilCode1', CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, TMP_ECL_LANDED_USMSIGNINGTRANS.USMSIGNINGTRANSID, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.FILCODE_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ FILCODE_REPOS_ID ], [ 0 ], [ FILCODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.FILCODE2, FILCODE_TYPE, '=', 'FilCode1', CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, CONVERT( VARCHAR(50) , UNIQUEMARKETREF), __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.BROKER, 'PRE_LOAD_CACHE', 'MAX'], [ BROKER_REPOS_ID ], [ 0 ], [ BROKER_CODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERCODE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.BROKER, 'PRE_LOAD_CACHE', 'MAX'], [ BROKER_REPOS_ID ], [ 0 ], [ BROKER_CODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.PLACINGBROKERCODE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERREFONE), CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERREFTWO), TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERORDER1, TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERORDER2, TMP_ECL_LANDED_USMSIGNINGTRANS.SIGNINGNARR, TMP_ECL_LANDED_USMSIGNINGTRANS.OVERRIDINGCOMMISSIONIND, ACTUALSETTDATE, EARLYRIIND, RILEVEL, CONVERT( VARCHAR(50) , MSGREF), TMP_ECL_LANDED_USMSIGNINGTRANS.ISCONTRA, TMP_ECL_LANDED_USMSIGNINGTRANS.HASCONTRA, TMP_ECL_LANDED_USMSIGNINGTRANS.ISREPL, TMP_ECL_LANDED_USMSIGNINGTRANS.INWARDSOUTWARDSIND, TMP_ECL_LANDED_USMSIGNINGTRANS.CATCODE, __AL_LOOKUPEX_TRAN lookup_ext([KDRStaging.DBO.TMP_ECL_LANDED_USMSIGNINGSTATUS, 'PRE_LOAD_CACHE', 'MAX'], [ DSC ], [  NULL  ], [ USMSIGNINGSTATUSID, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.STATUSID, LOAD_ID, '=', $G_UNLOAD_ID ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, TMP_ECL_LANDED_USMSIGNINGTRANS.GENERATED_IND, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.OUTW_CONTRACT, 'PRE_LOAD_CACHE', 'MAX'], [ OUTW_CONTRACT_REPOS_ID ], [ 0 ], [ POLICY_REFERENCE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS.OUTPOLICYREF, CURRENT_IND, '=', 'Y', DELETED_IND, '=', 'N' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, TMP_ECL_LANDED_USMSIGNINGTRANS.DTI_CODE FROM TMP_ECL_LANDED_USMSIGNINGTRANS  WHERE (((TMP_ECL_LANDED_USMSIGNINGTRANS.LOAD_ID = $G_UNLOAD_ID) AND
+   (INWARDSOUTWARDSIND = 'I')) AND
+   (POLICYLINEID != 0))
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '45', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '85', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '80', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>388</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-175</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '58', "x" = '12', "y" = '-1448')
+GUID::'6de4055f-cf6a-4636-a6a3-de9980bd2a1d' READ TABLE KDRStaging.DBO.TMP_ECL_LANDED_USMSIGNINGTRANS OUTPUT(TMP_ECL_LANDED_USMSIGNINGTRANS)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'no', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'KDRStaging', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '42', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Business_Name', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '120', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '365', "Input_Width_Type" = '85', "ObjectDesc" = 'Separate out the inward transactions', "Output_1st_Column_Name" = 'Description', "Output_2nd_Column_Name" = 'Type', "Output_3rd_Column_Name" = 'Mapping', "Output_Column_Name_4" = 'Business_Name', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '80', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '210', "Output_Width_Mapping" = '85', "Output_Width_Name" = '356', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>26</X><Y>0</Y></LOCATION><SIZE><CX>288</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-194</Y></LOCATION><SIZE><CX>208</CX><CY>119</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '67', "ui_acta_from_schema_0" = 'QRY_Lookup', "ui_display_name" = 'QRY_Inw_USM', "ui_where_text" = '(QRY_Lookup.INWARDSOUTWARDSIND = \'I\')
+
+', "x" = '641', "y" = '-1563')
+GUID::'be7905f3-35f2-42af-af1e-aa2bd33f43da' CREATE VIEW QRY_Inw_USM( lookup_ext_1 AL_RFC_SCHEMA_GROUP (INW_USM_REPOS_ID INT ) ,
+ INW_USM_SOURCE_ID VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup.USM_SOURCE_ID') ,
+ DATA_SOURCE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.DATA_SOURCE_REPOS_ID') ,
+ MARKET_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.MARKET_REPOS_ID') ,
+ INSERTED_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Lookup.INSERTED_DT') ,
+ LAST_UPDATED_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Lookup.LAST_UPDATED_DT') ,
+ TRANSACTION_REASON_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.TRANSACTION_REASON_REPOS_ID') ,
+ QUALIFYING_CATEGORY_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.QUALIFYING_CATEGORY_REPOS_ID') ,
+ MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID INT  SET( "Description" = 'Based on BUSINESSCATEGORY but this was not populated in the source data until 1995', "ui_mapping_text" = 'QRY_Lookup.MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID') ,
+ USM_ENTRY_TYPE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.USM_ENTRY_TYPE_REPOS_ID') ,
+ YEAR_OF_ACCOUNT INT  SET( "ui_mapping_text" = 'QRY_Lookup.YEAR_OF_ACCOUNT') ,
+ SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Lookup.SIGNING_DT') ,
+ SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup.SIGNING_NUMBER') ,
+ SIGNING_VERSION VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup.SIGNING_VERSION') ,
+ SETTLEMENT_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.SETTLEMENT_CURRENCY_REPOS_ID') ,
+ SETTLEMENT_TRANSACTION_AMT DECIMAL(21, 6)  SET( "Description" = 'Share in Settlement CCY', "ui_mapping_text" = 'QRY_Lookup.SETTLEMENT_TRANSACTION_AMT') ,
+ SETTLEMENT_TRANSACTION_WAR_AMT DECIMAL(21, 6)  SET( "Description" = 'War amount in Settlement CCY', "ui_mapping_text" = 'QRY_Lookup.SETTLEMENT_TRANSACTION_WAR_AMT') ,
+ SETTLEMENT_TRANSACTION_VAT_AMT DECIMAL(21, 6)  SET( "Description" = 'VAT amount in Settlement CCY', "ui_mapping_text" = 'QRY_Lookup.SETTLEMENT_TRANSACTION_VAT_AMT') ,
+ SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT DECIMAL(21, 6)  SET( "Description" = 'Amount ceded to Lloyds', "ui_mapping_text" = 'QRY_Lookup.SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT') ,
+ SYNDICATE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.SYNDICATE_REPOS_ID') ,
+ BROKERCODE VARCHAR(6)  SET( "ui_mapping_text" = '#EUI-ITEM-29: Altered the datatype for this column from Varchar(4) to Varchar(6).
+QRY_Lookup.BROKERCODE') ,
+ PLACINGBROKERCODE VARCHAR(6)  SET( "ui_mapping_text" = '#EUI-ITEM-29: Altered the datatype for this column from Varchar(4) to Varchar(6).
+QRY_Lookup.PLACINGBROKERCODE') ,
+ ENTRYTYPE VARCHAR(3)  SET( "ui_mapping_text" = 'QRY_Lookup.ENTRYTYPE') ,
+ RISKCODE VARCHAR(2)  SET( "ui_mapping_text" = 'QRY_Lookup.RISKCODE') ,
+ FILCODE1 VARCHAR(4)  SET( "ui_mapping_text" = 'QRY_Lookup.FILCODE1') ,
+ FILCODE2 VARCHAR(4)  SET( "ui_mapping_text" = 'QRY_Lookup.FILCODE2') ,
+ FILCODE VARCHAR(2)  SET( "ui_mapping_text" = 'QRY_Lookup.FILCODE') ,
+ TRUSTFUNDCODE VARCHAR(2)  SET( "ui_mapping_text" = 'QRY_Lookup.TRUSTFUNDCODE') ,
+ POLICYLINEREF VARCHAR(20)  SET( "ui_mapping_text" = 'QRY_Lookup.POLICYLINEREF') ,
+ POLICYLINEID INT  SET( "ui_mapping_text" = 'QRY_Lookup.POLICYLINEID') ,
+ STATUSID INT  SET( "ui_mapping_text" = 'QRY_Lookup.STATUSID') ,
+ lookup_ext AL_RFC_SCHEMA_GROUP (INW_CONTRACT_REPOS_ID INT )  SET( "Description" = 'This will need to be updated when inw-contract table is available') ,
+ ORIGINAL_TO_SETTLEMENT_ROE DECIMAL(18, 9)  SET( "ui_mapping_text" = 'QRY_Lookup.ORIGINAL_TO_SETTLEMENT_ROE') ,
+ ORIGINAL_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.ORIGINAL_CURRENCY_REPOS_ID') ,
+ ORIGINAL_SIGNING_NUM VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup.ORIGINAL_SIGNING_NUM') ,
+ ORIGINAL_SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Lookup.ORIGINAL_SIGNING_DT') ,
+ TRUST_FUND_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.TRUST_FUND_REPOS_ID') ,
+ RISK_CODE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.RISK_CODE_REPOS_ID') ,
+ MARKET_FILCODE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.MARKET_FILCODE_REPOS_ID') ,
+ FILCODE1_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.FILCODE1_REPOS_ID') ,
+ FILCODE2_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.FILCODE2_REPOS_ID') ,
+ UNIQUE_MARKET_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup.UNIQUE_MARKET_REFERENCE') ,
+ PLACING_BROKER_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.PLACING_BROKER_REPOS_ID') ,
+ BROKER_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.BROKER_REPOS_ID') ,
+ BROKERREFONE VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup.BROKERREFONE') ,
+ BROKERREFTWO VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup.BROKERREFTWO') ,
+ BROKERORDER1 DECIMAL(15, 8)  SET( "ui_mapping_text" = 'QRY_Lookup.BROKERORDER1') ,
+ BROKERORDER2 DECIMAL(15, 8)  SET( "ui_mapping_text" = 'QRY_Lookup.BROKERORDER2') ,
+ SIGNING_NARRATIVE VARCHAR(500)  SET( "ui_mapping_text" = 'QRY_Lookup.SIGNING_NARRATIVE') ,
+ ACTUAL_SETTLEMENT_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Lookup.ACTUAL_SETTLEMENT_DT') ,
+ EARLY_RI_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Lookup.EARLY_RI_IND') ,
+ RI_LEVEL INT  SET( "ui_mapping_text" = 'QRY_Lookup.RI_LEVEL') ,
+ PROCESSING_PERIOD_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.PROCESSING_PERIOD_REPOS_ID') ,
+ MESSAGE_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup.MESSAGE_REFERENCE') ,
+ ISCONTRA VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Lookup.ISCONTRA') ,
+ HASCONTRA VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Lookup.HASCONTRA') ,
+ ISREPL VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Lookup.ISREPL') ,
+ CATASTROPHE_CODE VARCHAR(4)  SET( "ui_mapping_text" = 'QRY_Lookup.CATASTROPHE_CODE') ,
+ lookup_ext_2 AL_RFC_SCHEMA_GROUP (SIGNING_STATUS_REPOS_ID INT ) ,
+ GENERATED_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Lookup.GENERATED_IND') ,
+ OUTW_CONTRACT_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup.OUTW_CONTRACT_REPOS_ID') ,
+ OVERRIDING_COMMISSION_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Lookup.OVERRIDINGCOMMISSIONIND') ,
+ DTI_CODE VARCHAR(50)  SET( "ui_mapping_text" = '#As part of KMI Phase3 drag and drop the column from the source to target
+QRY_Lookup.DTI_CODE') ,
+ USMSIGNINGTRANSID INT  KEY  SET( "ui_mapping_text" = 'QRY_Lookup.USMSIGNINGTRANSID')  )
+ AS
+SELECT __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.INW_USM, 'PRE_LOAD_CACHE', 'MAX'], [ INW_USM_REPOS_ID ], [ 0 ], [ INW_USM_SOURCE_ID, '=', QRY_Lookup.USM_SOURCE_ID, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, QRY_Lookup.USM_SOURCE_ID, QRY_Lookup.DATA_SOURCE_REPOS_ID, QRY_Lookup.MARKET_REPOS_ID, QRY_Lookup.INSERTED_DT, QRY_Lookup.LAST_UPDATED_DT, QRY_Lookup.TRANSACTION_REASON_REPOS_ID, QRY_Lookup.QUALIFYING_CATEGORY_REPOS_ID, QRY_Lookup.MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID, QRY_Lookup.USM_ENTRY_TYPE_REPOS_ID, QRY_Lookup.YEAR_OF_ACCOUNT, QRY_Lookup.SIGNING_DT, QRY_Lookup.SIGNING_NUMBER, QRY_Lookup.SIGNING_VERSION, QRY_Lookup.SETTLEMENT_CURRENCY_REPOS_ID, QRY_Lookup.SETTLEMENT_TRANSACTION_AMT, QRY_Lookup.SETTLEMENT_TRANSACTION_WAR_AMT, QRY_Lookup.SETTLEMENT_TRANSACTION_VAT_AMT, QRY_Lookup.SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT, QRY_Lookup.SYNDICATE_REPOS_ID, QRY_Lookup.BROKERCODE, QRY_Lookup.PLACINGBROKERCODE, QRY_Lookup.ENTRYTYPE, QRY_Lookup.RISKCODE, QRY_Lookup.FILCODE1, QRY_Lookup.FILCODE2, QRY_Lookup.FILCODE, QRY_Lookup.TRUSTFUNDCODE, QRY_Lookup.POLICYLINEREF, QRY_Lookup.POLICYLINEID, QRY_Lookup.STATUSID, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.INW_CONTRACT, 'PRE_LOAD_CACHE', 'MAX'], [ INW_CONTRACT_REPOS_ID ], [ 0 ], [ CURRENT_IND, '=', 'Y', INW_CONTRACT_SOURCE_ID, '=', ('PL_' || QRY_Lookup.POLICYLINEID), DATA_SOURCE_REPOS_ID, '=', $G_KDR_ECLIPSE_DATA_SOURCE_REPOS_ID, CONTRACT_RECORD_TYPE_REPOS_ID, '=', $G_CONTRACT_RECORD_SYNDICATE_CONTRACT_REPOS_ID ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, QRY_Lookup.ORIGINAL_TO_SETTLEMENT_ROE, QRY_Lookup.ORIGINAL_CURRENCY_REPOS_ID, QRY_Lookup.ORIGINAL_SIGNING_NUM, QRY_Lookup.ORIGINAL_SIGNING_DT, QRY_Lookup.TRUST_FUND_REPOS_ID, QRY_Lookup.RISK_CODE_REPOS_ID, QRY_Lookup.MARKET_FILCODE_REPOS_ID, QRY_Lookup.FILCODE1_REPOS_ID, QRY_Lookup.FILCODE2_REPOS_ID, QRY_Lookup.UNIQUE_MARKET_REFERENCE, QRY_Lookup.PLACING_BROKER_REPOS_ID, QRY_Lookup.BROKER_REPOS_ID, QRY_Lookup.BROKERREFONE, QRY_Lookup.BROKERREFTWO, QRY_Lookup.BROKERORDER1, QRY_Lookup.BROKERORDER2, QRY_Lookup.SIGNING_NARRATIVE, QRY_Lookup.ACTUAL_SETTLEMENT_DT, QRY_Lookup.EARLY_RI_IND, QRY_Lookup.RI_LEVEL, QRY_Lookup.PROCESSING_PERIOD_REPOS_ID, QRY_Lookup.MESSAGE_REFERENCE, QRY_Lookup.ISCONTRA, QRY_Lookup.HASCONTRA, QRY_Lookup.ISREPL, QRY_Lookup.CATASTROPHE_CODE, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.SIGNING_STATUS_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ SIGNING_STATUS_REPOS_ID ], [ 0 ], [ SIGNING_STATUS, '=', QRY_Lookup.SIGNING_STATUS, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, QRY_Lookup.GENERATED_IND, QRY_Lookup.OUTW_CONTRACT_REPOS_ID, QRY_Lookup.OVERRIDINGCOMMISSIONIND, QRY_Lookup.DTI_CODE, QRY_Lookup.USMSIGNINGTRANSID FROM QRY_Lookup  WHERE (QRY_Lookup.INWARDSOUTWARDSIND = 'I')
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '39', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Business_Name', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '120', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '202', "Input_Width_Type" = '85', "ObjectDesc" = 'Separate out the outward transactions', "Output_1st_Column_Name" = 'Description', "Output_2nd_Column_Name" = 'Type', "Output_3rd_Column_Name" = 'Mapping', "Output_Column_Name_4" = 'Business_Name', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '120', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Name" = '337', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>175</X><Y>0</Y></LOCATION><SIZE><CX>316</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-187</Y></LOCATION><SIZE><CX>420</CX><CY>127</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '55', "ui_acta_from_schema_0" = 'QRY_Lookup_1', "ui_display_name" = 'QRY_Outw_USM', "ui_where_text" = '(QRY_Lookup_1.INWARDSOUTWARDSIND = \'O\')
+
+', "x" = '486', "y" = '-2216')
+GUID::'8ecb4149-b8c4-4ea9-bf1d-57dd05bd8788' CREATE VIEW QRY_Outw_USM( lookup_ext AL_RFC_SCHEMA_GROUP (OUTW_USM_REPOS_ID INT ) ,
+ OUTW_USM_SOURCE_ID VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup_1.USM_SOURCE_ID') ,
+ DATA_SOURCE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.DATA_SOURCE_REPOS_ID') ,
+ MARKET_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.MARKET_REPOS_ID') ,
+ INSERTED_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Lookup_1.INSERTED_DT') ,
+ LAST_UPDATED_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Lookup_1.LAST_UPDATED_DT') ,
+ TRANSACTION_REASON_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.TRANSACTION_REASON_REPOS_ID') ,
+ QUALIFYING_CATEGORY_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.QUALIFYING_CATEGORY_REPOS_ID') ,
+ USM_ENTRY_TYPE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.USM_ENTRY_TYPE_REPOS_ID') ,
+ MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID INT  SET( "Description" = 'Based on BUSINESSCATEGORY but this was not populated in the source data until 1995', "ui_mapping_text" = 'QRY_Lookup_1.MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID') ,
+ YEAR_OF_ACCOUNT INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.YEAR_OF_ACCOUNT') ,
+ SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Lookup_1.SIGNING_DT') ,
+ SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup_1.SIGNING_NUMBER') ,
+ SIGNING_VERSION VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup_1.SIGNING_VERSION') ,
+ SYNDICATE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.SYNDICATE_REPOS_ID') ,
+ SETTLEMENT_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.SETTLEMENT_CURRENCY_REPOS_ID') ,
+ SETTLEMENT_TRANSACTION_AMT DECIMAL(21, 6)  SET( "Description" = 'Share in Settlement CCY', "ui_mapping_text" = 'QRY_Lookup_1.SETTLEMENT_TRANSACTION_AMT') ,
+ SETTLEMENT_TRANSACTION_WAR_AMT DECIMAL(21, 6)  SET( "Description" = 'Share War amount in Settlement CCY', "ui_mapping_text" = 'QRY_Lookup_1.SETTLEMENT_TRANSACTION_WAR_AMT') ,
+ SETTLEMENT_TRANSACTION_VAT_AMT DECIMAL(21, 6)  SET( "Description" = 'Share VAT amount in Settlement CCY', "ui_mapping_text" = 'QRY_Lookup_1.SETTLEMENT_TRANSACTION_VAT_AMT') ,
+ SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT DECIMAL(21, 6)  SET( "Description" = 'Share amount ceded to Lloyd\'s', "ui_mapping_text" = 'QRY_Lookup_1.SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT') ,
+ POLICYLINEREF VARCHAR(20)  SET( "ui_mapping_text" = 'QRY_Lookup_1.POLICYLINEREF') ,
+ lookup_ext_1 AL_RFC_SCHEMA_GROUP (OUTW_CONTRACT_REPOS_ID INT ) ,
+ ORIGINAL_TO_SETTLEMENT_ROE DECIMAL(18, 9)  SET( "ui_mapping_text" = 'QRY_Lookup_1.ORIGINAL_TO_SETTLEMENT_ROE') ,
+ ORIGINAL_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.ORIGINAL_CURRENCY_REPOS_ID') ,
+ BROKERCODE VARCHAR(6)  SET( "ui_mapping_text" = '#EUI-ITEM-29: Altered the datatype for this column from Varchar(4) to Varchar(6).
+QRY_Lookup_1.BROKERCODE') ,
+ ENTRYTYPE VARCHAR(3)  SET( "ui_mapping_text" = 'QRY_Lookup_1.ENTRYTYPE') ,
+ RISKCODE VARCHAR(2)  SET( "ui_mapping_text" = 'QRY_Lookup_1.RISKCODE') ,
+ FILCODE1 VARCHAR(4)  SET( "ui_mapping_text" = 'QRY_Lookup_1.FILCODE1') ,
+ FILCODE2 VARCHAR(4)  SET( "ui_mapping_text" = 'QRY_Lookup_1.FILCODE2') ,
+ FILCODE VARCHAR(2)  SET( "ui_mapping_text" = 'QRY_Lookup_1.FILCODE') ,
+ TRUSTFUNDCODE VARCHAR(2)  SET( "ui_mapping_text" = 'QRY_Lookup_1.TRUSTFUNDCODE') ,
+ STATUSID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.STATUSID') ,
+ TRUST_FUND_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.TRUST_FUND_REPOS_ID') ,
+ RISK_CODE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.RISK_CODE_REPOS_ID') ,
+ MARKET_FILCODE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.MARKET_FILCODE_REPOS_ID') ,
+ FILCODE1_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.FILCODE1_REPOS_ID') ,
+ FILCODE2_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.FILCODE2_REPOS_ID') ,
+ UNIQUE_MARKET_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup_1.UNIQUE_MARKET_REFERENCE') ,
+ BROKER_REPOS_ID INT  SET( "Description" = 'Used for outwards data only', "ui_mapping_text" = 'QRY_Lookup_1.BROKER_REPOS_ID') ,
+ BROKERREFONE VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup_1.BROKERREFONE') ,
+ BROKERREFTWO VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Lookup_1.BROKERREFTWO') ,
+ BROKERORDER1 DECIMAL(15, 8)  SET( "ui_mapping_text" = 'QRY_Lookup_1.BROKERORDER1') ,
+ BROKERORDER2 DECIMAL(15, 8)  SET( "ui_mapping_text" = 'QRY_Lookup_1.BROKERORDER2') ,
+ SIGNING_NARRATIVE VARCHAR(500)  SET( "ui_mapping_text" = 'QRY_Lookup_1.SIGNING_NARRATIVE') ,
+ ACTUAL_SETTLEMENT_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Lookup_1.ACTUAL_SETTLEMENT_DT') ,
+ EARLY_RI_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Lookup_1.EARLY_RI_IND') ,
+ RI_LEVEL INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.RI_LEVEL') ,
+ PROCESSING_PERIOD_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Lookup_1.PROCESSING_PERIOD_REPOS_ID') ,
+ MESSAGE_REFERENCE VARCHAR(8)  SET( "ui_mapping_text" = 'QRY_Lookup_1.MESSAGE_REFERENCE') ,
+ ISCONTRA VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Lookup_1.ISCONTRA') ,
+ HASCONTRA VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Lookup_1.HASCONTRA') ,
+ ISREPL VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Lookup_1.ISREPL') ,
+ lookup_ext_2 AL_RFC_SCHEMA_GROUP (SIGNING_STATUS_REPOS_ID INT )  )
+ AS
+SELECT __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.OUTW_USM, 'PRE_LOAD_CACHE', 'MAX'], [ OUTW_USM_REPOS_ID ], [ 0 ], [ OUTW_USM_SOURCE_ID, '=', QRY_Lookup_1.USM_SOURCE_ID, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, QRY_Lookup_1.USM_SOURCE_ID, QRY_Lookup_1.DATA_SOURCE_REPOS_ID, QRY_Lookup_1.MARKET_REPOS_ID, QRY_Lookup_1.INSERTED_DT, QRY_Lookup_1.LAST_UPDATED_DT, QRY_Lookup_1.TRANSACTION_REASON_REPOS_ID, QRY_Lookup_1.QUALIFYING_CATEGORY_REPOS_ID, QRY_Lookup_1.USM_ENTRY_TYPE_REPOS_ID, QRY_Lookup_1.MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID, QRY_Lookup_1.YEAR_OF_ACCOUNT, QRY_Lookup_1.SIGNING_DT, QRY_Lookup_1.SIGNING_NUMBER, QRY_Lookup_1.SIGNING_VERSION, QRY_Lookup_1.SYNDICATE_REPOS_ID, QRY_Lookup_1.SETTLEMENT_CURRENCY_REPOS_ID, QRY_Lookup_1.SETTLEMENT_TRANSACTION_AMT, QRY_Lookup_1.SETTLEMENT_TRANSACTION_WAR_AMT, QRY_Lookup_1.SETTLEMENT_TRANSACTION_VAT_AMT, QRY_Lookup_1.SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT, QRY_Lookup_1.POLICYLINEREF, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.OUTW_CONTRACT, 'PRE_LOAD_CACHE', 'MAX'], [ OUTW_CONTRACT_REPOS_ID ], [ 0 ], [ POLICY_REFERENCE, '=', QRY_Lookup_1.POLICYLINEREF, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, QRY_Lookup_1.ORIGINAL_TO_SETTLEMENT_ROE, QRY_Lookup_1.ORIGINAL_CURRENCY_REPOS_ID, QRY_Lookup_1.BROKERCODE, QRY_Lookup_1.ENTRYTYPE, QRY_Lookup_1.RISKCODE, QRY_Lookup_1.FILCODE1, QRY_Lookup_1.FILCODE2, QRY_Lookup_1.FILCODE, QRY_Lookup_1.TRUSTFUNDCODE, QRY_Lookup_1.STATUSID, QRY_Lookup_1.TRUST_FUND_REPOS_ID, QRY_Lookup_1.RISK_CODE_REPOS_ID, QRY_Lookup_1.MARKET_FILCODE_REPOS_ID, QRY_Lookup_1.FILCODE1_REPOS_ID, QRY_Lookup_1.FILCODE2_REPOS_ID, QRY_Lookup_1.UNIQUE_MARKET_REFERENCE, QRY_Lookup_1.BROKER_REPOS_ID, QRY_Lookup_1.BROKERREFONE, QRY_Lookup_1.BROKERREFTWO, QRY_Lookup_1.BROKERORDER1, QRY_Lookup_1.BROKERORDER2, QRY_Lookup_1.SIGNING_NARRATIVE, QRY_Lookup_1.ACTUAL_SETTLEMENT_DT, QRY_Lookup_1.EARLY_RI_IND, QRY_Lookup_1.RI_LEVEL, QRY_Lookup_1.PROCESSING_PERIOD_REPOS_ID, QRY_Lookup_1.MESSAGE_REFERENCE, QRY_Lookup_1.ISCONTRA, QRY_Lookup_1.HASCONTRA, QRY_Lookup_1.ISREPL, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.SIGNING_STATUS_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ SIGNING_STATUS_REPOS_ID ], [  NULL  ], [ SIGNING_STATUS, '=', QRY_Lookup_1.SIGNING_STATUS, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+ FROM QRY_Lookup_1  WHERE (QRY_Lookup_1.INWARDSOUTWARDSIND = 'O')
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '46', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '85', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '293', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Description', "Output_3rd_Column_Name" = 'Content_Type', "Output_Column_Name_4" = 'Description', "Output_Column_Name_5" = 'Description', "Output_Column_Width_4" = '243', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '240', "Output_Width_Mapping" = '85', "Output_Width_Name" = '362', "Output_Width_Type" = '240', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>435</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>263</X><Y>-140</Y></LOCATION><SIZE><CX>894</CX><CY>86</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '63', "x" = '2319', "y" = '-1562')
+GUID::'a58813d4-cba0-4aca-9ebb-0cb44c43df6b' LOAD TABLE KDRStaging.DBO.WRK_ECL_INW_USM INPUT(QRY_Inw_Filter)
+SET("LDRLiveLoad" = 'no', "Table_Type" = 'TABLE', "connection_port" = 'no', "ldr_configuration_enabled" = 'yes', "ldr_configurations" = '<?xml version="1.0" encoding="UTF-8"?>
+<LDRConfigurations>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2016">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit></bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load>0</loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>no</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>replace</loader_load_choice>
+<loader_num_parallel_loaders>2</loader_num_parallel_loaders>
+<loader_overflow_file>overflow_file</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>10000</loader_xact_size>
+<mssql_bulk_ldr_mode>truncate</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>4</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2000">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>10000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load>1</loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>no</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>overflow_file</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>truncate</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>4</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2008">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>10000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load>1</loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>no</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>overflow_file</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>truncate</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>4</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+</LDRConfigurations>', "loader_template_table" = 'no', "name" = 'KDRStaging', "use_unicode_varchar" = 'no');
+
+ALGUIComment ("InputSchema_WidthProp" = '41', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '85', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Description', "Output_3rd_Column_Name" = 'Content_Type', "Output_Column_Name_4" = 'Description', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '80', "Output_Column_Width_5" = '10', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Name" = '277', "Output_Width_Type" = '134', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>450</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>398</X><Y>-83</Y></LOCATION><SIZE><CX>1012</CX><CY>83</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '63', "x" = '2340', "y" = '-2353')
+GUID::'12083258-1553-442e-93cf-f0f3195f7ac5' LOAD TABLE KDRStaging.DBO.WRK_ECL_OUTW_USM INPUT(QRY_Outw_Filter)
+SET("LDRLiveLoad" = 'no', "Table_Type" = 'TABLE', "connection_port" = 'no', "ldr_configuration_enabled" = 'yes', "ldr_configurations" = '<?xml version="1.0" encoding="UTF-8"?>
+<LDRConfigurations>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2016">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit></bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load>0</loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>no</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>replace</loader_load_choice>
+<loader_num_parallel_loaders>2</loader_num_parallel_loaders>
+<loader_overflow_file>overflow_file</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>10000</loader_xact_size>
+<mssql_bulk_ldr_mode>truncate</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>4</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2000">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>10000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load>1</loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>no</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>overflow_file</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>10000</loader_xact_size>
+<mssql_bulk_ldr_mode>truncate</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>4</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2008">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>10000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load>1</loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>no</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>overflow_file</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>10000</loader_xact_size>
+<mssql_bulk_ldr_mode>truncate</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>4</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+</LDRConfigurations>', "loader_template_table" = 'no', "name" = 'KDRStaging', "use_unicode_varchar" = 'no');
+
+ALGUIComment ("InputSchema_WidthProp" = '63', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '85', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '337', "Input_Width_Type" = '85', "ObjectDesc" = 'Performs validation on:
+Inw_Contract_Repos_ID,
+Trust_Fund_Repos_ID,
+Risk_Code_Repos_ID,
+Market_FILCode_Repos_ID,
+FILCode1_Repos_ID,
+FILCode2_Repos_ID,
+Placing_Broker_Repos_ID,
+Broker_Repos_ID', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Description', "Output_3rd_Column_Name" = 'Content_Type', "Output_Column_Name_4" = 'Description', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '80', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>188</X><Y>0</Y></LOCATION><SIZE><CX>285</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-207</Y></LOCATION><SIZE><CX>522</CX><CY>511</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '58', "ui_display_name" = 'VAL_Repos_ID', "x" = '935', "y" = '-1563')
+GUID::'77061368-2413-4ee8-8da9-5edcbffae60a' CALL TRANSFORM Validation() INPUT(QRY_Inw_USM) OUTPUT(VAL_Repos_ID_Pass()
+,
+ VAL_Repos_ID_Fail()
+,
+ VAL_Repos_ID_RuleViolation()
+)
+SET("e_action" = 'DI_ERRORACTION', "e_columns" = 'DI_ERRORCOLUMNS', "rowid_in_fail_schema" = 'no', "validation_rules" = '<?xml version="1.0" encoding="UTF-8"?>
+<VRules collectStats="false" collectData="false" version="2" >
+<apptype>DataServices</apptype>
+<Rules><Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Inw_USM.RISK_CODE_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="12">
+<UIValue1>0</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Inw_USM.RISK_CODE_REPOS_ID &lt;&gt; 0</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Inw_USM.RISK_CODE_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="false" noValidationWhenNull="false" >
+<RuleName>QRY_Inw_USM.FILCODE1</RuleName>
+<Description></Description>
+<Expression uiSelection="12">
+<UIValue1>0</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Inw_USM.FILCODE1 &lt;&gt; \'0\'</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Inw_USM.FILCODE1</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Inw_USM.INW_CONTRACT_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="12">
+<UIValue1>0</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Inw_USM.INW_CONTRACT_REPOS_ID &lt;&gt; 0</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Inw_USM.INW_CONTRACT_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Inw_USM.MARKET_FILCODE_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1>&lt;&gt;</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Inw_USM.MARKET_FILCODE_REPOS_ID &lt;&gt; 0 or QRY_Inw_USM.FILCODE is null</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Inw_USM.MARKET_FILCODE_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Inw_USM.PLACING_BROKER_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1></UIValue1>
+<UIValue2></UIValue2>
+<Custom>QRY_Inw_USM.PLACING_BROKER_REPOS_ID &lt;&gt; 0 or QRY_Inw_USM.PLACINGBROKERCODE is null</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Inw_USM.PLACING_BROKER_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="false" noValidationWhenNull="false" >
+<RuleName>QRY_Inw_USM.USM_ENTRY_TYPE_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="12">
+<UIValue1>0</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Inw_USM.USM_ENTRY_TYPE_REPOS_ID &lt;&gt; 0</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Inw_USM.USM_ENTRY_TYPE_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Inw_USM.FILCODE1_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1>&lt;&gt;</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Inw_USM.FILCODE1_REPOS_ID &lt;&gt; 0 or QRY_Inw_USM.FILCODE1 is null</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Inw_USM.FILCODE1_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Inw_USM.TRUST_FUND_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1></UIValue1>
+<UIValue2></UIValue2>
+<Custom>QRY_Inw_USM.TRUST_FUND_REPOS_ID &lt;&gt; 0 or QRY_Inw_USM.TRUSTFUNDCODE is null</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Inw_USM.TRUST_FUND_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Inw_USM.BROKER_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1>&lt;&gt;</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Inw_USM.BROKER_REPOS_ID &lt;&gt; 0 or QRY_Inw_USM.BROKERCODE is null</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Inw_USM.BROKER_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Inw_USM.FILCODE2_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1>&lt;&gt;</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Inw_USM.FILCODE2_REPOS_ID &lt;&gt; 0 or QRY_Inw_USM.FILCODE2 is null</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Inw_USM.FILCODE2_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="false" noValidationWhenNull="false" >
+<RuleName>QRY_Inw_USM.SIGNING_STATUS_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="12">
+<UIValue1>0</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Inw_USM.SIGNING_STATUS_REPOS_ID &lt;&gt; 0</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Inw_USM.SIGNING_STATUS_REPOS_ID</Col></Cols></Rule>
+</Rules><Substitutions><Sub><Enabled>false</Enabled><Col>QRY_Inw_USM.BROKER_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Inw_USM.FILCODE1</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Inw_USM.FILCODE1_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Inw_USM.FILCODE2_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Inw_USM.INW_CONTRACT_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Inw_USM.MARKET_FILCODE_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Inw_USM.PLACING_BROKER_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Inw_USM.RISK_CODE_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Inw_USM.SIGNING_STATUS_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Inw_USM.TRUST_FUND_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Inw_USM.USM_ENTRY_TYPE_REPOS_ID</Col><Val></Val></Sub></Substitutions></VRules>
+');
+
+ALGUIComment ("InputSchema_WidthProp" = '45', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '85', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '273', "Input_Width_Type" = '85', "ObjectDesc" = 'Performs validation on:
+Outw_Contract_Repos_ID,
+Trust_Fund_Repos_ID,
+Risk_Code_Repos_ID,
+Market_FILCode_Repos_ID,
+FILCode1_Repos_ID,
+FILCode2_Repos_ID,
+Broker_Repos_ID', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '80', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>174</X><Y>0</Y></LOCATION><SIZE><CX>285</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-203</Y></LOCATION><SIZE><CX>528</CX><CY>436</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '50', "ui_display_name" = 'VAL_Repos_ID', "x" = '942', "y" = '-2351')
+GUID::'0b6cd610-ea87-4803-8873-edcc43aa39ee' CALL TRANSFORM Validation() INPUT(QRY_Outw_USM) OUTPUT(VAL_Repos_ID_1_Pass()
+,
+ VAL_Repos_ID_1_Fail()
+,
+ VAL_Repos_ID_1_RuleViolation()
+)
+SET("e_action" = 'DI_ERRORACTION', "e_columns" = 'DI_ERRORCOLUMNS', "rowid_in_fail_schema" = 'no', "validation_rules" = '<?xml version="1.0" encoding="UTF-8"?>
+<VRules collectStats="false" collectData="false" version="2" >
+<apptype>DataServices</apptype>
+<Rules><Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Outw_USM.RISK_CODE_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1></UIValue1>
+<UIValue2></UIValue2>
+<Custom>QRY_Outw_USM.RISK_CODE_REPOS_ID &lt;&gt; 0 or QRY_Outw_USM.RISKCODE is null</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Outw_USM.RISK_CODE_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Outw_USM.TRUST_FUND_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1>&lt;&gt;</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Outw_USM.TRUST_FUND_REPOS_ID &lt;&gt; 0 or QRY_Outw_USM.TRUSTFUNDCODE is null</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Outw_USM.TRUST_FUND_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="false" noValidationWhenNull="false" >
+<RuleName>QRY_Outw_USM.USM_ENTRY_TYPE_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="12">
+<UIValue1>0</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Outw_USM.USM_ENTRY_TYPE_REPOS_ID &lt;&gt; 0</Custom>
+</Expression>
+<Action sendTo="0" />
+<Cols><Col>QRY_Outw_USM.USM_ENTRY_TYPE_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Outw_USM.OUTW_CONTRACT_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="14">
+<UIValue1>0</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Outw_USM.OUTW_CONTRACT_REPOS_ID &gt; 0</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Outw_USM.OUTW_CONTRACT_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Outw_USM.FILCODE1_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1>&lt;&gt;</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Outw_USM.FILCODE1_REPOS_ID &lt;&gt; 0 or QRY_Outw_USM.FILCODE1 is null</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Outw_USM.FILCODE1_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="false" noValidationWhenNull="false" >
+<RuleName>QRY_Outw_USM.SIGNING_STATUS_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1>&lt;&gt;</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Outw_USM.SIGNING_STATUS_REPOS_ID</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Outw_USM.SIGNING_STATUS_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Outw_USM.BROKER_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1></UIValue1>
+<UIValue2></UIValue2>
+<Custom>QRY_Outw_USM.BROKER_REPOS_ID &lt;&gt; 0 or QRY_Outw_USM.BROKERCODE is null</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Outw_USM.BROKER_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Outw_USM.FILCODE2_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1>&lt;&gt;</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Outw_USM.FILCODE2_REPOS_ID &lt;&gt; 0 or QRY_Outw_USM.FILCODE2 is null</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Outw_USM.FILCODE2_REPOS_ID</Col></Cols></Rule>
+<Rule Enabled="true" noValidationWhenNull="false" >
+<RuleName>QRY_Outw_USM.MARKET_FILCODE_REPOS_ID</RuleName>
+<Description></Description>
+<Expression uiSelection="6">
+<UIValue1>&lt;&gt;</UIValue1>
+<UIValue2>0</UIValue2>
+<Custom>QRY_Outw_USM.MARKET_FILCODE_REPOS_ID &lt;&gt; 0 or QRY_Outw_USM.FILCODE is null</Custom>
+</Expression>
+<Action sendTo="2" />
+<Cols><Col>QRY_Outw_USM.MARKET_FILCODE_REPOS_ID</Col></Cols></Rule>
+</Rules><Substitutions><Sub><Enabled>false</Enabled><Col>QRY_Outw_USM.BROKER_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Outw_USM.FILCODE1_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Outw_USM.FILCODE2_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Outw_USM.MARKET_FILCODE_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Outw_USM.OUTW_CONTRACT_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Outw_USM.RISK_CODE_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Outw_USM.SIGNING_STATUS_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Outw_USM.TRUST_FUND_REPOS_ID</Col><Val></Val></Sub><Sub><Enabled>false</Enabled><Col>QRY_Outw_USM.USM_ENTRY_TYPE_REPOS_ID</Col><Val></Val></Sub></Substitutions></VRules>
+');
+
+ALGUIComment ("InputSchema_WidthProp" = '45', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Business_Name', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '120', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '365', "Input_Width_Type" = '85', "ObjectDesc" = 'Filters columns out that were only required for validation', "Output_1st_Column_Name" = 'Description', "Output_2nd_Column_Name" = 'Type', "Output_3rd_Column_Name" = 'Mapping', "Output_Column_Name_4" = 'Business_Name', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '120', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Name" = '365', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>13</X><Y>0</Y></LOCATION><SIZE><CX>291</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-180</Y></LOCATION><SIZE><CX>403</CX><CY>131</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '63', "ui_acta_from_schema_0" = 'VAL_Repos_ID_Pass', "ui_display_name" = 'QRY_Inw_Filter', "x" = '1764', "y" = '-1564')
+GUID::'d114b73a-5ffb-4599-8cb8-84363dd0e4f7' CREATE VIEW QRY_Inw_Filter( INW_USM_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.INW_USM_REPOS_ID') ,
+ INW_USM_SOURCE_ID VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.INW_USM_SOURCE_ID') ,
+ DATA_SOURCE_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.DATA_SOURCE_REPOS_ID') ,
+ MARKET_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.MARKET_REPOS_ID') ,
+ INSERTED_DT DATETIME(9)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.INSERTED_DT') ,
+ LAST_UPDATED_DT DATETIME(9)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.LAST_UPDATED_DT') ,
+ TRANSACTION_REASON_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.TRANSACTION_REASON_REPOS_ID') ,
+ QUALIFYING_CATEGORY_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.QUALIFYING_CATEGORY_REPOS_ID') ,
+ MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID INT  SET( "Description" = 'Based on BUSINESSCATEGORY but this was not populated in the source data until 1995', "ui_mapping_text" = 'VAL_Repos_ID_Pass.MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID') ,
+ USM_ENTRY_TYPE_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.USM_ENTRY_TYPE_REPOS_ID') ,
+ SIGNING_STATUS_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.SIGNING_STATUS_REPOS_ID') ,
+ YEAR_OF_ACCOUNT INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.YEAR_OF_ACCOUNT') ,
+ SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.SIGNING_DT') ,
+ SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.SIGNING_NUMBER') ,
+ SIGNING_VERSION VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.SIGNING_VERSION') ,
+ SETTLEMENT_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.SETTLEMENT_CURRENCY_REPOS_ID') ,
+ SETTLEMENT_TRANSACTION_AMT DECIMAL(21, 6)  SET( "Description" = 'Share in Settlement CCY', "ui_mapping_text" = 'VAL_Repos_ID_Pass.SETTLEMENT_TRANSACTION_AMT') ,
+ SETTLEMENT_TRANSACTION_WAR_AMT DECIMAL(21, 6)  SET( "Description" = 'War amount in Settlement CCY', "ui_mapping_text" = 'VAL_Repos_ID_Pass.SETTLEMENT_TRANSACTION_WAR_AMT') ,
+ SETTLEMENT_TRANSACTION_VAT_AMT DECIMAL(21, 6)  SET( "Description" = 'VAT amount in Settlement CCY', "ui_mapping_text" = 'VAL_Repos_ID_Pass.SETTLEMENT_TRANSACTION_VAT_AMT') ,
+ SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT DECIMAL(21, 6)  SET( "Description" = 'Amount ceded to Lloyds', "ui_mapping_text" = 'VAL_Repos_ID_Pass.SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT') ,
+ SYNDICATE_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.SYNDICATE_REPOS_ID') ,
+ INW_CONTRACT_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.INW_CONTRACT_REPOS_ID') ,
+ ORIGINAL_TO_SETTLEMENT_ROE DECIMAL(18, 9)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.ORIGINAL_TO_SETTLEMENT_ROE') ,
+ ORIGINAL_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.ORIGINAL_CURRENCY_REPOS_ID') ,
+ ORIGINAL_SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.ORIGINAL_SIGNING_NUM') ,
+ ORIGINAL_SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.ORIGINAL_SIGNING_DT') ,
+ TRUST_FUND_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.TRUST_FUND_REPOS_ID') ,
+ RISK_CODE_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.RISK_CODE_REPOS_ID') ,
+ MARKET_FILCODE_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.MARKET_FILCODE_REPOS_ID') ,
+ FILCODE1_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.FILCODE1_REPOS_ID') ,
+ FILCODE2_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.FILCODE2_REPOS_ID') ,
+ UNIQUE_MARKET_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.UNIQUE_MARKET_REFERENCE') ,
+ PLACING_BROKER_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.PLACING_BROKER_REPOS_ID') ,
+ BROKER_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.BROKER_REPOS_ID') ,
+ BROKERREFONE VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.BROKERREFONE') ,
+ BROKERREFTWO VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.BROKERREFTWO') ,
+ BROKERORDER1 DECIMAL(15, 8)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.BROKERORDER1') ,
+ BROKERORDER2 DECIMAL(15, 8)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.BROKERORDER2') ,
+ SIGNING_NARRATIVE VARCHAR(500)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.SIGNING_NARRATIVE') ,
+ ACTUAL_SETTLEMENT_DT DATETIME(9)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.ACTUAL_SETTLEMENT_DT') ,
+ EARLY_RI_IND VARCHAR(1)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.EARLY_RI_IND') ,
+ RI_LEVEL INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.RI_LEVEL') ,
+ PROCESSING_PERIOD_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.PROCESSING_PERIOD_REPOS_ID') ,
+ MESSAGE_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.MESSAGE_REFERENCE') ,
+ IS_CONTRA_IND VARCHAR(1)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.ISCONTRA') ,
+ HAS_CONTRA_IND VARCHAR(1)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.HASCONTRA') ,
+ IS_REPLACEMENT_IND VARCHAR(1)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.ISREPL') ,
+ CATASTROPHE_CODE VARCHAR(4)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.CATASTROPHE_CODE') ,
+ OUTW_CONTRACT_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.OUTW_CONTRACT_REPOS_ID') ,
+ OVERRIDING_COMMISSION_IND VARCHAR(1)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.OVERRIDING_COMMISSION_IND') ,
+ GENERATED_IND VARCHAR(1)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.GENERATED_IND') ,
+ INW_USM_INT_SOURCE_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_Pass.USMSIGNINGTRANSID') ,
+ DTI_CODE VARCHAR(50)  SET( "ui_mapping_text" = '#As part of KMI Phase3 drag and drop the column from the source to target
+VAL_Repos_ID_Pass.DTI_CODE')  )
+ AS
+SELECT VAL_Repos_ID_Pass.INW_USM_REPOS_ID, VAL_Repos_ID_Pass.INW_USM_SOURCE_ID, VAL_Repos_ID_Pass.DATA_SOURCE_REPOS_ID, VAL_Repos_ID_Pass.MARKET_REPOS_ID, VAL_Repos_ID_Pass.INSERTED_DT, VAL_Repos_ID_Pass.LAST_UPDATED_DT, VAL_Repos_ID_Pass.TRANSACTION_REASON_REPOS_ID, VAL_Repos_ID_Pass.QUALIFYING_CATEGORY_REPOS_ID, VAL_Repos_ID_Pass.MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID, VAL_Repos_ID_Pass.USM_ENTRY_TYPE_REPOS_ID, VAL_Repos_ID_Pass.SIGNING_STATUS_REPOS_ID, VAL_Repos_ID_Pass.YEAR_OF_ACCOUNT, VAL_Repos_ID_Pass.SIGNING_DT, VAL_Repos_ID_Pass.SIGNING_NUMBER, VAL_Repos_ID_Pass.SIGNING_VERSION, VAL_Repos_ID_Pass.SETTLEMENT_CURRENCY_REPOS_ID, VAL_Repos_ID_Pass.SETTLEMENT_TRANSACTION_AMT, VAL_Repos_ID_Pass.SETTLEMENT_TRANSACTION_WAR_AMT, VAL_Repos_ID_Pass.SETTLEMENT_TRANSACTION_VAT_AMT, VAL_Repos_ID_Pass.SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT, VAL_Repos_ID_Pass.SYNDICATE_REPOS_ID, VAL_Repos_ID_Pass.INW_CONTRACT_REPOS_ID, VAL_Repos_ID_Pass.ORIGINAL_TO_SETTLEMENT_ROE, VAL_Repos_ID_Pass.ORIGINAL_CURRENCY_REPOS_ID, VAL_Repos_ID_Pass.ORIGINAL_SIGNING_NUM, VAL_Repos_ID_Pass.ORIGINAL_SIGNING_DT, VAL_Repos_ID_Pass.TRUST_FUND_REPOS_ID, VAL_Repos_ID_Pass.RISK_CODE_REPOS_ID, VAL_Repos_ID_Pass.MARKET_FILCODE_REPOS_ID, VAL_Repos_ID_Pass.FILCODE1_REPOS_ID, VAL_Repos_ID_Pass.FILCODE2_REPOS_ID, VAL_Repos_ID_Pass.UNIQUE_MARKET_REFERENCE, VAL_Repos_ID_Pass.PLACING_BROKER_REPOS_ID, VAL_Repos_ID_Pass.BROKER_REPOS_ID, VAL_Repos_ID_Pass.BROKERREFONE, VAL_Repos_ID_Pass.BROKERREFTWO, VAL_Repos_ID_Pass.BROKERORDER1, VAL_Repos_ID_Pass.BROKERORDER2, VAL_Repos_ID_Pass.SIGNING_NARRATIVE, VAL_Repos_ID_Pass.ACTUAL_SETTLEMENT_DT, VAL_Repos_ID_Pass.EARLY_RI_IND, VAL_Repos_ID_Pass.RI_LEVEL, VAL_Repos_ID_Pass.PROCESSING_PERIOD_REPOS_ID, VAL_Repos_ID_Pass.MESSAGE_REFERENCE, VAL_Repos_ID_Pass.ISCONTRA, VAL_Repos_ID_Pass.HASCONTRA, VAL_Repos_ID_Pass.ISREPL, VAL_Repos_ID_Pass.CATASTROPHE_CODE, VAL_Repos_ID_Pass.OUTW_CONTRACT_REPOS_ID, VAL_Repos_ID_Pass.OVERRIDING_COMMISSION_IND, VAL_Repos_ID_Pass.GENERATED_IND, VAL_Repos_ID_Pass.USMSIGNINGTRANSID, VAL_Repos_ID_Pass.DTI_CODE FROM VAL_Repos_ID_Pass 
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '36', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Business_Name', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '120', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '194', "Input_Width_Type" = '85', "ObjectDesc" = 'Filters columns out that were only required for validation', "Output_1st_Column_Name" = 'Description', "Output_2nd_Column_Name" = 'Type', "Output_3rd_Column_Name" = 'Mapping', "Output_Column_Name_4" = 'Business_Name', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '120', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Name" = '365', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>319</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>13</X><Y>-205</Y></LOCATION><SIZE><CX>407</CX><CY>162</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '63', "ui_acta_from_schema_0" = 'VAL_Repos_ID_1_Pass', "ui_display_name" = 'QRY_Outw_Filter', "x" = '1848', "y" = '-2349')
+GUID::'d2fbfaf8-26ae-4b54-82cf-97005b4fc63e' CREATE VIEW QRY_Outw_Filter( OUTW_USM_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.OUTW_USM_REPOS_ID') ,
+ OUTW_USM_SOURCE_ID VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.OUTW_USM_SOURCE_ID') ,
+ DATA_SOURCE_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.DATA_SOURCE_REPOS_ID') ,
+ MARKET_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.MARKET_REPOS_ID') ,
+ INSERTED_DT DATETIME(9)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.INSERTED_DT') ,
+ LAST_UPDATED_DT DATETIME(9)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.LAST_UPDATED_DT') ,
+ TRANSACTION_REASON_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.TRANSACTION_REASON_REPOS_ID') ,
+ QUALIFYING_CATEGORY_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.QUALIFYING_CATEGORY_REPOS_ID') ,
+ USM_ENTRY_TYPE_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.USM_ENTRY_TYPE_REPOS_ID') ,
+ MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID INT  SET( "Description" = 'Based on BUSINESSCATEGORY but this was not populated in the source data until 1995', "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID') ,
+ SIGNING_STATUS_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.SIGNING_STATUS_REPOS_ID') ,
+ YEAR_OF_ACCOUNT INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.YEAR_OF_ACCOUNT') ,
+ SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.SIGNING_DT') ,
+ SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.SIGNING_NUMBER') ,
+ SIGNING_VERSION VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.SIGNING_VERSION') ,
+ SYNDICATE_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.SYNDICATE_REPOS_ID') ,
+ SETTLEMENT_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.SETTLEMENT_CURRENCY_REPOS_ID') ,
+ SETTLEMENT_TRANSACTION_AMT DECIMAL(21, 6)  SET( "Description" = 'Share in Settlement CCY', "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.SETTLEMENT_TRANSACTION_AMT') ,
+ SETTLEMENT_TRANSACTION_WAR_AMT DECIMAL(21, 6)  SET( "Description" = 'Share War amount in Settlement CCY', "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.SETTLEMENT_TRANSACTION_WAR_AMT') ,
+ SETTLEMENT_TRANSACTION_VAT_AMT DECIMAL(21, 6)  SET( "Description" = 'Share VAT amount in Settlement CCY', "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.SETTLEMENT_TRANSACTION_VAT_AMT') ,
+ SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT DECIMAL(21, 6)  SET( "Description" = 'Share amount ceded to Lloyd\'s', "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT') ,
+ OUTW_CONTRACT_REPOS_ID INT  SET( "Description" = 'Used for outwards only', "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.OUTW_CONTRACT_REPOS_ID') ,
+ ORIGINAL_TO_SETTLEMENT_ROE DECIMAL(18, 9)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.ORIGINAL_TO_SETTLEMENT_ROE') ,
+ ORIGINAL_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.ORIGINAL_CURRENCY_REPOS_ID') ,
+ TRUST_FUND_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.TRUST_FUND_REPOS_ID') ,
+ RISK_CODE_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.RISK_CODE_REPOS_ID') ,
+ MARKET_FILCODE_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.MARKET_FILCODE_REPOS_ID') ,
+ FILCODE1_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.FILCODE1_REPOS_ID') ,
+ FILCODE2_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.FILCODE2_REPOS_ID') ,
+ UNIQUE_MARKET_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.UNIQUE_MARKET_REFERENCE') ,
+ BROKER_REPOS_ID INT  SET( "Description" = 'Used for outwards data only', "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.BROKER_REPOS_ID') ,
+ BROKERREFONE VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.BROKERREFONE') ,
+ BROKERREFTWO VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.BROKERREFTWO') ,
+ BROKERORDER1 DECIMAL(15, 8)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.BROKERORDER1') ,
+ BROKERORDER2 DECIMAL(15, 8)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.BROKERORDER2') ,
+ SIGNING_NARRATIVE VARCHAR(500)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.SIGNING_NARRATIVE') ,
+ ACTUAL_SETTLEMENT_DT DATETIME(9)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.ACTUAL_SETTLEMENT_DT') ,
+ EARLY_RI_IND VARCHAR(1)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.EARLY_RI_IND') ,
+ RI_LEVEL INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.RI_LEVEL') ,
+ PROCESSING_PERIOD_REPOS_ID INT  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.PROCESSING_PERIOD_REPOS_ID') ,
+ MESSAGE_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.MESSAGE_REFERENCE') ,
+ IS_CONTRA_IND VARCHAR(1)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.ISCONTRA') ,
+ HAS_CONTRA_IND VARCHAR(1)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.HASCONTRA') ,
+ IS_REPLACEMENT_IND VARCHAR(1)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Pass.ISREPL')  )
+ AS
+SELECT VAL_Repos_ID_1_Pass.OUTW_USM_REPOS_ID, VAL_Repos_ID_1_Pass.OUTW_USM_SOURCE_ID, VAL_Repos_ID_1_Pass.DATA_SOURCE_REPOS_ID, VAL_Repos_ID_1_Pass.MARKET_REPOS_ID, VAL_Repos_ID_1_Pass.INSERTED_DT, VAL_Repos_ID_1_Pass.LAST_UPDATED_DT, VAL_Repos_ID_1_Pass.TRANSACTION_REASON_REPOS_ID, VAL_Repos_ID_1_Pass.QUALIFYING_CATEGORY_REPOS_ID, VAL_Repos_ID_1_Pass.USM_ENTRY_TYPE_REPOS_ID, VAL_Repos_ID_1_Pass.MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID, VAL_Repos_ID_1_Pass.SIGNING_STATUS_REPOS_ID, VAL_Repos_ID_1_Pass.YEAR_OF_ACCOUNT, VAL_Repos_ID_1_Pass.SIGNING_DT, VAL_Repos_ID_1_Pass.SIGNING_NUMBER, VAL_Repos_ID_1_Pass.SIGNING_VERSION, VAL_Repos_ID_1_Pass.SYNDICATE_REPOS_ID, VAL_Repos_ID_1_Pass.SETTLEMENT_CURRENCY_REPOS_ID, VAL_Repos_ID_1_Pass.SETTLEMENT_TRANSACTION_AMT, VAL_Repos_ID_1_Pass.SETTLEMENT_TRANSACTION_WAR_AMT, VAL_Repos_ID_1_Pass.SETTLEMENT_TRANSACTION_VAT_AMT, VAL_Repos_ID_1_Pass.SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT, VAL_Repos_ID_1_Pass.OUTW_CONTRACT_REPOS_ID, VAL_Repos_ID_1_Pass.ORIGINAL_TO_SETTLEMENT_ROE, VAL_Repos_ID_1_Pass.ORIGINAL_CURRENCY_REPOS_ID, VAL_Repos_ID_1_Pass.TRUST_FUND_REPOS_ID, VAL_Repos_ID_1_Pass.RISK_CODE_REPOS_ID, VAL_Repos_ID_1_Pass.MARKET_FILCODE_REPOS_ID, VAL_Repos_ID_1_Pass.FILCODE1_REPOS_ID, VAL_Repos_ID_1_Pass.FILCODE2_REPOS_ID, VAL_Repos_ID_1_Pass.UNIQUE_MARKET_REFERENCE, VAL_Repos_ID_1_Pass.BROKER_REPOS_ID, VAL_Repos_ID_1_Pass.BROKERREFONE, VAL_Repos_ID_1_Pass.BROKERREFTWO, VAL_Repos_ID_1_Pass.BROKERORDER1, VAL_Repos_ID_1_Pass.BROKERORDER2, VAL_Repos_ID_1_Pass.SIGNING_NARRATIVE, VAL_Repos_ID_1_Pass.ACTUAL_SETTLEMENT_DT, VAL_Repos_ID_1_Pass.EARLY_RI_IND, VAL_Repos_ID_1_Pass.RI_LEVEL, VAL_Repos_ID_1_Pass.PROCESSING_PERIOD_REPOS_ID, VAL_Repos_ID_1_Pass.MESSAGE_REFERENCE, VAL_Repos_ID_1_Pass.ISCONTRA, VAL_Repos_ID_1_Pass.HASCONTRA, VAL_Repos_ID_1_Pass.ISREPL FROM VAL_Repos_ID_1_Pass 
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '40', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Business_Name', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '85', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Description', "Output_2nd_Column_Name" = 'Type', "Output_3rd_Column_Name" = 'Mapping', "Output_Column_Name_4" = 'Business_Name', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '80', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>297</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-175</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '52', "ui_acta_from_schema_0" = 'VAL_Repos_ID_1_Fail', "ui_display_name" = 'QRY_Outw_Fail', "x" = '1786', "y" = '-2087')
+GUID::'33462e0d-0e9c-43db-bd7c-e221339cfdf5' CREATE VIEW QRY_Outw_Fail( LOAD_ID INT  SET( "ui_mapping_text" = '$G_LOAD_ID') ,
+ JOB_NAME VARCHAR(64)  SET( "ui_mapping_text" = '$G_JOB_NAME') ,
+ WORKFLOW_NAME VARCHAR(64)  SET( "ui_mapping_text" = '\'WF_KDR_Build_USM\'') ,
+ DATAFLOW_NAME VARCHAR(64)  SET( "ui_mapping_text" = '\'DF_KDR_WRK_USM\'') ,
+ KEY_INT_FIELD VARCHAR(64)  SET( "ui_mapping_text" = 'NULL') ,
+ KEY_INT_VALUE INT  SET( "ui_mapping_text" = 'NULL') ,
+ KEY_CHAR_FIELD VARCHAR(64)  SET( "ui_mapping_text" = '\'OUTW_USM_TRANSACTION\'') ,
+ KEY_CHAR_VALUE VARCHAR(64)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Fail.OUTW_USM_SOURCE_ID') ,
+ DI_ERRORACTION VARCHAR(10)  SET( "ui_mapping_text" = 'DECODE((VAL_Repos_ID_1_Fail.DI_ERRORACTION = \'F\'), \'FAIL\', (VAL_Repos_ID_1_Fail.DI_ERRORACTION = \'P\'), \'PASS\', (VAL_Repos_ID_1_Fail.DI_ERRORACTION = \'B\'), \'BOTH\', \'UNKNOWN\')') ,
+ DI_ERRORCOLUMNS VARCHAR(150)  SET( "ui_mapping_text" = 'VAL_Repos_ID_1_Fail.DI_ERRORCOLUMNS') ,
+ DI_ERRORTEXT VARCHAR(1024)  SET( "ui_mapping_text" = '\'Validation Failed - Outward Contract, Trust Fund, Risk Code, Market Filcode, Filcode1, Filcode2 or Broker Repos IDs are 0\'')  )
+ AS
+SELECT $G_LOAD_ID, $G_JOB_NAME, 'WF_KDR_Build_USM', 'DF_KDR_WRK_USM',  NULL ,  NULL , 'OUTW_USM_TRANSACTION', VAL_Repos_ID_1_Fail.OUTW_USM_SOURCE_ID, decode((VAL_Repos_ID_1_Fail.DI_ERRORACTION = 'F'), 'FAIL', (VAL_Repos_ID_1_Fail.DI_ERRORACTION = 'P'), 'PASS', (VAL_Repos_ID_1_Fail.DI_ERRORACTION = 'B'), 'BOTH', 'UNKNOWN'), VAL_Repos_ID_1_Fail.DI_ERRORCOLUMNS, 'Validation Failed - Outward Contract, Trust Fund, Risk Code, Market Filcode, Filcode1, Filcode2 or Broker Repos IDs are 0' FROM VAL_Repos_ID_1_Fail 
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '40', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Business_Name', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '120', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '365', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Description', "Output_2nd_Column_Name" = 'Type', "Output_3rd_Column_Name" = 'Mapping', "Output_Column_Name_4" = 'Business_Name', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '120', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Name" = '177', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>269</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-175</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '52', "ui_acta_from_schema_0" = 'VAL_Repos_ID_Fail', "ui_display_name" = 'QRY_Inw_Fail', "x" = '1792', "y" = '-1901')
+GUID::'0b0e5e58-2cb3-47d6-a12d-3a25adf3c508' CREATE VIEW QRY_Inw_Fail( LOAD_ID INT  SET( "ui_mapping_text" = '$G_LOAD_ID') ,
+ JOB_NAME VARCHAR(64)  SET( "ui_mapping_text" = '$G_JOB_NAME') ,
+ WORKFLOW_NAME VARCHAR(64)  SET( "ui_mapping_text" = '\'WF_KDR_Build_USM\'') ,
+ DATAFLOW_NAME VARCHAR(64)  SET( "ui_mapping_text" = '\'DF_KDR_WRK_USM\'') ,
+ KEY_INT_FIELD VARCHAR(64)  SET( "ui_mapping_text" = 'NULL') ,
+ KEY_INT_VALUE INT  SET( "ui_mapping_text" = 'NULL') ,
+ KEY_CHAR_FIELD VARCHAR(64)  SET( "ui_mapping_text" = '\'INW_USM_TRANSACTION\'') ,
+ KEY_CHAR_VALUE VARCHAR(64)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Fail.INW_USM_SOURCE_ID') ,
+ DI_ERRORACTION VARCHAR(10)  SET( "ui_mapping_text" = 'DECODE((VAL_Repos_ID_Fail.DI_ERRORACTION = \'F\'), \'FAIL\', (VAL_Repos_ID_Fail.DI_ERRORACTION = \'P\'), \'PASS\', (VAL_Repos_ID_Fail.DI_ERRORACTION = \'B\'), \'BOTH\', \'UNKNOWN\')') ,
+ DI_ERRORCOLUMNS VARCHAR(500)  SET( "ui_mapping_text" = 'VAL_Repos_ID_Fail.DI_ERRORCOLUMNS') ,
+ DI_ERRORTEXT VARCHAR(64)  SET( "ui_mapping_text" = '\'Validation Failed - Inward Contract, Trust Fund, Risk Code, Market Filcode, Filcode1, Filcode2, Placing Broker or Broker Repos IDs are 0\'')  )
+ AS
+SELECT $G_LOAD_ID, $G_JOB_NAME, 'WF_KDR_Build_USM', 'DF_KDR_WRK_USM',  NULL ,  NULL , 'INW_USM_TRANSACTION', VAL_Repos_ID_Fail.INW_USM_SOURCE_ID, decode((VAL_Repos_ID_Fail.DI_ERRORACTION = 'F'), 'FAIL', (VAL_Repos_ID_Fail.DI_ERRORACTION = 'P'), 'PASS', (VAL_Repos_ID_Fail.DI_ERRORACTION = 'B'), 'BOTH', 'UNKNOWN'), VAL_Repos_ID_Fail.DI_ERRORCOLUMNS, 'Validation Failed - Inward Contract, Trust Fund, Risk Code, Market Filcode, Filcode1, Filcode2, Placing Broker or Broker Repos IDs are 0' FROM VAL_Repos_ID_Fail 
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '40', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '85', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '80', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>400</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-175</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '52', "x" = '2337', "y" = '-1900')
+GUID::'6380106c-5575-4ae2-b6da-e7c553835da2' LOAD TABLE KDR.DBO.DI_VALIDATION INPUT(QRY_Inw_Fail)
+SET("LDRLiveLoad" = 'no', "Table_Type" = 'TABLE', "connection_port" = 'no', "ldr_configuration_enabled" = 'yes', "ldr_configurations" = '<?xml version="1.0" encoding="UTF-8"?>
+<LDRConfigurations>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2016">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>1000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load></loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>yes</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>overflow_file</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>append</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>0</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2000">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>1000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load></loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>yes</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>overflow_file</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>append</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>0</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2008">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>1000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load></loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>yes</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>overflow_file</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>append</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>0</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+</LDRConfigurations>', "loader_template_table" = 'no', "name" = 'KDR', "use_unicode_varchar" = 'no');
+
+ALGUIComment ("InputSchema_WidthProp" = '40', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '85', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '80', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>400</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-175</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '52', "x" = '2344', "y" = '-2088')
+GUID::'5e04b63a-39bd-4818-bac2-ef2234e9ecfb' LOAD TABLE KDR.DBO.DI_VALIDATION INPUT(QRY_Outw_Fail)
+SET("LDRLiveLoad" = 'no', "Table_Type" = 'TABLE', "connection_port" = 'no', "ldr_configuration_enabled" = 'yes', "ldr_configurations" = '<?xml version="1.0" encoding="UTF-8"?>
+<LDRConfigurations>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2016">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>1000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load></loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>yes</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>overflow_file</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>append</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>0</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2000">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>1000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load></loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>yes</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>overflow_file</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>append</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>0</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2008">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>1000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load></loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>yes</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>overflow_file</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>append</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>0</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+</LDRConfigurations>', "loader_template_table" = 'no', "name" = 'KDR', "use_unicode_varchar" = 'no');
+
+ALGUIComment ("InputSchema_WidthProp" = '45', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '85', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '80', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>388</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-175</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '58', "x" = '69', "y" = '-2797')
+GUID::'9d6db345-27a2-4873-b781-0a59ebf1cad2' READ TABLE KDRStaging.DBO.TMP_ECL_LANDED_USMSIGNINGTRANS OUTPUT(TMP_ECL_LANDED_USMSIGNINGTRANS_1)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'no', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'KDRStaging', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '37', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Business_Name', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '120', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '281', "Input_Width_Type" = '85', "ObjectDesc" = 'Perform Lookups on USM Transactions 
+
+Exclude Inward transactions where PolicyLineID <= 0 ', "Output_1st_Column_Name" = 'Description', "Output_2nd_Column_Name" = 'Type', "Output_3rd_Column_Name" = 'Mapping', "Output_Column_Name_4" = 'Business_Name', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '80', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '185', "Output_Width_Mapping" = '85', "Output_Width_Name" = '384', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>231</X><Y>0</Y></LOCATION><SIZE><CX>291</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-206</Y></LOCATION><SIZE><CX>338</CX><CY>308</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '60', "ui_acta_from_schema_0" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1', "ui_display_name" = 'QRY_Lookup_1', "ui_where_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.LOAD_ID = $G_UNLOAD_ID
+AND INWARDSOUTWARDSIND = \'O\'
+
+', "x" = '66', "y" = '-2082')
+GUID::'400e5434-5b33-4d6b-b879-aaed470609ed' CREATE VIEW QRY_Lookup_1( USM_SOURCE_ID VARCHAR(50)  KEY  SET( "ui_mapping_text" = 'CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS_1.USMSIGNINGTRANSID)', "ui_pasting" = 'CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS.USMSIGNINGTRANSID)') ,
+ DATA_SOURCE_REPOS_ID INT  SET( "ui_mapping_text" = '$G_KDR_ECLIPSE_DATA_SOURCE_REPOS_ID', "ui_pasting" = '$G_KDR_ECLIPSE_DATA_SOURCE_REPOS_ID') ,
+ INSERTED_DT DATETIME(9)  SET( "ui_mapping_text" = '$G_UNLOAD_EXECUTION_START_DT', "ui_pasting" = '$G_UNLOAD_EXECUTION_START_DT') ,
+ LAST_UPDATED_DT DATETIME(9)  SET( "ui_mapping_text" = '$G_UNLOAD_EXECUTION_START_DT', "ui_pasting" = '$G_UNLOAD_EXECUTION_START_DT') ,
+ MARKET_REPOS_ID INT  SET( "ui_mapping_text" = '$G_MARKET_REPOS_ID', "ui_pasting" = '$G_MARKET_REPOS_ID') ,
+ lookup_ext AL_RFC_SCHEMA_GROUP (PROCESSING_PERIOD_REPOS_ID INT  KEY ) ,
+ lookup_ext_14 AL_RFC_SCHEMA_GROUP (TRANSACTION_REASON_REPOS_ID INT ) ,
+ lookup_ext_15 AL_RFC_SCHEMA_GROUP (QUALIFYING_CATEGORY_REPOS_ID INT ) ,
+ lookup_ext_1 AL_RFC_SCHEMA_GROUP (USM_ENTRY_TYPE_REPOS_ID INT ) ,
+ lookup_ext_2 AL_RFC_SCHEMA_GROUP (MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID INT )  SET( "Description" = 'Based on BUSINESSCATEGORY but this was not populated in the source data until 1995') ,
+ YEAR_OF_ACCOUNT INT  SET( "ui_mapping_text" = '#YOA
+TMP_ECL_LANDED_USMSIGNINGTRANS_1.YOA', "ui_pasting" = '#YOA
+TMP_ECL_LANDED_USMSIGNINGTRANS.YOA') ,
+ SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.SIGNINGDATE', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.SIGNINGDATE') ,
+ SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = '#SIGNINGNUM
+CONVERT(VARCHAR(50),TMP_ECL_LANDED_USMSIGNINGTRANS_1.SIGNINGNUM)', "ui_pasting" = '#SIGNINGNUM
+CONVERT(VARCHAR(50),TMP_ECL_LANDED_USMSIGNINGTRANS.SIGNINGNUM)') ,
+ SIGNING_VERSION VARCHAR(2)  SET( "ui_mapping_text" = '#SIGNINGVERSIONNUM
+
+# As Part of EUI-11, The NVL is applied to handle Null data coming from the source.
+NVL(CONVERT(VARCHAR(50),TMP_ECL_LANDED_USMSIGNINGTRANS_1.SIGNINGVERSIONNUM),\'01\')', "ui_pasting" = '#SIGNINGVERSIONNUM
+
+# As Part of EUI-11, The NVL is applied to handle Null data coming from the source.
+NVL(CONVERT(VARCHAR(50),TMP_ECL_LANDED_USMSIGNINGTRANS.SIGNINGVERSIONNUM),\'01\')') ,
+ lookup_ext_4 AL_RFC_SCHEMA_GROUP (SETTLEMENT_CURRENCY_REPOS_ID INT ) ,
+ SETTLEMENT_TRANSACTION_AMT DECIMAL(21, 6)  SET( "Description" = 'Share in Settlement CCY - nulls set to 0.0', "ui_mapping_text" = 'NVL(TMP_ECL_LANDED_USMSIGNINGTRANS_1.SHARENETAMTSETTCCY,0.0)', "ui_pasting" = 'NVL(SHARENETAMTSETTCCY,0.0)') ,
+ SETTLEMENT_TRANSACTION_WAR_AMT DECIMAL(21, 6)  SET( "Description" = 'Share WAR amount in Settlement CCY  - nulls set to 0.0', "ui_mapping_text" = 'NVL(TMP_ECL_LANDED_USMSIGNINGTRANS_1.SHAREWARAMTSETTCCY,0.0)', "ui_pasting" = 'NVL(TMP_ECL_LANDED_USMSIGNINGTRANS.SHAREWARAMTSETTCCY,0.0)') ,
+ SETTLEMENT_TRANSACTION_VAT_AMT DECIMAL(21, 6)  SET( "Description" = 'Share VAT amount in Settlement CCY  - nulls set to 0.0', "ui_mapping_text" = 'NVL(TMP_ECL_LANDED_USMSIGNINGTRANS_1.SHAREVATAMTSETTCCY,0.0)', "ui_pasting" = 'NVL(TMP_ECL_LANDED_USMSIGNINGTRANS.SHAREVATAMTSETTCCY,0.0)') ,
+ SETTLEMENT_TRANSACTION_CEDED_TO_LLOYDS_AMT DECIMAL(21, 6)  SET( "Description" = 'Share amount ceded to Lloyd\'s  - nulls set to 0.0', "ui_mapping_text" = 'NVL(TMP_ECL_LANDED_USMSIGNINGTRANS_1.SHARECEDEDTOLLOYDSSETTCCY,0.0)', "ui_pasting" = 'NVL(TMP_ECL_LANDED_USMSIGNINGTRANS.SHARECEDEDTOLLOYDSSETTCCY,0.0)') ,
+ lookup_ext_5 AL_RFC_SCHEMA_GROUP (SYNDICATE_REPOS_ID INT ) ,
+ POLICYLINEREF VARCHAR(20)  SET( "ui_mapping_text" = 'UPPER(TMP_ECL_LANDED_USMSIGNINGTRANS_1.POLICYLINEREF)', "ui_pasting" = 'UPPER(TMP_ECL_LANDED_USMSIGNINGTRANS.POLICYLINEREF)') ,
+ POLICYLINEID INT  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.POLICYLINEID', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.POLICYLINEID') ,
+ ORIGINAL_TO_SETTLEMENT_ROE DECIMAL(18, 9)  SET( "ui_mapping_text" = 'ORIGTOSETTCCYROE', "ui_pasting" = 'ORIGTOSETTCCYROE') ,
+ lookup_ext_6 AL_RFC_SCHEMA_GROUP (ORIGINAL_CURRENCY_REPOS_ID INT ) ,
+ ORIGINAL_SIGNING_NUM VARCHAR(50)  SET( "ui_mapping_text" = 'CONVERT(VARCHAR(50),ORIGSIGNINGNUM)', "ui_pasting" = 'CONVERT(VARCHAR(50),ORIGSIGNINGNUM)') ,
+ ORIGINAL_SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'ORIGSIGNINGDATE', "ui_pasting" = 'ORIGSIGNINGDATE') ,
+ lookup_ext_7 AL_RFC_SCHEMA_GROUP (TRUST_FUND_REPOS_ID INT ) ,
+ lookup_ext_8 AL_RFC_SCHEMA_GROUP (RISK_CODE_REPOS_ID INT ) ,
+ BROKERCODE VARCHAR(6)  SET( "ui_mapping_text" = '#EUI-ITEM-29: Altered the datatype for this column from Varchar(4) to Varchar(6).
+TMP_ECL_LANDED_USMSIGNINGTRANS_1.BROKERCODE', "ui_pasting" = '#EUI-ITEM-29: Altered the datatype for this column from Varchar(4) to Varchar(6).
+TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERCODE') ,
+ PLACINGBROKERCODE VARCHAR(6)  SET( "ui_mapping_text" = '#EUI-ITEM-29: Altered the datatype for this column from Varchar(4) to Varchar(6).
+TMP_ECL_LANDED_USMSIGNINGTRANS_1.PLACINGBROKERCODE', "ui_pasting" = '#EUI-ITEM-29: Altered the datatype for this column from Varchar(4) to Varchar(6).
+TMP_ECL_LANDED_USMSIGNINGTRANS.PLACINGBROKERCODE') ,
+ ENTRYTYPE VARCHAR(3)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.ENTRYTYPE', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.ENTRYTYPE') ,
+ RISKCODE VARCHAR(2)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.RISKCODE', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.RISKCODE') ,
+ FILCODE1 VARCHAR(4)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.FILCODE1', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.FILCODE1') ,
+ FILCODE2 VARCHAR(4)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.FILCODE2', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.FILCODE2') ,
+ FILCODE VARCHAR(2)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.FILCODE', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.FILCODE') ,
+ TRUSTFUNDCODE VARCHAR(2)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.TRUSTFUNDCODE', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.TRUSTFUNDCODE') ,
+ STATUSID INT  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.STATUSID', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.STATUSID') ,
+ lookup_ext_9 AL_RFC_SCHEMA_GROUP (MARKET_FILCODE_REPOS_ID INT ) ,
+ lookup_ext_10 AL_RFC_SCHEMA_GROUP (FILCODE1_REPOS_ID INT ) ,
+ USMSIGNINGTRANSID INT  KEY  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.USMSIGNINGTRANSID', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.USMSIGNINGTRANSID') ,
+ lookup_ext_11 AL_RFC_SCHEMA_GROUP (FILCODE2_REPOS_ID INT ) ,
+ UNIQUE_MARKET_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'CONVERT(VARCHAR(50),UNIQUEMARKETREF)', "ui_pasting" = 'CONVERT(VARCHAR(50),UNIQUEMARKETREF)') ,
+ lookup_ext_12 AL_RFC_SCHEMA_GROUP (BROKER_REPOS_ID INT ) ,
+ lookup_ext_13 AL_RFC_SCHEMA_GROUP (PLACING_BROKER_REPOS_ID INT ) ,
+ BROKERREFONE VARCHAR(50)  SET( "ui_mapping_text" = 'CONVERT(VARCHAR(50),TMP_ECL_LANDED_USMSIGNINGTRANS_1.BROKERREFONE)', "ui_pasting" = 'CONVERT(VARCHAR(50),TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERREFONE)') ,
+ BROKERREFTWO VARCHAR(50)  SET( "ui_mapping_text" = 'CONVERT(VARCHAR(50),TMP_ECL_LANDED_USMSIGNINGTRANS_1.BROKERREFTWO)', "ui_pasting" = 'CONVERT(VARCHAR(50),TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERREFTWO)') ,
+ BROKERORDER1 DECIMAL(15, 8)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.BROKERORDER1', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERORDER1') ,
+ BROKERORDER2 DECIMAL(15, 8)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.BROKERORDER2', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.BROKERORDER2') ,
+ SIGNING_NARRATIVE VARCHAR(500)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.SIGNINGNARR', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.SIGNINGNARR') ,
+ OVERRIDINGCOMMISSIONIND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.OVERRIDINGCOMMISSIONIND', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.OVERRIDINGCOMMISSIONIND') ,
+ ACTUAL_SETTLEMENT_DT DATETIME(9)  SET( "ui_mapping_text" = 'ACTUALSETTDATE', "ui_pasting" = 'ACTUALSETTDATE') ,
+ EARLY_RI_IND VARCHAR(1)  SET( "ui_mapping_text" = 'EARLYRIIND', "ui_pasting" = 'EARLYRIIND') ,
+ RI_LEVEL INT  SET( "ui_mapping_text" = 'RILEVEL', "ui_pasting" = 'RILEVEL') ,
+ MESSAGE_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'CONVERT(Varchar(50),MSGREF)', "ui_pasting" = 'CONVERT(Varchar(50),MSGREF)') ,
+ ISCONTRA VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.ISCONTRA', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.ISCONTRA') ,
+ HASCONTRA VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.HASCONTRA', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.HASCONTRA') ,
+ ISREPL VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.ISREPL', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.ISREPL') ,
+ INWARDSOUTWARDSIND VARCHAR(10)  SET( "Description" = 'I or O', "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.INWARDSOUTWARDSIND', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.INWARDSOUTWARDSIND') ,
+ CATASTROPHE_CODE VARCHAR(4)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.CATCODE', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.CATCODE') ,
+ lookup_ext_16 AL_RFC_SCHEMA_GROUP (SIGNING_STATUS VARCHAR(40) ) ,
+ GENERATED_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_USMSIGNINGTRANS_1.GENERATED_IND', "ui_pasting" = 'TMP_ECL_LANDED_USMSIGNINGTRANS.GENERATED_IND') ,
+ lookup_ext_3 AL_RFC_SCHEMA_GROUP (OUTW_CONTRACT_REPOS_ID INT ) ,
+ DTI_CODE VARCHAR(50)  SET( "ui_mapping_text" = '#As part of KMI Phase3 drag and drop the column from the source to target
+TMP_ECL_LANDED_USMSIGNINGTRANS_1.DTI_CODE', "ui_pasting" = '#As part of KMI Phase3 drag and drop the column from the source to target
+TMP_ECL_LANDED_USMSIGNINGTRANS.DTI_CODE')  )
+ AS
+SELECT CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS_1.USMSIGNINGTRANSID), $G_KDR_ECLIPSE_DATA_SOURCE_REPOS_ID, $G_UNLOAD_EXECUTION_START_DT, $G_UNLOAD_EXECUTION_START_DT, $G_MARKET_REPOS_ID, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.PERIOD_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ PERIOD_REPOS_ID ], [ 0 ], [ PERIOD_END_DT, '=', (add_months(to_date((CONVERT( INT , TMP_ECL_LANDED_USMSIGNINGTRANS_1.PROCESSPERIOD) + 1), 'YYYYMMDD'), 1) - num_to_interval(1, 'S')), PERIOD_TYPE, '=', 'Month' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.TRANSACTION_REASON_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ TRANSACTION_REASON_REPOS_ID ], [ 0 ], [ TRANSACTION_REASON, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.CATEGORYCODE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.QUALIFYING_CATEGORY_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ QUALIFYING_CATEGORY_REPOS_ID ], [ 0 ], [ QUALIFYING_CATEGORY, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.QUALCATEGORY, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.USM_ENTRY_TYPE_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ USM_ENTRY_TYPE_REPOS_ID ], [ 0 ], [ USM_ENTRY_TYPE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.ENTRYTYPE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.MARKET_TRANSACTION_CATEGORY_CODE_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ MARKET_TRANSACTION_CATEGORY_CODE_REPOS_ID ], [ 0 ], [ MARKET_TRANSACTION_CATEGORY_CODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.BUSINESSCATEGORY, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, TMP_ECL_LANDED_USMSIGNINGTRANS_1.YOA, TMP_ECL_LANDED_USMSIGNINGTRANS_1.SIGNINGDATE, CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS_1.SIGNINGNUM), nvl(CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS_1.SIGNINGVERSIONNUM), '01'), __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.CURRENCY_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ CURRENCY_REPOS_ID ], [ 0 ], [ CURRENCY, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.SETTCCYISO, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, nvl(TMP_ECL_LANDED_USMSIGNINGTRANS_1.SHARENETAMTSETTCCY, 0.00000000000000e+00), nvl(TMP_ECL_LANDED_USMSIGNINGTRANS_1.SHAREWARAMTSETTCCY, 0.00000000000000e+00), nvl(TMP_ECL_LANDED_USMSIGNINGTRANS_1.SHAREVATAMTSETTCCY, 0.00000000000000e+00), nvl(TMP_ECL_LANDED_USMSIGNINGTRANS_1.SHARECEDEDTOLLOYDSSETTCCY, 0.00000000000000e+00), __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.SYNDICATE, 'PRE_LOAD_CACHE', 'MAX'], [ SYNDICATE_REPOS_ID ], [ 0 ], [ SYNDICATE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.SYND, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, upper(TMP_ECL_LANDED_USMSIGNINGTRANS_1.POLICYLINEREF), TMP_ECL_LANDED_USMSIGNINGTRANS_1.POLICYLINEID, ORIGTOSETTCCYROE, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.CURRENCY_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ CURRENCY_REPOS_ID ], [ 0 ], [ CURRENCY, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.ORIGCCYISO, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, CONVERT( VARCHAR(50) , ORIGSIGNINGNUM), ORIGSIGNINGDATE, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.TRUST_FUND_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ TRUST_FUND_REPOS_ID ], [ 0 ], [ TRUST_FUND, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.TRUSTFUNDCODE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.RISK_CODE_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ RISK_CODE_REPOS_ID ], [ 0 ], [ RISK_CODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.RISKCODE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, TMP_ECL_LANDED_USMSIGNINGTRANS_1.BROKERCODE, TMP_ECL_LANDED_USMSIGNINGTRANS_1.PLACINGBROKERCODE, TMP_ECL_LANDED_USMSIGNINGTRANS_1.ENTRYTYPE, TMP_ECL_LANDED_USMSIGNINGTRANS_1.RISKCODE, TMP_ECL_LANDED_USMSIGNINGTRANS_1.FILCODE1, TMP_ECL_LANDED_USMSIGNINGTRANS_1.FILCODE2, TMP_ECL_LANDED_USMSIGNINGTRANS_1.FILCODE, TMP_ECL_LANDED_USMSIGNINGTRANS_1.TRUSTFUNDCODE, TMP_ECL_LANDED_USMSIGNINGTRANS_1.STATUSID, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.FILCODE_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ FILCODE_REPOS_ID ], [ 0 ], [ FILCODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.FILCODE, FILCODE_TYPE, '=', 'FilCode', CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.FILCODE_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ FILCODE_REPOS_ID ], [ 0 ], [ FILCODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.FILCODE1, FILCODE_TYPE, '=', 'FilCode1', CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, TMP_ECL_LANDED_USMSIGNINGTRANS_1.USMSIGNINGTRANSID, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.FILCODE_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ FILCODE_REPOS_ID ], [ 0 ], [ FILCODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.FILCODE2, FILCODE_TYPE, '=', 'FilCode1', CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, CONVERT( VARCHAR(50) , UNIQUEMARKETREF), __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.BROKER, 'PRE_LOAD_CACHE', 'MAX'], [ BROKER_REPOS_ID ], [ 0 ], [ BROKER_CODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.BROKERCODE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.BROKER, 'PRE_LOAD_CACHE', 'MAX'], [ BROKER_REPOS_ID ], [ 0 ], [ BROKER_CODE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.PLACINGBROKERCODE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS_1.BROKERREFONE), CONVERT( VARCHAR(50) , TMP_ECL_LANDED_USMSIGNINGTRANS_1.BROKERREFTWO), TMP_ECL_LANDED_USMSIGNINGTRANS_1.BROKERORDER1, TMP_ECL_LANDED_USMSIGNINGTRANS_1.BROKERORDER2, TMP_ECL_LANDED_USMSIGNINGTRANS_1.SIGNINGNARR, TMP_ECL_LANDED_USMSIGNINGTRANS_1.OVERRIDINGCOMMISSIONIND, ACTUALSETTDATE, EARLYRIIND, RILEVEL, CONVERT( VARCHAR(50) , MSGREF), TMP_ECL_LANDED_USMSIGNINGTRANS_1.ISCONTRA, TMP_ECL_LANDED_USMSIGNINGTRANS_1.HASCONTRA, TMP_ECL_LANDED_USMSIGNINGTRANS_1.ISREPL, TMP_ECL_LANDED_USMSIGNINGTRANS_1.INWARDSOUTWARDSIND, TMP_ECL_LANDED_USMSIGNINGTRANS_1.CATCODE, __AL_LOOKUPEX_TRAN lookup_ext([KDRStaging.DBO.TMP_ECL_LANDED_USMSIGNINGSTATUS, 'PRE_LOAD_CACHE', 'MAX'], [ DSC ], [  NULL  ], [ USMSIGNINGSTATUSID, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.STATUSID, LOAD_ID, '=', $G_UNLOAD_ID ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, TMP_ECL_LANDED_USMSIGNINGTRANS_1.GENERATED_IND, __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.OUTW_CONTRACT, 'PRE_LOAD_CACHE', 'MAX'], [ OUTW_CONTRACT_REPOS_ID ], [ 0 ], [ POLICY_REFERENCE, '=', TMP_ECL_LANDED_USMSIGNINGTRANS_1.OUTPOLICYREF, CURRENT_IND, '=', 'Y', DELETED_IND, '=', 'N' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, TMP_ECL_LANDED_USMSIGNINGTRANS_1.DTI_CODE FROM TMP_ECL_LANDED_USMSIGNINGTRANS_1  WHERE ((TMP_ECL_LANDED_USMSIGNINGTRANS_1.LOAD_ID = $G_UNLOAD_ID) AND
+   (INWARDSOUTWARDSIND = 'O'))
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+END
+ SET ("Audit" = '<?xml version="1.0" encoding="UTF-8"?>
+<Audit>
+<AuditObjects>
+</AuditObjects>
+<AuditRules>
+</AuditRules>
+<Notifications>
+<RaiseException Enabled="true" >
+</RaiseException>
+<Mail Enabled="false" ></Mail>
+<Script Enabled="false" ></Script>
+</Notifications>
+</Audit>
+', "Cache_type" = 'pageable_cache', "Parallelism_degree" = '2', "allows_both_input_and_output" = 'yes', "dataflow_loader_bulk_load" = 'no', "dataflow_loader_commit_size" = 'default', "dataflow_loader_row_size_bytes" = '0', "dataflow_number_of_loaders" = '0', "run_once" = 'no', "use_dataflow_links" = 'no', "use_datastore_links" = 'yes', "validation_xform_exists" = 'yes', "validation_xform_stats" = 'no')

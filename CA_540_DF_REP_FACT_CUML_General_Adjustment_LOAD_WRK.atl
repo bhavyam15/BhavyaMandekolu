@@ -1,0 +1,465 @@
+#__AW_Repository_Version '14.2.11.0000';
+#__AW_Product_Version '14.2.11.2138';
+#__AW_ATL_Locale 'eng_gb.utf-8';
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'408\', y = \'-1376\',ObjectDesc=\'DataFlow Name:	DF_REP_FACT_CUML_General_Adjustment_LOAD_WRK_QRT
+Created By:	Stan Levtchenko
+Date Created:	03/12/2013
+
+Description
+---------------
+This DataFlow loads General FReD Adjustments Data from the KDR OYA and YOA General Adjusments tables to a Work table.
+
+Modification History
+=================
+
+Version		Date		By		Description
+----------		------		---		----------------
+1.000		03/12/2013	Stan Levtchenko	Initial version
+1.001		28/03/2014	Stan Levtchenko	Defect REPT-555 Add the qry_Lookup_DIM_Keys_2 for DIM_UNDERWRITING_DIVISION_KEY
+1.002                       16/04/2020                Savita Rawat        CA-540 DF optimized : Added a where condition in Qry_Yoa/oyoa_Gen_Adjustment for a  delta load.Removed the Filter of Qry_LookUp_Period_Subdivision should be moved to Qry_Yoa/oyoa_Gen_Adjustment
+\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-408</X><Y>1376</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>1924</CX><CY>1088</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RSavedAfterCheckOut', "ActaName_2" = 'RDate_created', "ActaName_3" = 'RDate_modified', "ActaName_4" = 'RDescription', "ActaValue_1" = 'YES', "ActaValue_2" = 'Fri Jun 20 13:14:59 2014', "ActaValue_3" = 'Sun Apr 26 16:31:15 2020', "ActaValue_4" = 'This WorkFlow loads General FReD Adjustments Data from the KDR OYA and YOA General Adjusments tables to a Work table.', "x" = '-1', "y" = '-1')
+CREATE  DATAFLOW DF_REP_FACT_CUML_General_Adjustment_LOAD_WRK::'1e93f198-b97a-436d-b90f-6858331008e5'
+BEGIN
+
+ALGUIComment ("InputSchema_WidthProp" = '42', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '348', "Output_Width_Name" = '306', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>241</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '63', "ui_acta_from_schema_0" = 'Qry_GroupBy_Gen_Adjusment', "ui_display_name" = 'Qry_LookUp', "x" = '1815', "y" = '-499')
+GUID::'ccc2a940-b8d8-48c5-9a3c-3455915298ae' CREATE VIEW Qry_LookUp( ADJUSTMENT_SET_REPOS_KEY INT  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.ADJUSTMENT_SET_REPOS_KEY', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.ADJUSTMENT_SET_REPOS_KEY') ,
+ CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.CURRENCY_REPOS_ID', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.CURRENCY_REPOS_ID') ,
+ YEAR INT  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.YEAR', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.YEAR') ,
+ DURG_REPOS_ID INT  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.DURG_REPOS_ID', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.DURG_REPOS_ID') ,
+ RISK_CODE_REPOS_ID INT  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.RISK_CODE_REPOS_ID', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.RISK_CODE_REPOS_ID') ,
+ IPREM_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.IPREM_SIGNED_GROSS_NETT', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.IPREM_SIGNED_GROSS_NETT') ,
+ IPREM_SIGNED_FUTURE DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.IPREM_SIGNED_FUTURE', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.IPREM_SIGNED_FUTURE') ,
+ OPREM_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OPREM_SIGNED_GROSS_NETT', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OPREM_SIGNED_GROSS_NETT') ,
+ OPREM_PAID_ACCRUAL DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OPREM_PAID_ACCRUAL', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OPREM_PAID_ACCRUAL') ,
+ OPREM_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OPREM_OS', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OPREM_OS') ,
+ OPREM_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OPREM_IBNR', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OPREM_IBNR') ,
+ ICLAIMS_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.ICLAIMS_SIGNED_GROSS_NETT', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.ICLAIMS_SIGNED_GROSS_NETT') ,
+ ICLAIMS_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.ICLAIMS_OS', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.ICLAIMS_OS') ,
+ ICLAIMS_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.ICLAIMS_IBNR', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.ICLAIMS_IBNR') ,
+ OCLAIMS_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OCLAIMS_SIGNED_GROSS_NETT', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OCLAIMS_SIGNED_GROSS_NETT') ,
+ OCAS_HELD DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OCAS_HELD', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OCAS_HELD') ,
+ OCLAIMS_PAID_ACCRUAL DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OCLAIMS_PAID_ACCRUAL', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OCLAIMS_PAID_ACCRUAL') ,
+ OCLAIMS_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OCLAIMS_OS', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OCLAIMS_OS') ,
+ OCLAIMS_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OCLAIMS_IBNR', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OCLAIMS_IBNR') ,
+ IPREM_WRITTEN_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.IPREM_WRITTEN_GROSS_NETT', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.IPREM_WRITTEN_GROSS_NETT') ,
+ IPREM_WRITTEN_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.IPREM_WRITTEN_AC', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.IPREM_WRITTEN_AC') ,
+ IPREM_EARNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.IPREM_EARNED_GROSS_NETT', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.IPREM_EARNED_GROSS_NETT') ,
+ IPREM_EARNED_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.IPREM_EARNED_AC', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.IPREM_EARNED_AC') ,
+ ICLAIMS_INCURRED DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.ICLAIMS_INCURRED', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.ICLAIMS_INCURRED') ,
+ OPREM_WRITTEN_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OPREM_WRITTEN_NETT', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OPREM_WRITTEN_NETT') ,
+ OPREM_WRITTEN_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OPREM_WRITTEN_AC', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OPREM_WRITTEN_AC') ,
+ OPREM_WRITTEN_PC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OPREM_WRITTEN_PC', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OPREM_WRITTEN_PC') ,
+ OPREM_EARNED_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OPREM_EARNED_NETT', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OPREM_EARNED_NETT') ,
+ OPREM_EARNED_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OPREM_EARNED_AC', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OPREM_EARNED_AC') ,
+ OPREM_EARNED_PC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OPREM_EARNED_PC', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OPREM_EARNED_PC') ,
+ OCLAIMS_INCURRED DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.OCLAIMS_INCURRED', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.OCLAIMS_INCURRED') ,
+ lookup_ext_1 AL_RFC_SCHEMA_GROUP (SYNDICATE_REPOS_ID INT ) ,
+ PERIOD_REPOS_ID INT  SET( "ui_mapping_text" = 'Qry_GroupBy_Gen_Adjusment.PERIOD_REPOS_ID', "ui_pasting" = 'Qry_GroupBy_Gen_Adjusment.PERIOD_REPOS_ID')  )
+ AS
+SELECT Qry_GroupBy_Gen_Adjusment.ADJUSTMENT_SET_REPOS_KEY, Qry_GroupBy_Gen_Adjusment.CURRENCY_REPOS_ID, Qry_GroupBy_Gen_Adjusment.YEAR, Qry_GroupBy_Gen_Adjusment.DURG_REPOS_ID, Qry_GroupBy_Gen_Adjusment.RISK_CODE_REPOS_ID, Qry_GroupBy_Gen_Adjusment.IPREM_SIGNED_GROSS_NETT, Qry_GroupBy_Gen_Adjusment.IPREM_SIGNED_FUTURE, Qry_GroupBy_Gen_Adjusment.OPREM_SIGNED_GROSS_NETT, Qry_GroupBy_Gen_Adjusment.OPREM_PAID_ACCRUAL, Qry_GroupBy_Gen_Adjusment.OPREM_OS, Qry_GroupBy_Gen_Adjusment.OPREM_IBNR, Qry_GroupBy_Gen_Adjusment.ICLAIMS_SIGNED_GROSS_NETT, Qry_GroupBy_Gen_Adjusment.ICLAIMS_OS, Qry_GroupBy_Gen_Adjusment.ICLAIMS_IBNR, Qry_GroupBy_Gen_Adjusment.OCLAIMS_SIGNED_GROSS_NETT, Qry_GroupBy_Gen_Adjusment.OCAS_HELD, Qry_GroupBy_Gen_Adjusment.OCLAIMS_PAID_ACCRUAL, Qry_GroupBy_Gen_Adjusment.OCLAIMS_OS, Qry_GroupBy_Gen_Adjusment.OCLAIMS_IBNR, Qry_GroupBy_Gen_Adjusment.IPREM_WRITTEN_GROSS_NETT, Qry_GroupBy_Gen_Adjusment.IPREM_WRITTEN_AC, Qry_GroupBy_Gen_Adjusment.IPREM_EARNED_GROSS_NETT, Qry_GroupBy_Gen_Adjusment.IPREM_EARNED_AC, Qry_GroupBy_Gen_Adjusment.ICLAIMS_INCURRED, Qry_GroupBy_Gen_Adjusment.OPREM_WRITTEN_NETT, Qry_GroupBy_Gen_Adjusment.OPREM_WRITTEN_AC, Qry_GroupBy_Gen_Adjusment.OPREM_WRITTEN_PC, Qry_GroupBy_Gen_Adjusment.OPREM_EARNED_NETT, Qry_GroupBy_Gen_Adjusment.OPREM_EARNED_AC, Qry_GroupBy_Gen_Adjusment.OPREM_EARNED_PC, Qry_GroupBy_Gen_Adjusment.OCLAIMS_INCURRED, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.TMP_REP_LANDED_SUB_DIVISION, 'PRE_LOAD_CACHE', 'MAX'], [ SYNDICATE_REPOS_ID ], [  NULL  ], [ Sub_Division_Repos_ID, '=', Qry_GroupBy_Gen_Adjusment.SUB_DIVISION_REPOS_ID, Deleted_IND, '=', 'N', Current_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+, Qry_GroupBy_Gen_Adjusment.PERIOD_REPOS_ID FROM Qry_GroupBy_Gen_Adjusment 
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '33', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>444</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '63', "ui_acta_from_schema_0" = 'Qry_Lookup_DIM_Keys', "ui_display_name" = 'Qry_Lookup_DIM_Keys_2', "x" = '2727', "y" = '-541')
+GUID::'e073c588-5fed-4365-a337-6ddbbd1ea457' CREATE VIEW Qry_Lookup_DIM_Keys_2( DIM_SYNDICATE_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.DIM_SYNDICATE_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys.DIM_SYNDICATE_KEY') ,
+ lookup_ext AL_RFC_SCHEMA_GROUP (DIM_UNDERWRITING_DIVISION_KEY INT ) ,
+ DIM_CALENDAR_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.DIM_CALENDAR_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys.DIM_CALENDAR_KEY') ,
+ DIM_CURRENCY_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.DIM_CURRENCY_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys.DIM_CURRENCY_KEY') ,
+ DIM_YEAR_OF_ACCOUNT_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.DIM_YEAR_OF_ACCOUNT_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys.DIM_YEAR_OF_ACCOUNT_KEY') ,
+ DIM_DURG_CLASS_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.DIM_DURG_CLASS_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys.DIM_DURG_CLASS_KEY') ,
+ DIM_RISK_CODE_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.DIM_RISK_CODE_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys.DIM_RISK_CODE_KEY') ,
+ IPREM_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.IPREM_SIGNED_GROSS_NETT', "ui_pasting" = 'Qry_Lookup_DIM_Keys.IPREM_SIGNED_GROSS_NETT') ,
+ IPREM_SIGNED_FUTURE DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.IPREM_SIGNED_FUTURE', "ui_pasting" = 'Qry_Lookup_DIM_Keys.IPREM_SIGNED_FUTURE') ,
+ OPREM_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OPREM_SIGNED_GROSS_NETT', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OPREM_SIGNED_GROSS_NETT') ,
+ OPREM_PAID_ACCRUAL DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OPREM_PAID_ACCRUAL', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OPREM_PAID_ACCRUAL') ,
+ OPREM_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OPREM_OS', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OPREM_OS') ,
+ OPREM_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OPREM_IBNR', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OPREM_IBNR') ,
+ ICLAIMS_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.ICLAIMS_SIGNED_GROSS_NETT', "ui_pasting" = 'Qry_Lookup_DIM_Keys.ICLAIMS_SIGNED_GROSS_NETT') ,
+ ICLAIMS_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.ICLAIMS_OS', "ui_pasting" = 'Qry_Lookup_DIM_Keys.ICLAIMS_OS') ,
+ ICLAIMS_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.ICLAIMS_IBNR', "ui_pasting" = 'Qry_Lookup_DIM_Keys.ICLAIMS_IBNR') ,
+ OCLAIMS_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OCLAIMS_SIGNED_GROSS_NETT', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OCLAIMS_SIGNED_GROSS_NETT') ,
+ OCAS_HELD DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OCAS_HELD', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OCAS_HELD') ,
+ OCLAIMS_PAID_ACCRUAL DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OCLAIMS_PAID_ACCRUAL', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OCLAIMS_PAID_ACCRUAL') ,
+ OCLAIMS_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OCLAIMS_OS', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OCLAIMS_OS') ,
+ OCLAIMS_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OCLAIMS_IBNR', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OCLAIMS_IBNR') ,
+ IPREM_WRITTEN_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.IPREM_WRITTEN_GROSS_NETT', "ui_pasting" = 'Qry_Lookup_DIM_Keys.IPREM_WRITTEN_GROSS_NETT') ,
+ IPREM_WRITTEN_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.IPREM_WRITTEN_AC', "ui_pasting" = 'Qry_Lookup_DIM_Keys.IPREM_WRITTEN_AC') ,
+ IPREM_EARNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.IPREM_EARNED_GROSS_NETT', "ui_pasting" = 'Qry_Lookup_DIM_Keys.IPREM_EARNED_GROSS_NETT') ,
+ IPREM_EARNED_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.IPREM_EARNED_AC', "ui_pasting" = 'Qry_Lookup_DIM_Keys.IPREM_EARNED_AC') ,
+ ICLAIMS_INCURRED DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.ICLAIMS_INCURRED', "ui_pasting" = 'Qry_Lookup_DIM_Keys.ICLAIMS_INCURRED') ,
+ OPREM_WRITTEN_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OPREM_WRITTEN_NETT', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OPREM_WRITTEN_NETT') ,
+ OPREM_WRITTEN_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OPREM_WRITTEN_AC', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OPREM_WRITTEN_AC') ,
+ OPREM_WRITTEN_PC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OPREM_WRITTEN_PC', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OPREM_WRITTEN_PC') ,
+ OPREM_EARNED_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OPREM_EARNED_NETT', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OPREM_EARNED_NETT') ,
+ OPREM_EARNED_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OPREM_EARNED_AC', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OPREM_EARNED_AC') ,
+ OPREM_EARNED_PC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OPREM_EARNED_PC', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OPREM_EARNED_PC') ,
+ OCLAIMS_INCURRED DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys.OCLAIMS_INCURRED', "ui_pasting" = 'Qry_Lookup_DIM_Keys.OCLAIMS_INCURRED')  )
+ AS
+SELECT Qry_Lookup_DIM_Keys.DIM_SYNDICATE_KEY, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.dbo.DIM_SYNDICATE_DIVISION_DURG, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_UNDERWRITING_DIVISION_KEY ], [ 0 ], [ DIM_DURG_CLASS_KEY, '=', Qry_Lookup_DIM_Keys.DIM_DURG_CLASS_KEY ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+, Qry_Lookup_DIM_Keys.DIM_CALENDAR_KEY, Qry_Lookup_DIM_Keys.DIM_CURRENCY_KEY, Qry_Lookup_DIM_Keys.DIM_YEAR_OF_ACCOUNT_KEY, Qry_Lookup_DIM_Keys.DIM_DURG_CLASS_KEY, Qry_Lookup_DIM_Keys.DIM_RISK_CODE_KEY, Qry_Lookup_DIM_Keys.IPREM_SIGNED_GROSS_NETT, Qry_Lookup_DIM_Keys.IPREM_SIGNED_FUTURE, Qry_Lookup_DIM_Keys.OPREM_SIGNED_GROSS_NETT, Qry_Lookup_DIM_Keys.OPREM_PAID_ACCRUAL, Qry_Lookup_DIM_Keys.OPREM_OS, Qry_Lookup_DIM_Keys.OPREM_IBNR, Qry_Lookup_DIM_Keys.ICLAIMS_SIGNED_GROSS_NETT, Qry_Lookup_DIM_Keys.ICLAIMS_OS, Qry_Lookup_DIM_Keys.ICLAIMS_IBNR, Qry_Lookup_DIM_Keys.OCLAIMS_SIGNED_GROSS_NETT, Qry_Lookup_DIM_Keys.OCAS_HELD, Qry_Lookup_DIM_Keys.OCLAIMS_PAID_ACCRUAL, Qry_Lookup_DIM_Keys.OCLAIMS_OS, Qry_Lookup_DIM_Keys.OCLAIMS_IBNR, Qry_Lookup_DIM_Keys.IPREM_WRITTEN_GROSS_NETT, Qry_Lookup_DIM_Keys.IPREM_WRITTEN_AC, Qry_Lookup_DIM_Keys.IPREM_EARNED_GROSS_NETT, Qry_Lookup_DIM_Keys.IPREM_EARNED_AC, Qry_Lookup_DIM_Keys.ICLAIMS_INCURRED, Qry_Lookup_DIM_Keys.OPREM_WRITTEN_NETT, Qry_Lookup_DIM_Keys.OPREM_WRITTEN_AC, Qry_Lookup_DIM_Keys.OPREM_WRITTEN_PC, Qry_Lookup_DIM_Keys.OPREM_EARNED_NETT, Qry_Lookup_DIM_Keys.OPREM_EARNED_AC, Qry_Lookup_DIM_Keys.OPREM_EARNED_PC, Qry_Lookup_DIM_Keys.OCLAIMS_INCURRED FROM Qry_Lookup_DIM_Keys 
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '33', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Description', "Output_3rd_Column_Name" = 'Content_Type', "Output_Column_Name_4" = 'Description', "Output_Column_Name_5" = 'Description', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>797</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '99', "x" = '3613', "y" = '-461')
+GUID::'2f50bc24-90c5-4314-b009-ecee6c488ed5' LOAD TABLE REP_MART.DBO.WRK_GENERAL_ADJUSTMENT INPUT(Qry_Filter_Zeros)
+SET("LDRLiveLoad" = 'no', "Table_Type" = 'TABLE', "connection_port" = 'no', "ldr_configuration_enabled" = 'yes', "ldr_configurations" = '<?xml version="1.0" encoding="UTF-8"?>
+<LDRConfigurations>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2016">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>1000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load></loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>no</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>replace</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>REP_MART_DBO_WRK_GENERAL_ADJUSTMENT.txt</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>append</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>4</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2008">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>1000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load></loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>no</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>replace</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>REP_MART_DBO_WRK_GENERAL_ADJUSTMENT.txt</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>append</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>4</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+</LDRConfigurations>', "loader_template_table" = 'no', "name" = 'REP_MART', "use_unicode_varchar" = 'no');
+
+ALGUIComment ("InputSchema_WidthProp" = '30', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '284', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '340', "Output_Width_Name" = '323', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>310</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '63', "ui_acta_from_schema_0" = 'Qry_Lookup_DIM_Keys_2', "ui_display_name" = 'Qry_Filter_Zeros', "ui_where_text" = 'Qry_Lookup_DIM_Keys_2.DIM_SYNDICATE_KEY <> 0 AND
+Qry_Lookup_DIM_Keys_2.DIM_UNDERWRITING_DIVISION_KEY <> 0 AND
+Qry_Lookup_DIM_Keys_2.DIM_CALENDAR_KEY <> 0 AND
+Qry_Lookup_DIM_Keys_2.DIM_CURRENCY_KEY <> 0 AND
+Qry_Lookup_DIM_Keys_2.DIM_YEAR_OF_ACCOUNT_KEY <> 0 AND
+Qry_Lookup_DIM_Keys_2.DIM_DURG_CLASS_KEY <> 0 AND
+Qry_Lookup_DIM_Keys_2.DIM_RISK_CODE_KEY <> 0
+
+
+
+
+', "x" = '3282', "y" = '-461')
+GUID::'8a884d68-9d20-4586-9ece-0d32bb2a9440' CREATE VIEW Qry_Filter_Zeros( DIM_SYNDICATE_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys_2.DIM_SYNDICATE_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys_2.DIM_SYNDICATE_KEY') ,
+ DIM_UNDERWRITING_DIVISION_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys_2.DIM_UNDERWRITING_DIVISION_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys_2.DIM_UNDERWRITING_DIVISION_KEY') ,
+ DIM_CALENDAR_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys_2.DIM_CALENDAR_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys_2.DIM_CALENDAR_KEY') ,
+ DIM_CURRENCY_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys_2.DIM_CURRENCY_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys_2.DIM_CURRENCY_KEY') ,
+ DIM_YEAR_OF_ACCOUNT_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys_2.DIM_YEAR_OF_ACCOUNT_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys_2.DIM_YEAR_OF_ACCOUNT_KEY') ,
+ DIM_DURG_CLASS_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys_2.DIM_DURG_CLASS_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys_2.DIM_DURG_CLASS_KEY') ,
+ DIM_RISK_CODE_KEY INT  KEY  SET( "ui_mapping_text" = 'Qry_Lookup_DIM_Keys_2.DIM_RISK_CODE_KEY', "ui_pasting" = 'Qry_Lookup_DIM_Keys_2.DIM_RISK_CODE_KEY') ,
+ IPREM_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_SIGNED_GROSS_NETT, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_SIGNED_GROSS_NETT, 0.0))') ,
+ IPREM_SIGNED_FUTURE DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_SIGNED_FUTURE, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_SIGNED_FUTURE, 0.0))') ,
+ OPREM_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_SIGNED_GROSS_NETT, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_SIGNED_GROSS_NETT, 0.0))') ,
+ OPREM_PAID_ACCRUAL DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_PAID_ACCRUAL, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_PAID_ACCRUAL, 0.0))') ,
+ OPREM_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_OS, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_OS, 0.0))') ,
+ OPREM_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_IBNR, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_IBNR, 0.0))') ,
+ ICLAIMS_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.ICLAIMS_SIGNED_GROSS_NETT, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.ICLAIMS_SIGNED_GROSS_NETT, 0.0))') ,
+ ICLAIMS_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.ICLAIMS_OS, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.ICLAIMS_OS, 0.0))') ,
+ ICLAIMS_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.ICLAIMS_IBNR, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.ICLAIMS_IBNR, 0.0))') ,
+ OCLAIMS_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_SIGNED_GROSS_NETT, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_SIGNED_GROSS_NETT, 0.0))') ,
+ OCAS_HELD DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OCAS_HELD, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OCAS_HELD, 0.0))') ,
+ OCLAIMS_PAID_ACCRUAL DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_PAID_ACCRUAL, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_PAID_ACCRUAL, 0.0))') ,
+ OCLAIMS_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_OS, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_OS, 0.0))') ,
+ OCLAIMS_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_IBNR, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_IBNR, 0.0))') ,
+ IPREM_WRITTEN_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_WRITTEN_GROSS_NETT, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_WRITTEN_GROSS_NETT, 0.0))') ,
+ IPREM_WRITTEN_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_WRITTEN_AC, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_WRITTEN_AC, 0.0))') ,
+ IPREM_EARNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_EARNED_GROSS_NETT, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_EARNED_GROSS_NETT, 0.0))') ,
+ IPREM_EARNED_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_EARNED_AC, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_EARNED_AC, 0.0))') ,
+ ICLAIMS_INCURRED DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.ICLAIMS_INCURRED, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.ICLAIMS_INCURRED, 0.0))') ,
+ OPREM_WRITTEN_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_WRITTEN_NETT, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_WRITTEN_NETT, 0.0))') ,
+ OPREM_WRITTEN_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_WRITTEN_AC, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_WRITTEN_AC, 0.0))') ,
+ OPREM_WRITTEN_PC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_WRITTEN_PC, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_WRITTEN_PC, 0.0))') ,
+ OPREM_EARNED_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_EARNED_NETT, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_EARNED_NETT, 0.0))') ,
+ OPREM_EARNED_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_EARNED_AC, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_EARNED_AC, 0.0))') ,
+ OPREM_EARNED_PC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_EARNED_PC, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_EARNED_PC, 0.0))') ,
+ OCLAIMS_INCURRED DECIMAL(21, 6)  SET( "ui_mapping_text" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_INCURRED, 0.0))', "ui_pasting" = 'Sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_INCURRED, 0.0))')  )
+ AS
+SELECT Qry_Lookup_DIM_Keys_2.DIM_SYNDICATE_KEY, Qry_Lookup_DIM_Keys_2.DIM_UNDERWRITING_DIVISION_KEY, Qry_Lookup_DIM_Keys_2.DIM_CALENDAR_KEY, Qry_Lookup_DIM_Keys_2.DIM_CURRENCY_KEY, Qry_Lookup_DIM_Keys_2.DIM_YEAR_OF_ACCOUNT_KEY, Qry_Lookup_DIM_Keys_2.DIM_DURG_CLASS_KEY, Qry_Lookup_DIM_Keys_2.DIM_RISK_CODE_KEY, sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_SIGNED_GROSS_NETT, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_SIGNED_FUTURE, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_SIGNED_GROSS_NETT, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_PAID_ACCRUAL, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_OS, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_IBNR, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.ICLAIMS_SIGNED_GROSS_NETT, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.ICLAIMS_OS, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.ICLAIMS_IBNR, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_SIGNED_GROSS_NETT, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OCAS_HELD, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_PAID_ACCRUAL, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_OS, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_IBNR, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_WRITTEN_GROSS_NETT, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_WRITTEN_AC, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_EARNED_GROSS_NETT, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.IPREM_EARNED_AC, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.ICLAIMS_INCURRED, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_WRITTEN_NETT, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_WRITTEN_AC, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_WRITTEN_PC, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_EARNED_NETT, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_EARNED_AC, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OPREM_EARNED_PC, 0.00000000000000e+00)), sum(nvl(Qry_Lookup_DIM_Keys_2.OCLAIMS_INCURRED, 0.00000000000000e+00)) FROM Qry_Lookup_DIM_Keys_2  WHERE (((((((Qry_Lookup_DIM_Keys_2.DIM_SYNDICATE_KEY != 0) AND
+   (Qry_Lookup_DIM_Keys_2.DIM_UNDERWRITING_DIVISION_KEY != 0)) AND
+   (Qry_Lookup_DIM_Keys_2.DIM_CALENDAR_KEY != 0)) AND
+   (Qry_Lookup_DIM_Keys_2.DIM_CURRENCY_KEY != 0)) AND
+   (Qry_Lookup_DIM_Keys_2.DIM_YEAR_OF_ACCOUNT_KEY != 0)) AND
+   (Qry_Lookup_DIM_Keys_2.DIM_DURG_CLASS_KEY != 0)) AND
+   (Qry_Lookup_DIM_Keys_2.DIM_RISK_CODE_KEY != 0)) GROUP BY Qry_Lookup_DIM_Keys_2.DIM_SYNDICATE_KEY, Qry_Lookup_DIM_Keys_2.DIM_UNDERWRITING_DIVISION_KEY, Qry_Lookup_DIM_Keys_2.DIM_CALENDAR_KEY, Qry_Lookup_DIM_Keys_2.DIM_CURRENCY_KEY, Qry_Lookup_DIM_Keys_2.DIM_YEAR_OF_ACCOUNT_KEY, Qry_Lookup_DIM_Keys_2.DIM_DURG_CLASS_KEY, Qry_Lookup_DIM_Keys_2.DIM_RISK_CODE_KEY
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '43', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '503', "Output_Width_Name" = '292', "Output_Width_Type" = '103', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>472</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '66', "ui_acta_from_schema_0" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT', "ui_display_name" = 'Qry_YOA_Gen_Adjustment', "ui_where_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.CURRENT_IND = \'Y\' 
+AND
+TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.YOA_GENERAL_ADJUSTMENT_REPOS_KEY <> 0
+and load_id >=$G_DELTA_LOAD
+
+', "x" = '331', "y" = '-877')
+GUID::'3ee56f26-42e6-41d3-a974-2346abc23fc2' CREATE VIEW Qry_YOA_Gen_Adjustment( ADJUSTMENT_SET_REPOS_KEY INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ADJUSTMENT_SET_REPOS_KEY', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ADJUSTMENT_SET_REPOS_KEY') ,
+ CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.CURRENCY_REPOS_ID', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.CURRENCY_REPOS_ID') ,
+ YEAR INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.YEAR', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.YEAR') ,
+ DURG_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.DURG_REPOS_ID', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.DURG_REPOS_ID') ,
+ RISK_CODE_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.RISK_CODE_REPOS_ID', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.RISK_CODE_REPOS_ID') ,
+ IPREM_SIGNED_GROSS_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.IPREM_SIGNED_GROSS_NETT', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.IPREM_SIGNED_GROSS_NETT') ,
+ IPREM_SIGNED_FUTURE DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.IPREM_SIGNED_FUTURE', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.IPREM_SIGNED_FUTURE') ,
+ OPREM_SIGNED_GROSS_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OPREM_SIGNED_GROSS_NETT', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OPREM_SIGNED_GROSS_NETT') ,
+ OPREM_PAID_ACCRUAL DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OPREM_PAID_ACCRUAL', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OPREM_PAID_ACCRUAL') ,
+ OPREM_OS DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OPREM_OS', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OPREM_OS') ,
+ OPREM_IBNR DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OPREM_IBNR', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OPREM_IBNR') ,
+ ICLAIMS_SIGNED_GROSS_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ICLAIMS_SIGNED_GROSS_NETT', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ICLAIMS_SIGNED_GROSS_NETT') ,
+ ICLAIMS_OS DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ICLAIMS_OS', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ICLAIMS_OS') ,
+ ICLAIMS_IBNR DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ICLAIMS_IBNR', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ICLAIMS_IBNR') ,
+ OCLAIMS_SIGNED_GROSS_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCLAIMS_SIGNED_GROSS_NETT', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCLAIMS_SIGNED_GROSS_NETT') ,
+ OCA_HELD DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCA_HELD', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCA_HELD') ,
+ OCLAIMS_PAID_ACCRUAL DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCLAIMS_PAID_ACCRUAL', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCLAIMS_PAID_ACCRUAL') ,
+ OCLAIMS_OS DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCLAIMS_OS', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCLAIMS_OS') ,
+ OCLAIMS_IBNR DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCLAIMS_IBNR', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCLAIMS_IBNR') ,
+ LOAD_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.LOAD_ID', "ui_pasting" = 'TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.LOAD_ID') ,
+ IPREM_WRITTEN_GROSS_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ IPREM_WRITTEN_AC DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ IPREM_EARNED_GROSS_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ IPREM_EARNED_AC DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ ICLAIMS_INCURRED DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OPREM_WRITTEN_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OPREM_WRITTEN_AC DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OPREM_WRITTEN_PC DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OPREM_EARNED_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OPREM_EARNED_AC DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OPREM_EARNED_PC DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OCLAIMS_INCURRED DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ lookup_ext AL_RFC_SCHEMA_GROUP (PERIOD_REPOS_ID INT ,
+ SUB_DIVISION_REPOS_ID INT )  )
+ AS
+SELECT TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ADJUSTMENT_SET_REPOS_KEY, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.CURRENCY_REPOS_ID, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.YEAR, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.DURG_REPOS_ID, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.RISK_CODE_REPOS_ID, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.IPREM_SIGNED_GROSS_NETT, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.IPREM_SIGNED_FUTURE, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OPREM_SIGNED_GROSS_NETT, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OPREM_PAID_ACCRUAL, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OPREM_OS, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OPREM_IBNR, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ICLAIMS_SIGNED_GROSS_NETT, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ICLAIMS_OS, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ICLAIMS_IBNR, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCLAIMS_SIGNED_GROSS_NETT, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCA_HELD, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCLAIMS_PAID_ACCRUAL, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCLAIMS_OS, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.OCLAIMS_IBNR, TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.LOAD_ID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.TMP_REP_LANDED_ADJUSTMENT_SET, 'PRE_LOAD_CACHE', 'MAX'], [ PERIOD_REPOS_ID, SUB_DIVISION_REPOS_ID ], [  NULL ,  NULL  ], [ ADJUSTMENT_SET_REPOS_KEY, '=', TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.ADJUSTMENT_SET_REPOS_KEY, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+<col index="2" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+ FROM TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT  WHERE (((TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.CURRENT_IND = 'Y') AND
+   (TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT.YOA_GENERAL_ADJUSTMENT_REPOS_KEY != 0)) AND
+   (load_id >= $G_DELTA_LOAD))
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '42', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Description', "Output_3rd_Column_Name" = 'Content_Type', "Output_Column_Name_4" = 'Description', "Output_Column_Name_5" = 'Description', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '10', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Name" = '306', "Output_Width_Type" = '85', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>416</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '49', "ui_display_name" = 'Merge_Gen_Adjustment', "x" = '850', "y" = '-461')
+GUID::'369f1bd9-8066-4472-a32d-0944b7317c82' CALL TRANSFORM Merge() INPUT(Qry_OYA_Gen_Adjustment, Qry_YOA_Gen_Adjustment) OUTPUT(Merge_Gen_Adjustment()
+);
+
+ALGUIComment ("InputSchema_WidthProp" = '42', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '336', "Output_Width_Name" = '420', "Output_Width_Type" = '79', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>407</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '84', "ui_acta_from_schema_0" = 'Qry_LookUp', "ui_display_name" = 'Qry_Lookup_DIM_Keys', "x" = '2279', "y" = '-501')
+GUID::'37196e11-49e3-435d-a8b8-2e95d4fe6048' CREATE VIEW Qry_Lookup_DIM_Keys( lookup_ext_5 AL_RFC_SCHEMA_GROUP (DIM_SYNDICATE_KEY INT  KEY ) ,
+ lookup_ext_4 AL_RFC_SCHEMA_GROUP (DIM_CALENDAR_KEY INT  KEY ) ,
+ lookup_ext_3 AL_RFC_SCHEMA_GROUP (DIM_CURRENCY_KEY INT  KEY ) ,
+ lookup_ext_2 AL_RFC_SCHEMA_GROUP (DIM_YEAR_OF_ACCOUNT_KEY INT  KEY ) ,
+ lookup_ext_1 AL_RFC_SCHEMA_GROUP (DIM_DURG_CLASS_KEY INT  KEY ) ,
+ lookup_ext AL_RFC_SCHEMA_GROUP (DIM_RISK_CODE_KEY INT  KEY ) ,
+ IPREM_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.IPREM_SIGNED_GROSS_NETT, 0)', "ui_pasting" = 'nvl(Qry_LookUp.IPREM_SIGNED_GROSS_NETT, 0)') ,
+ IPREM_SIGNED_FUTURE DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.IPREM_SIGNED_FUTURE, 0)', "ui_pasting" = 'nvl(Qry_LookUp.IPREM_SIGNED_FUTURE, 0)') ,
+ OPREM_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OPREM_SIGNED_GROSS_NETT, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OPREM_SIGNED_GROSS_NETT, 0)') ,
+ OPREM_PAID_ACCRUAL DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OPREM_PAID_ACCRUAL, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OPREM_PAID_ACCRUAL, 0)') ,
+ OPREM_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OPREM_OS, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OPREM_OS, 0)') ,
+ OPREM_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OPREM_IBNR, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OPREM_IBNR, 0)') ,
+ ICLAIMS_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.ICLAIMS_SIGNED_GROSS_NETT, 0)', "ui_pasting" = 'nvl(Qry_LookUp.ICLAIMS_SIGNED_GROSS_NETT, 0)') ,
+ ICLAIMS_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.ICLAIMS_OS, 0)', "ui_pasting" = 'nvl(Qry_LookUp.ICLAIMS_OS, 0)') ,
+ ICLAIMS_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.ICLAIMS_IBNR, 0)', "ui_pasting" = 'nvl(Qry_LookUp.ICLAIMS_IBNR, 0)') ,
+ OCLAIMS_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OCLAIMS_SIGNED_GROSS_NETT, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OCLAIMS_SIGNED_GROSS_NETT, 0)') ,
+ OCAS_HELD DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OCAS_HELD, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OCAS_HELD, 0)') ,
+ OCLAIMS_PAID_ACCRUAL DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OCLAIMS_PAID_ACCRUAL, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OCLAIMS_PAID_ACCRUAL, 0)') ,
+ OCLAIMS_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OCLAIMS_OS, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OCLAIMS_OS, 0)') ,
+ OCLAIMS_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OCLAIMS_IBNR, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OCLAIMS_IBNR, 0)') ,
+ IPREM_WRITTEN_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.IPREM_WRITTEN_GROSS_NETT, 0)', "ui_pasting" = 'nvl(Qry_LookUp.IPREM_WRITTEN_GROSS_NETT, 0)') ,
+ IPREM_WRITTEN_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.IPREM_WRITTEN_AC, 0)', "ui_pasting" = 'nvl(Qry_LookUp.IPREM_WRITTEN_AC, 0)') ,
+ IPREM_EARNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.IPREM_EARNED_GROSS_NETT, 0)', "ui_pasting" = 'nvl(Qry_LookUp.IPREM_EARNED_GROSS_NETT, 0)') ,
+ IPREM_EARNED_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.IPREM_EARNED_AC, 0)', "ui_pasting" = 'nvl(Qry_LookUp.IPREM_EARNED_AC, 0)') ,
+ ICLAIMS_INCURRED DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.ICLAIMS_INCURRED, 0)', "ui_pasting" = 'nvl(Qry_LookUp.ICLAIMS_INCURRED, 0)') ,
+ OPREM_WRITTEN_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OPREM_WRITTEN_NETT, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OPREM_WRITTEN_NETT, 0)') ,
+ OPREM_WRITTEN_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OPREM_WRITTEN_AC, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OPREM_WRITTEN_AC, 0)') ,
+ OPREM_WRITTEN_PC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OPREM_WRITTEN_PC, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OPREM_WRITTEN_PC, 0)') ,
+ OPREM_EARNED_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OPREM_EARNED_NETT, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OPREM_EARNED_NETT, 0)') ,
+ OPREM_EARNED_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OPREM_EARNED_AC, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OPREM_EARNED_AC, 0)') ,
+ OPREM_EARNED_PC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OPREM_EARNED_PC, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OPREM_EARNED_PC, 0)') ,
+ OCLAIMS_INCURRED DECIMAL(21, 6)  SET( "ui_mapping_text" = 'nvl(Qry_LookUp.OCLAIMS_INCURRED, 0)', "ui_pasting" = 'nvl(Qry_LookUp.OCLAIMS_INCURRED, 0)')  )
+ AS
+SELECT __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_SYNDICATE, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_SYNDICATE_KEY ], [ 0 ], [ SYNDICATE_SOURCE_ID, '=', Qry_LookUp.SYNDICATE_REPOS_ID, CURRENT_IND, '=', 'Y', DELETED_IND, '=', 'N' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.DIM_CALENDAR, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_CALENDAR_KEY ], [ 0 ], [ PERIOD_LOOKUP_QUARTER_REPOS_ID, '=', Qry_LookUp.PERIOD_REPOS_ID ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_CURRENCY, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_CURRENCY_KEY ], [ 0 ], [ CURRENCY_SOURCE_ID, '=', Qry_LookUp.CURRENCY_REPOS_ID ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_YEAR_OF_ACCOUNT, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_YEAR_OF_ACCOUNT_KEY ], [ 0 ], [ YEAR_YYYY, '=', Qry_LookUp.YEAR ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_DURG_CLASS, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_DURG_CLASS_KEY ], [ 0 ], [ DURG_CLASS_SOURCE_ID, '=', Qry_LookUp.DURG_REPOS_ID, DELETED_IND, '=', 'N' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_RISK_CODE, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_RISK_CODE_KEY ], [ 0 ], [ RISK_CODE_SOURCE_ID, '=', Qry_LookUp.RISK_CODE_REPOS_ID, CURRENT_IND, '=', 'Y', DELETED_IND, '=', 'N' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+, nvl(Qry_LookUp.IPREM_SIGNED_GROSS_NETT, 0), nvl(Qry_LookUp.IPREM_SIGNED_FUTURE, 0), nvl(Qry_LookUp.OPREM_SIGNED_GROSS_NETT, 0), nvl(Qry_LookUp.OPREM_PAID_ACCRUAL, 0), nvl(Qry_LookUp.OPREM_OS, 0), nvl(Qry_LookUp.OPREM_IBNR, 0), nvl(Qry_LookUp.ICLAIMS_SIGNED_GROSS_NETT, 0), nvl(Qry_LookUp.ICLAIMS_OS, 0), nvl(Qry_LookUp.ICLAIMS_IBNR, 0), nvl(Qry_LookUp.OCLAIMS_SIGNED_GROSS_NETT, 0), nvl(Qry_LookUp.OCAS_HELD, 0), nvl(Qry_LookUp.OCLAIMS_PAID_ACCRUAL, 0), nvl(Qry_LookUp.OCLAIMS_OS, 0), nvl(Qry_LookUp.OCLAIMS_IBNR, 0), nvl(Qry_LookUp.IPREM_WRITTEN_GROSS_NETT, 0), nvl(Qry_LookUp.IPREM_WRITTEN_AC, 0), nvl(Qry_LookUp.IPREM_EARNED_GROSS_NETT, 0), nvl(Qry_LookUp.IPREM_EARNED_AC, 0), nvl(Qry_LookUp.ICLAIMS_INCURRED, 0), nvl(Qry_LookUp.OPREM_WRITTEN_NETT, 0), nvl(Qry_LookUp.OPREM_WRITTEN_AC, 0), nvl(Qry_LookUp.OPREM_WRITTEN_PC, 0), nvl(Qry_LookUp.OPREM_EARNED_NETT, 0), nvl(Qry_LookUp.OPREM_EARNED_AC, 0), nvl(Qry_LookUp.OPREM_EARNED_PC, 0), nvl(Qry_LookUp.OCLAIMS_INCURRED, 0) FROM Qry_LookUp 
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '42', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '360', "Output_Width_Name" = '292', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>522</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '64', "ui_acta_from_schema_0" = 'Merge_Gen_Adjustment', "ui_display_name" = 'Qry_GroupBy_Gen_Adjusment', "ui_where_text" = '#Merge_Gen_Adjustment.ADJUSTMENT_SET_REPOS_KEY <> 0
+Merge_Gen_Adjustment.YEAR is not NULL
+
+
+
+
+', "x" = '1273', "y" = '-461')
+GUID::'60a21d2a-8eac-489f-8095-5e3bcc69337a' CREATE VIEW Qry_GroupBy_Gen_Adjusment( ADJUSTMENT_SET_REPOS_KEY INT  SET( "ui_mapping_text" = 'Merge_Gen_Adjustment.ADJUSTMENT_SET_REPOS_KEY', "ui_pasting" = 'Merge_Gen_Adjustment.ADJUSTMENT_SET_REPOS_KEY') ,
+ CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'Merge_Gen_Adjustment.CURRENCY_REPOS_ID', "ui_pasting" = 'Merge_Gen_Adjustment.CURRENCY_REPOS_ID') ,
+ YEAR INT  SET( "ui_mapping_text" = 'Merge_Gen_Adjustment.YEAR', "ui_pasting" = 'Merge_Gen_Adjustment.YEAR') ,
+ DURG_REPOS_ID INT  SET( "ui_mapping_text" = 'Merge_Gen_Adjustment.DURG_REPOS_ID', "ui_pasting" = 'Merge_Gen_Adjustment.DURG_REPOS_ID') ,
+ RISK_CODE_REPOS_ID INT  SET( "ui_mapping_text" = 'Merge_Gen_Adjustment.RISK_CODE_REPOS_ID', "ui_pasting" = 'Merge_Gen_Adjustment.RISK_CODE_REPOS_ID') ,
+ IPREM_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.IPREM_SIGNED_GROSS_NETT)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.IPREM_SIGNED_GROSS_NETT)') ,
+ IPREM_SIGNED_FUTURE DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.IPREM_SIGNED_FUTURE)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.IPREM_SIGNED_FUTURE)') ,
+ OPREM_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OPREM_SIGNED_GROSS_NETT)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OPREM_SIGNED_GROSS_NETT)') ,
+ OPREM_PAID_ACCRUAL DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OPREM_PAID_ACCRUAL)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OPREM_PAID_ACCRUAL)') ,
+ OPREM_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OPREM_OS)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OPREM_OS)') ,
+ OPREM_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OPREM_IBNR)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OPREM_IBNR)') ,
+ ICLAIMS_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.ICLAIMS_SIGNED_GROSS_NETT)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.ICLAIMS_SIGNED_GROSS_NETT)') ,
+ ICLAIMS_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.ICLAIMS_OS)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.ICLAIMS_OS)') ,
+ ICLAIMS_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.ICLAIMS_IBNR)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.ICLAIMS_IBNR)') ,
+ OCLAIMS_SIGNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OCLAIMS_SIGNED_GROSS_NETT)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OCLAIMS_SIGNED_GROSS_NETT)') ,
+ OCAS_HELD DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OCA_HELD)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OCA_HELD)') ,
+ OCLAIMS_PAID_ACCRUAL DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OCLAIMS_PAID_ACCRUAL)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OCLAIMS_PAID_ACCRUAL)') ,
+ OCLAIMS_OS DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OCLAIMS_OS)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OCLAIMS_OS)') ,
+ OCLAIMS_IBNR DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OCLAIMS_IBNR)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OCLAIMS_IBNR)') ,
+ IPREM_WRITTEN_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.IPREM_WRITTEN_GROSS_NETT)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.IPREM_WRITTEN_GROSS_NETT)') ,
+ IPREM_WRITTEN_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.IPREM_WRITTEN_AC)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.IPREM_WRITTEN_AC)') ,
+ IPREM_EARNED_GROSS_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.IPREM_EARNED_GROSS_NETT)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.IPREM_EARNED_GROSS_NETT)') ,
+ IPREM_EARNED_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.IPREM_EARNED_AC)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.IPREM_EARNED_AC)') ,
+ ICLAIMS_INCURRED DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.ICLAIMS_INCURRED)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.ICLAIMS_INCURRED)') ,
+ OPREM_WRITTEN_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OPREM_WRITTEN_NETT)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OPREM_WRITTEN_NETT)') ,
+ OPREM_WRITTEN_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OPREM_WRITTEN_AC)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OPREM_WRITTEN_AC)') ,
+ OPREM_WRITTEN_PC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OPREM_WRITTEN_PC)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OPREM_WRITTEN_PC)') ,
+ OPREM_EARNED_NETT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OPREM_EARNED_NETT)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OPREM_EARNED_NETT)') ,
+ OPREM_EARNED_AC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OPREM_EARNED_AC)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OPREM_EARNED_AC)') ,
+ OPREM_EARNED_PC DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OPREM_EARNED_PC)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OPREM_EARNED_PC)') ,
+ OCLAIMS_INCURRED DECIMAL(21, 6)  SET( "ui_mapping_text" = 'sum(Merge_Gen_Adjustment.OCLAIMS_INCURRED)', "ui_pasting" = 'sum(Merge_Gen_Adjustment.OCLAIMS_INCURRED)') ,
+ PERIOD_REPOS_ID INT  SET( "ui_mapping_text" = 'Merge_Gen_Adjustment.PERIOD_REPOS_ID', "ui_pasting" = 'Merge_Gen_Adjustment.PERIOD_REPOS_ID') ,
+ SUB_DIVISION_REPOS_ID INT  SET( "ui_mapping_text" = 'Merge_Gen_Adjustment.SUB_DIVISION_REPOS_ID', "ui_pasting" = 'Merge_Gen_Adjustment.SUB_DIVISION_REPOS_ID')  )
+ AS
+SELECT Merge_Gen_Adjustment.ADJUSTMENT_SET_REPOS_KEY, Merge_Gen_Adjustment.CURRENCY_REPOS_ID, Merge_Gen_Adjustment.YEAR, Merge_Gen_Adjustment.DURG_REPOS_ID, Merge_Gen_Adjustment.RISK_CODE_REPOS_ID, sum(Merge_Gen_Adjustment.IPREM_SIGNED_GROSS_NETT), sum(Merge_Gen_Adjustment.IPREM_SIGNED_FUTURE), sum(Merge_Gen_Adjustment.OPREM_SIGNED_GROSS_NETT), sum(Merge_Gen_Adjustment.OPREM_PAID_ACCRUAL), sum(Merge_Gen_Adjustment.OPREM_OS), sum(Merge_Gen_Adjustment.OPREM_IBNR), sum(Merge_Gen_Adjustment.ICLAIMS_SIGNED_GROSS_NETT), sum(Merge_Gen_Adjustment.ICLAIMS_OS), sum(Merge_Gen_Adjustment.ICLAIMS_IBNR), sum(Merge_Gen_Adjustment.OCLAIMS_SIGNED_GROSS_NETT), sum(Merge_Gen_Adjustment.OCA_HELD), sum(Merge_Gen_Adjustment.OCLAIMS_PAID_ACCRUAL), sum(Merge_Gen_Adjustment.OCLAIMS_OS), sum(Merge_Gen_Adjustment.OCLAIMS_IBNR), sum(Merge_Gen_Adjustment.IPREM_WRITTEN_GROSS_NETT), sum(Merge_Gen_Adjustment.IPREM_WRITTEN_AC), sum(Merge_Gen_Adjustment.IPREM_EARNED_GROSS_NETT), sum(Merge_Gen_Adjustment.IPREM_EARNED_AC), sum(Merge_Gen_Adjustment.ICLAIMS_INCURRED), sum(Merge_Gen_Adjustment.OPREM_WRITTEN_NETT), sum(Merge_Gen_Adjustment.OPREM_WRITTEN_AC), sum(Merge_Gen_Adjustment.OPREM_WRITTEN_PC), sum(Merge_Gen_Adjustment.OPREM_EARNED_NETT), sum(Merge_Gen_Adjustment.OPREM_EARNED_AC), sum(Merge_Gen_Adjustment.OPREM_EARNED_PC), sum(Merge_Gen_Adjustment.OCLAIMS_INCURRED), Merge_Gen_Adjustment.PERIOD_REPOS_ID, Merge_Gen_Adjustment.SUB_DIVISION_REPOS_ID FROM Merge_Gen_Adjustment  WHERE (Merge_Gen_Adjustment.YEAR IS NOT  NULL ) GROUP BY Merge_Gen_Adjustment.ADJUSTMENT_SET_REPOS_KEY, Merge_Gen_Adjustment.SUB_DIVISION_REPOS_ID, Merge_Gen_Adjustment.PERIOD_REPOS_ID, Merge_Gen_Adjustment.CURRENCY_REPOS_ID, Merge_Gen_Adjustment.YEAR, Merge_Gen_Adjustment.DURG_REPOS_ID, Merge_Gen_Adjustment.RISK_CODE_REPOS_ID
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '33', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '317', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '503', "Output_Width_Name" = '292', "Output_Width_Type" = '211', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>472</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '68', "ui_acta_from_schema_0" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT', "ui_display_name" = 'Qry_OYA_Gen_Adjustment', "ui_where_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.CURRENT_IND = \'Y\' 
+AND 
+TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OYA_GENERAL_ADJUSTMENT_REPOS_KEY <> 0
+and load_id >=$G_DELTA_LOAD', "x" = '286', "y" = '0')
+GUID::'ac7d0f8b-e93a-4d80-b49c-9a3cb8dc8779' CREATE VIEW Qry_OYA_Gen_Adjustment( ADJUSTMENT_SET_REPOS_KEY INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.ADJUSTMENT_SET_REPOS_KEY', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.ADJUSTMENT_SET_REPOS_KEY') ,
+ CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.CURRENCY_REPOS_ID', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.CURRENCY_REPOS_ID') ,
+ YEAR INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.YEAR', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.YEAR') ,
+ DURG_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.DURG_REPOS_ID', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.DURG_REPOS_ID') ,
+ RISK_CODE_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.RISK_CODE_REPOS_ID', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.RISK_CODE_REPOS_ID') ,
+ IPREM_SIGNED_GROSS_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ IPREM_SIGNED_FUTURE DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OPREM_SIGNED_GROSS_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OPREM_PAID_ACCRUAL DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OPREM_OS DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OPREM_IBNR DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ ICLAIMS_SIGNED_GROSS_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ ICLAIMS_OS DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ ICLAIMS_IBNR DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OCLAIMS_SIGNED_GROSS_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OCA_HELD DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OCLAIMS_PAID_ACCRUAL DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OCLAIMS_OS DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ OCLAIMS_IBNR DECIMAL(15, 3)  SET( "ui_mapping_text" = '0', "ui_pasting" = '0') ,
+ LOAD_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.LOAD_ID', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.LOAD_ID') ,
+ IPREM_WRITTEN_GROSS_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.IPREM_WRITTEN_GROSS_NETT', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.IPREM_WRITTEN_GROSS_NETT') ,
+ IPREM_WRITTEN_AC DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.IPREM_WRITTEN_AC', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.IPREM_WRITTEN_AC') ,
+ IPREM_EARNED_GROSS_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.IPREM_EARNED_GROSS_NETT', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.IPREM_EARNED_GROSS_NETT') ,
+ IPREM_EARNED_AC DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.IPREM_EARNED_AC', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.IPREM_EARNED_AC') ,
+ ICLAIMS_INCURRED DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.ICLAIMS_INCURRED', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.ICLAIMS_INCURRED') ,
+ OPREM_WRITTEN_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_WRITTEN_NETT', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_WRITTEN_NETT') ,
+ OPREM_WRITTEN_AC DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_WRITTEN_AC', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_WRITTEN_AC') ,
+ OPREM_WRITTEN_PC DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_WRITTEN_PC', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_WRITTEN_PC') ,
+ OPREM_EARNED_NETT DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_EARNED_NETT', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_EARNED_NETT') ,
+ OPREM_EARNED_AC DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_EARNED_AC', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_EARNED_AC') ,
+ OPREM_EARNED_PC DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_EARNED_PC', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_EARNED_PC') ,
+ OCLAIMS_INCURRED DECIMAL(15, 3)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OCLAIMS_INCURRED', "ui_pasting" = 'TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OCLAIMS_INCURRED') ,
+ lookup_ext AL_RFC_SCHEMA_GROUP (PERIOD_REPOS_ID INT ,
+ SUB_DIVISION_REPOS_ID INT )  )
+ AS
+SELECT TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.ADJUSTMENT_SET_REPOS_KEY, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.CURRENCY_REPOS_ID, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.YEAR, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.DURG_REPOS_ID, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.RISK_CODE_REPOS_ID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.LOAD_ID, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.IPREM_WRITTEN_GROSS_NETT, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.IPREM_WRITTEN_AC, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.IPREM_EARNED_GROSS_NETT, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.IPREM_EARNED_AC, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.ICLAIMS_INCURRED, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_WRITTEN_NETT, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_WRITTEN_AC, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_WRITTEN_PC, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_EARNED_NETT, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_EARNED_AC, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OPREM_EARNED_PC, TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OCLAIMS_INCURRED, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.TMP_REP_LANDED_ADJUSTMENT_SET, 'PRE_LOAD_CACHE', 'MAX'], [ PERIOD_REPOS_ID, SUB_DIVISION_REPOS_ID ], [  NULL ,  NULL  ], [ ADJUSTMENT_SET_REPOS_KEY, '=', TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.ADJUSTMENT_SET_REPOS_KEY, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+<col index="2" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+ FROM TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT  WHERE (((TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.CURRENT_IND = 'Y') AND
+   (TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT.OYA_GENERAL_ADJUSTMENT_REPOS_KEY != 0)) AND
+   (load_id >= $G_DELTA_LOAD))
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '43', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>1059</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '66', "x" = '0', "y" = '-759')
+GUID::'0f5be1d3-b713-4dd9-a415-a4d91212f84b' READ TABLE REP_MART.DBO.TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT OUTPUT(TMP_REP_LANDED_YOA_GENERAL_ADJUSTMENT)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'yes', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'REP_MART', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '43', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Description', "Output_3rd_Column_Name" = 'Content_Type', "Output_Column_Name_4" = 'Description', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>1059</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '66', "x" = '5', "y" = '-200')
+GUID::'d2ec3e48-f3d5-4b43-af6f-49a1b0bfe723' READ TABLE REP_MART.DBO.TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT OUTPUT(TMP_REP_LANDED_OYA_GENERAL_ADJUSTMENT)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'yes', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'REP_MART', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+END
+ SET ("Cache_type" = 'pageable_cache', "Parallelism_degree" = '0', "allows_both_input_and_output" = 'yes', "dataflow_loader_bulk_load" = 'no', "dataflow_loader_commit_size" = 'default', "dataflow_loader_row_size_bytes" = '0', "dataflow_number_of_loaders" = '0', "run_once" = 'no', "use_dataflow_links" = 'no', "use_datastore_links" = 'yes', "validation_xform_exists" = 'no', "validation_xform_stats" = 'no')

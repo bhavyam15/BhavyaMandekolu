@@ -1,0 +1,478 @@
+#__AW_Repository_Version '14.2.11.0000';
+#__AW_Product_Version '14.2.11.2138';
+#__AW_ATL_Locale 'eng_gb.utf-8';
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'906\', y = \'-813\',ObjectDesc=\'Dataflow:    DF_REP_Fact_Inw_Claim_Movement_LOAD_FACT
+
+Modification History
+================
+
+Version              Date                  By               	      Description
+
+v0.1     28/10/2011        Harish.R	      Jira- REPT-454 - This dataflow loads the fact table RTL_FACT_INW_CLAIM_MOVEMENT.
+v0.2     20/12/2012       David                         changed Dim_Inw_Claim  look up condition to Dim_Actual_Inw_Claim
+v0.3     02/02/2012	    Meera		        ADM 23- Added the function fn_translate_old_syn_div to translate the obsolete syndicates to existing syndicates
+v0.4     12/03/2012	     Indira		      ADM-59 - Changed the join condition for Syndicate repos id from Inw_Claim ro INW_CONTRACT
+v0.5     12/04/2012	     Indira                         ADM - 85 - Commented out the Filter condition EARLY_RI_IND=\\\'N\\\' in the Query_Select to flow early RI records the target fact table
+v0.6      03/07/2012	     Venmani	       REPT-454 - ADM_92; ADM-96; ADM-97 - Removed the column movement_sequence from being propagated from the source; Aggregating by all dimensions in the last query transformaction to ensure uniqueness
+v1.0	01/10/2012	Venmani KT	REPT-454 - ADM-224 - Consider the Eclipse event code as catastrophe code instead of the code associated with catastrophe_repos_id.
+V1.1      12/12/2012	       Jayanth K            KMI Phase 3 - Replaced RTL_DIM_DATE lookup table with DIM_CALENDAR to get DIM_Date_Advised_Key,DIM_Movement_Date_Key KEYS and replaced the DIM_MONTH_KEY with DIM_CALENDAR_KEY in the target table-RTL_FACT_INW_CLAIM_MOVEMENT
+V1.2	13/02/2013	Venmani KT	KMI Phase 3 - Removed the condition that reads data till the Open Quarter, as KMI\\\'s expected behavior is to get all the data available in KDR regardless of open 
+period.
+v2.0	14/06/2013	Venmani KT 	ITSM-143637 - Added two columns for SCM Paid Loss Fund Amount to be available in reporting at a Claim level.
+v2.1	19/06/2013	Venmani KT	Job_100 Performance Improvement - removed the group by in the transformation "QRY_Insert_Facts", as the fact does not have a PK
+v2.2	18/07/2014	Alex Sam		BAU-61 - Modified the lookup against DIM_ACTUAL_INW_CLAIM in the query transform, QRY_Lookup_Dim_Keys by adding a condition IBNR_CLAIM_IND=\\\'N\\\'. 
+V2.3        15/10/2019             Mithun S                    As a part of SQL 2016 upgrade, we ran Where and Look up as a separate process in 
+V2.4       16/04/2020             Savita R        CA-540DF optimzationQRY_Summing is merged with previous query transform and Removed QRY_Insert_Facts\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-906</X><Y>813</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>1769</CX><CY>1794</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RSavedAfterCheckOut', "ActaName_2" = 'RDate_created', "ActaName_3" = 'RDescription', "ActaName_4" = 'RDate_modified', "ActaValue_1" = 'YES', "ActaValue_2" = 'Tue Jun 04 17:16:30 2013', "ActaValue_3" = 'This dataflow loads the data from KDR source Inw_Claim_Movement_Delta into RTL_FACT_INW_CLAIM_MOVEMENT', "ActaValue_4" = 'Thu Apr 16 15:06:38 2020', "x" = '-1', "y" = '-1')
+CREATE  DATAFLOW DF_REP_Fact_Inw_Claim_Movement_LOAD_FACT::'5bcff0d9-41e6-4e41-8ade-a2e98a89a1e4'
+BEGIN
+
+ALGUIComment ("InputSchema_WidthProp" = '45', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>869</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '64', "x" = '19', "y" = '-2172')
+GUID::'5a47bec1-90d8-4271-a1c7-74e52f67742a' READ TABLE REP_MART.DBO.TMP_REP_LANDED_FILCODE_LOOKUP OUTPUT(TMP_REP_LANDED_FILCODE_LOOKUP)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'yes', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'REP_MART', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '44', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '256', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Description', "Output_3rd_Column_Name" = 'Content_Type', "Output_Column_Name_4" = 'Description', "Output_Column_Name_5" = 'Description', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '10', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Name" = '318', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>878</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '99', "x" = '2884', "y" = '-827')
+GUID::'0c10f3a7-15a8-4a69-9bdc-e926b2bb7b9c' LOAD TABLE REP_MART.DBO.RTL_FACT_INW_CLAIM_MOVEMENT INPUT(QRY_Lookup_Dim_Keys)
+SET("LDRLiveLoad" = 'no', "Table_Type" = 'TABLE', "connection_port" = 'no', "ldr_configuration_enabled" = 'yes', "ldr_configurations" = '<?xml version="1.0" encoding="UTF-8"?>
+<LDRConfigurations>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2016">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>10000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load>1</loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>no</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>REP_MART_DBO_RTL_FACT_INW_CLAIM_MOVEMENT.txt</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>truncate</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>4</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2008">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>10000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load>1</loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>no</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>REP_MART_DBO_RTL_FACT_INW_CLAIM_MOVEMENT.txt</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>truncate</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>4</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+</LDRConfigurations>', "loader_template_table" = 'no', "name" = 'REP_MART', "use_unicode_varchar" = 'no');
+
+ALGUIComment ("InputSchema_WidthProp" = '49', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>1163</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '49', "x" = '19', "y" = '0')
+GUID::'9a91492e-d8fd-475a-8772-0425ad13b67d' READ TABLE REP_MART.DBO.TMP_REP_LANDED_CONTRACT_RECORD_TYPE_LOOKUP OUTPUT(TMP_REP_LANDED_CONTRACT_RECORD_TYPE_LOOKUP)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'yes', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'REP_MART', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '37', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '248', "Input_Width_Type" = '85', "ObjectDesc" = 'ADM 23-lookup over landed tables of underwriting division and syndicates to fetch the repos_id', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>378</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-170</Y></LOCATION><SIZE><CX>339</CX><CY>268</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '72', "ui_acta_from_schema_0" = 'QRY_SynDivTranslate', "ui_display_name" = 'QRY_SynDiv_Lookup', "x" = '1900', "y" = '-840')
+GUID::'5b77ac9d-7a21-4d01-80e2-118324dd7d3d' CREATE VIEW QRY_SynDiv_Lookup( INW_CLAIM_SOURCE_ID VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.INW_CLAIM_SOURCE_ID', "ui_pasting" = 'QRY_SynDivTranslate.INW_CLAIM_SOURCE_ID') ,
+ lookup_ext_2 AL_RFC_SCHEMA_GROUP (TRUST_FUND_GROUP_REPOS_ID INT ) ,
+ LOOKUP_INW_CLAIM_MOVEMENT_REPOS_ID INT  SET( "ui_mapping_text" = 'ifthenelse((QRY_SynDivTranslate.EARLY_RI_IND = \'N\'), QRY_SynDivTranslate.INW_CLAIM_MOVEMENT_REPOS_ID, 
+QRY_SynDivTranslate.ORIGINAL_INW_CLAIM_MOVEMENT_REPOS_ID)', "ui_pasting" = 'ifthenelse((QRY_SynDivTranslate.EARLY_RI_IND = \'N\'), QRY_SynDivTranslate.INW_CLAIM_MOVEMENT_REPOS_ID, 
+QRY_SynDivTranslate.ORIGINAL_INW_CLAIM_MOVEMENT_REPOS_ID)') ,
+ YEAR_OF_ACCOUNT INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.YEAR_OF_ACCOUNT', "ui_pasting" = 'QRY_SynDivTranslate.YEAR_OF_ACCOUNT') ,
+ ORIGINAL_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.ORIGINAL_CURRENCY_REPOS_ID', "ui_pasting" = 'QRY_SynDivTranslate.ORIGINAL_CURRENCY_REPOS_ID') ,
+ SETTLEMENT_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.SETTLEMENT_CURRENCY_REPOS_ID', "ui_pasting" = 'QRY_SynDivTranslate.SETTLEMENT_CURRENCY_REPOS_ID') ,
+ INW_CLAIM_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.INW_CLAIM_REPOS_ID', "ui_pasting" = 'QRY_SynDivTranslate.INW_CLAIM_REPOS_ID') ,
+ INW_CONTRACT_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.INW_CONTRACT_REPOS_ID', "ui_pasting" = 'QRY_SynDivTranslate.INW_CONTRACT_REPOS_ID') ,
+ PERIOD_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.PERIOD_REPOS_ID', "ui_pasting" = 'QRY_SynDivTranslate.PERIOD_REPOS_ID') ,
+ PERIOD_END_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.PERIOD_END_DT', "ui_pasting" = 'QRY_SynDivTranslate.PERIOD_END_DT') ,
+ DURG_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.DURG_REPOS_ID', "ui_pasting" = 'QRY_SynDivTranslate.DURG_REPOS_ID') ,
+ OUTW_CONTRACT_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.OUTW_CONTRACT_REPOS_ID', "ui_pasting" = 'QRY_SynDivTranslate.OUTW_CONTRACT_REPOS_ID') ,
+ RISK_CODE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.RISK_CODE_REPOS_ID', "ui_pasting" = 'QRY_SynDivTranslate.RISK_CODE_REPOS_ID') ,
+ TRUST_FUND_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.TRUST_FUND_REPOS_ID', "ui_pasting" = 'QRY_SynDivTranslate.TRUST_FUND_REPOS_ID') ,
+ FILCODE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.FILCODE_REPOS_ID', "ui_pasting" = 'QRY_SynDivTranslate.FILCODE_REPOS_ID') ,
+ INW_CLAIM_MOVEMENT_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.INW_CLAIM_MOVEMENT_REPOS_ID', "ui_pasting" = 'QRY_SynDivTranslate.INW_CLAIM_MOVEMENT_REPOS_ID') ,
+ ORIGINAL_INW_CLAIM_MOVEMENT_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.ORIGINAL_INW_CLAIM_MOVEMENT_REPOS_ID', "ui_pasting" = 'QRY_SynDivTranslate.ORIGINAL_INW_CLAIM_MOVEMENT_REPOS_ID') ,
+ MOVEMENT_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.MOVEMENT_DT', "ui_pasting" = 'QRY_SynDivTranslate.MOVEMENT_DT') ,
+ ADVISED_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.ADVISED_DT', "ui_pasting" = 'QRY_SynDivTranslate.ADVISED_DT') ,
+ PERIOD VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.PERIOD', "ui_pasting" = 'QRY_SynDivTranslate.PERIOD') ,
+ MOVEMENT_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.MOVEMENT_REFERENCE', "ui_pasting" = 'QRY_SynDivTranslate.MOVEMENT_REFERENCE') ,
+ MANUAL_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.MANUAL_IND', "ui_pasting" = 'QRY_SynDivTranslate.MANUAL_IND') ,
+ ROE_ORIGINAL_TO_SETTLEMENT_OUTSTANDING DECIMAL(18, 9)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.ROE_ORIGINAL_TO_SETTLEMENT_OUTSTANDING', "ui_pasting" = 'QRY_SynDivTranslate.ROE_ORIGINAL_TO_SETTLEMENT_OUTSTANDING') ,
+ ORIGINAL_SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.ORIGINAL_SIGNING_NUMBER', "ui_pasting" = 'QRY_SynDivTranslate.ORIGINAL_SIGNING_NUMBER') ,
+ ORIGINAL_SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.ORIGINAL_SIGNING_DT', "ui_pasting" = 'QRY_SynDivTranslate.ORIGINAL_SIGNING_DT') ,
+ IS_CONTRA_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.IS_CONTRA_IND', "ui_pasting" = 'QRY_SynDivTranslate.IS_CONTRA_IND') ,
+ HAS_CONTRA_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.HAS_CONTRA_IND', "ui_pasting" = 'QRY_SynDivTranslate.HAS_CONTRA_IND') ,
+ IS_REPLACEMENT_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.IS_REPLACEMENT_IND', "ui_pasting" = 'QRY_SynDivTranslate.IS_REPLACEMENT_IND') ,
+ EARLY_RI_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.EARLY_RI_IND', "ui_pasting" = 'QRY_SynDivTranslate.EARLY_RI_IND') ,
+ SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.SIGNING_DT', "ui_pasting" = 'QRY_SynDivTranslate.SIGNING_DT') ,
+ ROE_ORIGINAL_TO_SETTLEMENT_PAID_THIS_TIME DECIMAL(18, 9)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.ROE_ORIGINAL_TO_SETTLEMENT_PAID_THIS_TIME', "ui_pasting" = 'QRY_SynDivTranslate.ROE_ORIGINAL_TO_SETTLEMENT_PAID_THIS_TIME') ,
+ SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.SIGNING_NUMBER', "ui_pasting" = 'QRY_SynDivTranslate.SIGNING_NUMBER') ,
+ SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT', "ui_pasting" = 'QRY_SynDivTranslate.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT') ,
+ SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT', "ui_pasting" = 'QRY_SynDivTranslate.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT') ,
+ SHARE_ORIGINAL_OUTSTANDING_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.SHARE_ORIGINAL_OUTSTANDING_DELTA_AMT', "ui_pasting" = 'QRY_SynDivTranslate.SHARE_ORIGINAL_OUTSTANDING_DELTA_AMT') ,
+ SHARE_SETTLEMENT_OUTSTANDING_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.SHARE_SETTLEMENT_OUTSTANDING_DELTA_AMT', "ui_pasting" = 'QRY_SynDivTranslate.SHARE_SETTLEMENT_OUTSTANDING_DELTA_AMT') ,
+ SHARE_ORIGINAL_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.SHARE_ORIGINAL_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT', "ui_pasting" = 'QRY_SynDivTranslate.SHARE_ORIGINAL_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT') ,
+ SHARE_SETTLEMENT_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.SHARE_SETTLEMENT_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT', "ui_pasting" = 'QRY_SynDivTranslate.SHARE_SETTLEMENT_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT') ,
+ SCM_PAID_ORIGINAL_LOSS_FUND_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.SCM_PAID_ORIGINAL_LOSS_FUND_AMT', "ui_pasting" = 'QRY_SynDivTranslate.SCM_PAID_ORIGINAL_LOSS_FUND_AMT') ,
+ SCM_PAID_SETTLEMENT_LOSS_FUND_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.SCM_PAID_SETTLEMENT_LOSS_FUND_AMT', "ui_pasting" = 'QRY_SynDivTranslate.SCM_PAID_SETTLEMENT_LOSS_FUND_AMT') ,
+ CURRENT_NARRATIVE VARCHAR(500)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.CURRENT_NARRATIVE', "ui_pasting" = 'QRY_SynDivTranslate.CURRENT_NARRATIVE') ,
+ CATASTROPHE VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_SynDivTranslate.CATASTROPHE', "ui_pasting" = 'QRY_SynDivTranslate.CATASTROPHE') ,
+ lookup_ext AL_RFC_SCHEMA_GROUP (SYNDICATE_REPOS_ID INT ) ,
+ lookup_ext_1 AL_RFC_SCHEMA_GROUP (UNDERWRITING_DIVISION_REPOS_ID INT )  )
+ AS
+SELECT QRY_SynDivTranslate.INW_CLAIM_SOURCE_ID, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.dbo.TMP_REP_LANDED_FORECAST_LTF_GROUP_MAPPING, 'PRE_LOAD_CACHE', 'MAX'], [ TRUST_FUND_GROUP_REPOS_ID ], [ 0 ], [ TRUST_FUND_REPOS_ID, '=', QRY_SynDivTranslate.TRUST_FUND_REPOS_ID, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+, ifthenelse((QRY_SynDivTranslate.EARLY_RI_IND = 'N'), QRY_SynDivTranslate.INW_CLAIM_MOVEMENT_REPOS_ID, QRY_SynDivTranslate.ORIGINAL_INW_CLAIM_MOVEMENT_REPOS_ID), QRY_SynDivTranslate.YEAR_OF_ACCOUNT, QRY_SynDivTranslate.ORIGINAL_CURRENCY_REPOS_ID, QRY_SynDivTranslate.SETTLEMENT_CURRENCY_REPOS_ID, QRY_SynDivTranslate.INW_CLAIM_REPOS_ID, QRY_SynDivTranslate.INW_CONTRACT_REPOS_ID, QRY_SynDivTranslate.PERIOD_REPOS_ID, QRY_SynDivTranslate.PERIOD_END_DT, QRY_SynDivTranslate.DURG_REPOS_ID, QRY_SynDivTranslate.OUTW_CONTRACT_REPOS_ID, QRY_SynDivTranslate.RISK_CODE_REPOS_ID, QRY_SynDivTranslate.TRUST_FUND_REPOS_ID, QRY_SynDivTranslate.FILCODE_REPOS_ID, QRY_SynDivTranslate.INW_CLAIM_MOVEMENT_REPOS_ID, QRY_SynDivTranslate.ORIGINAL_INW_CLAIM_MOVEMENT_REPOS_ID, QRY_SynDivTranslate.MOVEMENT_DT, QRY_SynDivTranslate.ADVISED_DT, QRY_SynDivTranslate.PERIOD, QRY_SynDivTranslate.MOVEMENT_REFERENCE, QRY_SynDivTranslate.MANUAL_IND, QRY_SynDivTranslate.ROE_ORIGINAL_TO_SETTLEMENT_OUTSTANDING, QRY_SynDivTranslate.ORIGINAL_SIGNING_NUMBER, QRY_SynDivTranslate.ORIGINAL_SIGNING_DT, QRY_SynDivTranslate.IS_CONTRA_IND, QRY_SynDivTranslate.HAS_CONTRA_IND, QRY_SynDivTranslate.IS_REPLACEMENT_IND, QRY_SynDivTranslate.EARLY_RI_IND, QRY_SynDivTranslate.SIGNING_DT, QRY_SynDivTranslate.ROE_ORIGINAL_TO_SETTLEMENT_PAID_THIS_TIME, QRY_SynDivTranslate.SIGNING_NUMBER, QRY_SynDivTranslate.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT, QRY_SynDivTranslate.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT, QRY_SynDivTranslate.SHARE_ORIGINAL_OUTSTANDING_DELTA_AMT, QRY_SynDivTranslate.SHARE_SETTLEMENT_OUTSTANDING_DELTA_AMT, QRY_SynDivTranslate.SHARE_ORIGINAL_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT, QRY_SynDivTranslate.SHARE_SETTLEMENT_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT, QRY_SynDivTranslate.SCM_PAID_ORIGINAL_LOSS_FUND_AMT, QRY_SynDivTranslate.SCM_PAID_SETTLEMENT_LOSS_FUND_AMT, QRY_SynDivTranslate.CURRENT_NARRATIVE, QRY_SynDivTranslate.CATASTROPHE, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.TMP_REP_LANDED_SYNDICATE, 'PRE_LOAD_CACHE', 'MAX'], [ SYNDICATE_REPOS_ID ], [ 0 ], [ SYNDICATE, '=', QRY_SynDivTranslate.SYNDICATE ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.TMP_REP_LANDED_UNDERWRITING_DIVISION, 'PRE_LOAD_CACHE', 'MAX'], [ UNDERWRITING_DIVISION_REPOS_ID ], [ 0 ], [ UNDERWRITING_DIVISION, '=', QRY_SynDivTranslate.UNDERWRITING_DIVISION, OUTWARDS_IND, '=', 'N' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'no')
+ FROM QRY_SynDivTranslate 
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '33', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "ObjectDesc" = 'ADM 23-Add translate function to remove obsolete syndicates', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '431', "Output_Width_Name" = '235', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>391</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-170</Y></LOCATION><SIZE><CX>285</CX><CY>257</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '63', "ui_acta_from_schema_0" = 'QRY_Select', "ui_display_name" = 'QRY_SynDivTranslate', "x" = '1425', "y" = '-857')
+GUID::'2f588e74-3e17-43bf-95f0-a4a5f9397940' CREATE VIEW QRY_SynDivTranslate( INW_CLAIM_SOURCE_ID VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Select.INW_CLAIM_SOURCE_ID', "ui_pasting" = 'QRY_Select.INW_CLAIM_SOURCE_ID') ,
+ YEAR_OF_ACCOUNT INT  SET( "ui_mapping_text" = 'QRY_Select.YEAR_OF_ACCOUNT', "ui_pasting" = 'QRY_Select.YEAR_OF_ACCOUNT') ,
+ ORIGINAL_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Select.ORIGINAL_CURRENCY_REPOS_ID', "ui_pasting" = 'QRY_Select.ORIGINAL_CURRENCY_REPOS_ID') ,
+ SETTLEMENT_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Select.SETTLEMENT_CURRENCY_REPOS_ID', "ui_pasting" = 'QRY_Select.SETTLEMENT_CURRENCY_REPOS_ID') ,
+ INW_CLAIM_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Select.INW_CLAIM_REPOS_ID', "ui_pasting" = 'QRY_Select.INW_CLAIM_REPOS_ID') ,
+ INW_CONTRACT_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Select.INW_CONTRACT_REPOS_ID', "ui_pasting" = 'QRY_Select.INW_CONTRACT_REPOS_ID') ,
+ PERIOD_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Select.PERIOD_REPOS_ID', "ui_pasting" = 'QRY_Select.PERIOD_REPOS_ID') ,
+ PERIOD_END_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Select.PERIOD_END_DT', "ui_pasting" = 'QRY_Select.PERIOD_END_DT') ,
+ DURG_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Select.DURG_REPOS_ID', "ui_pasting" = 'QRY_Select.DURG_REPOS_ID') ,
+ OUTW_CONTRACT_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Select.OUTW_CONTRACT_REPOS_ID', "ui_pasting" = 'QRY_Select.OUTW_CONTRACT_REPOS_ID') ,
+ RISK_CODE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Select.RISK_CODE_REPOS_ID', "ui_pasting" = 'QRY_Select.RISK_CODE_REPOS_ID') ,
+ TRUST_FUND_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Select.TRUST_FUND_REPOS_ID', "ui_pasting" = 'QRY_Select.TRUST_FUND_REPOS_ID') ,
+ FILCODE_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Select.FILCODE_REPOS_ID', "ui_pasting" = 'QRY_Select.FILCODE_REPOS_ID') ,
+ INW_CLAIM_MOVEMENT_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Select.INW_CLAIM_MOVEMENT_REPOS_ID', "ui_pasting" = 'QRY_Select.INW_CLAIM_MOVEMENT_REPOS_ID') ,
+ ORIGINAL_INW_CLAIM_MOVEMENT_REPOS_ID INT  SET( "ui_mapping_text" = 'QRY_Select.ORIGINAL_INW_CLAIM_MOVEMENT_REPOS_ID', "ui_pasting" = 'QRY_Select.ORIGINAL_INW_CLAIM_MOVEMENT_REPOS_ID') ,
+ MOVEMENT_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Select.MOVEMENT_DT', "ui_pasting" = 'QRY_Select.MOVEMENT_DT') ,
+ ADVISED_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Select.ADVISED_DT', "ui_pasting" = 'QRY_Select.ADVISED_DT') ,
+ PERIOD VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Select.PERIOD', "ui_pasting" = 'QRY_Select.PERIOD') ,
+ MOVEMENT_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Select.MOVEMENT_REFERENCE', "ui_pasting" = 'QRY_Select.MOVEMENT_REFERENCE') ,
+ MANUAL_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Select.MANUAL_IND', "ui_pasting" = 'QRY_Select.MANUAL_IND') ,
+ ROE_ORIGINAL_TO_SETTLEMENT_OUTSTANDING DECIMAL(18, 9)  SET( "ui_mapping_text" = 'QRY_Select.ROE_ORIGINAL_TO_SETTLEMENT_OUTSTANDING', "ui_pasting" = 'QRY_Select.ROE_ORIGINAL_TO_SETTLEMENT_OUTSTANDING') ,
+ ORIGINAL_SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Select.ORIGINAL_SIGNING_NUMBER', "ui_pasting" = 'QRY_Select.ORIGINAL_SIGNING_NUMBER') ,
+ ORIGINAL_SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Select.ORIGINAL_SIGNING_DT', "ui_pasting" = 'QRY_Select.ORIGINAL_SIGNING_DT') ,
+ IS_CONTRA_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Select.IS_CONTRA_IND', "ui_pasting" = 'QRY_Select.IS_CONTRA_IND') ,
+ HAS_CONTRA_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Select.HAS_CONTRA_IND', "ui_pasting" = 'QRY_Select.HAS_CONTRA_IND') ,
+ IS_REPLACEMENT_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Select.IS_REPLACEMENT_IND', "ui_pasting" = 'QRY_Select.IS_REPLACEMENT_IND') ,
+ EARLY_RI_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Select.EARLY_RI_IND', "ui_pasting" = 'QRY_Select.EARLY_RI_IND') ,
+ SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Select.SIGNING_DT', "ui_pasting" = 'QRY_Select.SIGNING_DT') ,
+ ROE_ORIGINAL_TO_SETTLEMENT_PAID_THIS_TIME DECIMAL(18, 9)  SET( "ui_mapping_text" = 'QRY_Select.ROE_ORIGINAL_TO_SETTLEMENT_PAID_THIS_TIME', "ui_pasting" = 'QRY_Select.ROE_ORIGINAL_TO_SETTLEMENT_PAID_THIS_TIME') ,
+ SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Select.SIGNING_NUMBER', "ui_pasting" = 'QRY_Select.SIGNING_NUMBER') ,
+ SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Select.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT', "ui_pasting" = 'QRY_Select.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT') ,
+ SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Select.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT', "ui_pasting" = 'QRY_Select.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT') ,
+ SHARE_ORIGINAL_OUTSTANDING_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Select.SHARE_ORIGINAL_OUTSTANDING_DELTA_AMT', "ui_pasting" = 'QRY_Select.SHARE_ORIGINAL_OUTSTANDING_DELTA_AMT') ,
+ SHARE_SETTLEMENT_OUTSTANDING_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Select.SHARE_SETTLEMENT_OUTSTANDING_DELTA_AMT', "ui_pasting" = 'QRY_Select.SHARE_SETTLEMENT_OUTSTANDING_DELTA_AMT') ,
+ SHARE_ORIGINAL_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Select.SHARE_ORIGINAL_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT', "ui_pasting" = 'QRY_Select.SHARE_ORIGINAL_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT') ,
+ SHARE_SETTLEMENT_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Select.SHARE_SETTLEMENT_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT', "ui_pasting" = 'QRY_Select.SHARE_SETTLEMENT_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT') ,
+ SCM_PAID_ORIGINAL_LOSS_FUND_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Select.SCM_PAID_ORIGINAL_LOSS_FUND_AMT', "ui_pasting" = 'QRY_Select.SCM_PAID_ORIGINAL_LOSS_FUND_AMT') ,
+ SCM_PAID_SETTLEMENT_LOSS_FUND_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Select.SCM_PAID_SETTLEMENT_LOSS_FUND_AMT', "ui_pasting" = 'QRY_Select.SCM_PAID_SETTLEMENT_LOSS_FUND_AMT') ,
+ CURRENT_NARRATIVE VARCHAR(500)  SET( "ui_mapping_text" = 'QRY_Select.CURRENT_NARRATIVE', "ui_pasting" = 'QRY_Select.CURRENT_NARRATIVE') ,
+ CATASTROPHE VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Select.CATASTROPHE', "ui_pasting" = 'QRY_Select.CATASTROPHE') ,
+ fn_Translate_Old_Syn_Div AL_RFC_SCHEMA_GROUP (SYNDICATE VARCHAR(50) ,
+ UNDERWRITING_DIVISION VARCHAR(50) )  )
+ AS
+SELECT QRY_Select.INW_CLAIM_SOURCE_ID, QRY_Select.YEAR_OF_ACCOUNT, QRY_Select.ORIGINAL_CURRENCY_REPOS_ID, QRY_Select.SETTLEMENT_CURRENCY_REPOS_ID, QRY_Select.INW_CLAIM_REPOS_ID, QRY_Select.INW_CONTRACT_REPOS_ID, QRY_Select.PERIOD_REPOS_ID, QRY_Select.PERIOD_END_DT, QRY_Select.DURG_REPOS_ID, QRY_Select.OUTW_CONTRACT_REPOS_ID, QRY_Select.RISK_CODE_REPOS_ID, QRY_Select.TRUST_FUND_REPOS_ID, QRY_Select.FILCODE_REPOS_ID, QRY_Select.INW_CLAIM_MOVEMENT_REPOS_ID, QRY_Select.ORIGINAL_INW_CLAIM_MOVEMENT_REPOS_ID, QRY_Select.MOVEMENT_DT, QRY_Select.ADVISED_DT, QRY_Select.PERIOD, QRY_Select.MOVEMENT_REFERENCE, QRY_Select.MANUAL_IND, QRY_Select.ROE_ORIGINAL_TO_SETTLEMENT_OUTSTANDING, QRY_Select.ORIGINAL_SIGNING_NUMBER, QRY_Select.ORIGINAL_SIGNING_DT, QRY_Select.IS_CONTRA_IND, QRY_Select.HAS_CONTRA_IND, QRY_Select.IS_REPLACEMENT_IND, QRY_Select.EARLY_RI_IND, QRY_Select.SIGNING_DT, QRY_Select.ROE_ORIGINAL_TO_SETTLEMENT_PAID_THIS_TIME, QRY_Select.SIGNING_NUMBER, QRY_Select.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT, QRY_Select.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT, QRY_Select.SHARE_ORIGINAL_OUTSTANDING_DELTA_AMT, QRY_Select.SHARE_SETTLEMENT_OUTSTANDING_DELTA_AMT, QRY_Select.SHARE_ORIGINAL_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT, QRY_Select.SHARE_SETTLEMENT_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT, QRY_Select.SCM_PAID_ORIGINAL_LOSS_FUND_AMT, QRY_Select.SCM_PAID_SETTLEMENT_LOSS_FUND_AMT, QRY_Select.CURRENT_NARRATIVE, QRY_Select.CATASTROPHE, __AL_SCRIPT_FUNCTION fn_Translate_Old_Syn_Div["$Synd","$UWDivision"](QRY_Select.SYNDICATE, QRY_Select.UNDERWRITING_DIVISION)["$Synd","$UWDivision"] FROM QRY_Select 
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '30', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>978</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '50', "x" = '12', "y" = '-1824')
+GUID::'6b7ff749-0af1-45ca-91ae-dcc11d8fd97c' READ TABLE REP_MART.DBO.TMP_REP_LANDED_UNDERWRITING_DIVISION OUTPUT(TMP_REP_LANDED_UNDERWRITING_DIVISION)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'yes', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'REP_MART', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '30', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>769</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '50', "x" = '12', "y" = '-1472')
+GUID::'907b078a-918b-4069-85d1-11f6e839c740' READ TABLE REP_MART.DBO.TMP_REP_LANDED_SYNDICATE OUTPUT(TMP_REP_LANDED_SYNDICATE)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'yes', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'REP_MART', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '49', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>1081</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '61', "x" = '21', "y" = '-262')
+GUID::'aead4aee-02d4-41d3-b1ac-4763353a24b1' READ TABLE REP_MART.DBO.TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA OUTPUT(TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'yes', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'REP_MART', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '46', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>850</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '53', "x" = '9', "y" = '-1100')
+GUID::'ece60b10-3bf1-4828-85d0-425627529d4b' READ TABLE REP_MART.DBO.TMP_REP_LANDED_PERIOD_LOOKUP OUTPUT(TMP_REP_LANDED_PERIOD_LOOKUP_1)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'yes', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'REP_MART', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '46', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Description', "Output_3rd_Column_Name" = 'Content_Type', "Output_Column_Name_4" = 'Business_Name', "Output_Column_Name_5" = 'Description', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>763</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '53', "x" = '0', "y" = '-815')
+GUID::'3b755861-9a19-4a74-9e99-01487b90a373' READ TABLE REP_MART.DBO.TMP_REP_LANDED_INW_CLAIM OUTPUT(TMP_REP_LANDED_INW_CLAIM)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'yes', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'REP_MART', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '46', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>841</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '53', "x" = '6', "y" = '-547')
+GUID::'e1e8605d-bec0-41f9-bf81-453c3f758fca' READ TABLE REP_MART.DBO.TMP_REP_LANDED_INW_CONTRACT OUTPUT(TMP_REP_LANDED_INW_CONTRACT)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'yes', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'REP_MART', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '31', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '437', "Input_Width_Type" = '85', "ObjectDesc" = 'Select all the required columns', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '623', "Output_Width_Name" = '318', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>238</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-166</Y></LOCATION><SIZE><CX>224</CX><CY>152</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '50', "ui_acta_from_schema_0" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA', "ui_acta_from_schema_1" = 'TMP_REP_LANDED_UNDERWRITING_DIVISION', "ui_acta_from_schema_2" = 'TMP_REP_LANDED_CONTRACT_RECORD_TYPE_LOOKUP', "ui_acta_from_schema_3" = 'TMP_REP_LANDED_PERIOD_LOOKUP_1', "ui_acta_from_schema_4" = 'TMP_REP_LANDED_INW_CONTRACT', "ui_acta_from_schema_5" = 'TMP_REP_LANDED_FILCODE_LOOKUP', "ui_acta_from_schema_6" = 'TMP_REP_LANDED_INW_CLAIM', "ui_acta_from_schema_7" = 'TMP_REP_LANDED_SYNDICATE', "ui_display_name" = 'QRY_Select', "ui_where_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.INW_CLAIM_REPOS_ID = TMP_REP_LANDED_INW_CLAIM.INW_CLAIM_REPOS_ID
+AND TMP_REP_LANDED_INW_CLAIM.INW_CONTRACT_REPOS_ID = TMP_REP_LANDED_INW_CONTRACT.INW_CONTRACT_REPOS_ID
+AND TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD_REPOS_ID = TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.PROCESSING_PERIOD_REPOS_ID
+AND TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD_TYPE = \'MONTH\'
+#AND TMP_REP_LANDED_DIM_MONTH.DIM_PERIOD = TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD
+
+#no need to extract underwriting divisons of parents, hence the below condition is commented out
+
+#AND TMP_REP_LANDED_INW_CONTRACT.Parent_Contract_Repos_ID = TMP_REP_LANDED_INW_CONTRACT_1.Inw_Contract_Repos_ID
+
+AND TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.CURRENT_IND = \'Y\'
+AND TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.DELETED_IND = \'N\'
+AND TMP_REP_LANDED_INW_CONTRACT.CURRENT_IND = \'Y\'
+AND TMP_REP_LANDED_INW_CONTRACT.DELETED_IND = \'N\'
+
+#eliminated TMP_REP_LANDED_INW_CONTRACT_1 table and hence the below two conditions are commented out
+
+#AND TMP_REP_LANDED_INW_CONTRACT_1.CURRENT_IND = \'Y\'
+#AND TMP_REP_LANDED_INW_CONTRACT_1.DELETED_IND = \'N\'
+
+AND TMP_REP_LANDED_INW_CLAIM.CURRENT_IND = \'Y\'
+AND TMP_REP_LANDED_INW_CLAIM.DELETED_IND = \'N\'
+
+
+#AND TMP_REP_LANDED_INW_CLAIM.Catastrophe_Repos_ID = TMP_REP_LANDED_FORECAST_CATASTROPHE_LOOKUP.FORECAST_CATASTROPHE_REPOS_ID
+#AND TMP_REP_LANDED_Forecast_Catastrophe_Lookup.Current_IND = \'Y\'
+#AND TMP_REP_LANDED_Forecast_Catastrophe_Lookup.Deleted_IND = \'N\'
+
+#AND TMP_REP_LANDED_INW_CLAIM.CATASTROPHE_REPOS_ID = TMP_REP_LANDED_CATASTROPHE_LOOKUP.CATASTROPHE_REPOS_ID
+#AND TMP_REP_LANDED_CATASTROPHE_LOOKUP.CURRENT_IND = \'Y\'
+
+#Changes added to fix the obsolete syndicates and underwriting division. ADM-23
+#ADM-59 Changed the Joining condition
+AND TMP_REP_LANDED_INW_CONTRACT.SYNDICATE_REPOS_ID = TMP_REP_LANDED_SYNDICATE.SYNDICATE_REPOS_ID
+AND TMP_REP_LANDED_INW_CONTRACT.UNDERWRITING_DIVISION_REPOS_ID = TMP_REP_LANDED_UNDERWRITING_DIVISION.UNDERWRITING_DIVISION_REPOS_ID
+and TMP_REP_LANDED_INW_CONTRACT.Contract_Record_Type_Repos_ID = TMP_REP_LANDED_CONTRACT_RECORD_TYPE_LOOKUP.Contract_Record_Type_Repos_ID
+
+and TMP_REP_LANDED_CONTRACT_RECORD_TYPE_LOOKUP.Contract_Record_Type = \'Syndicate Contract\'
+and TMP_REP_LANDED_CONTRACT_RECORD_TYPE_LOOKUP."CURRENT_IND"  = \'Y\'
+
+and TMP_REP_LANDED_CONTRACT_RECORD_TYPE_LOOKUP.Deleted_IND = \'N\'
+# Added this condition to get the open MONTH data
+#Removed the condition because KMI\'s expected behavior is to get all the data in KDR regardless of open month
+#AND TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD_REPOS_ID  <=$G_OPEN_MONTH_PERIOD_REPOS_ID
+
+#Removed this condition as per the Tokio  MArine HO reports requires early and non early Ri records
+# Added Early_RI_IND filter
+#AND TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.EARLY_RI_IND =\'N\'
+
+and TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.FILCODE1_REPOS_ID = TMP_REP_LANDED_FILCODE_LOOKUP.FILCODE_REPOS_ID
+
+', "x" = '1011', "y" = '-857')
+GUID::'7d4e454d-c6a0-46f9-afb5-27ebd6100510' CREATE VIEW QRY_Select( INW_CLAIM_SOURCE_ID VARCHAR(50)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM.INW_CLAIM_SOURCE_ID', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM.INW_CLAIM_SOURCE_ID') ,
+ YEAR_OF_ACCOUNT INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Year_Of_Account', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Year_Of_Account') ,
+ ORIGINAL_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Original_Currency_Repos_ID', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Original_Currency_Repos_ID') ,
+ SETTLEMENT_CURRENCY_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Settlement_Currency_Repos_ID', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Settlement_Currency_Repos_ID') ,
+ INW_CLAIM_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Inw_Claim_Repos_ID', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Inw_Claim_Repos_ID') ,
+ INW_CONTRACT_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM.INW_CONTRACT_REPOS_ID', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM.INW_CONTRACT_REPOS_ID') ,
+ PERIOD_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD_REPOS_ID', "ui_pasting" = 'TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD_REPOS_ID') ,
+ PERIOD_END_DT DATETIME(9)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD_END_DT', "ui_pasting" = 'TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD_END_DT') ,
+ DURG_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CONTRACT.DURG_REPOS_ID', "ui_pasting" = 'TMP_REP_LANDED_INW_CONTRACT.DURG_REPOS_ID') ,
+ OUTW_CONTRACT_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Outw_Contract_Repos_Id', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Outw_Contract_Repos_Id') ,
+ RISK_CODE_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Risk_Code_Repos_ID', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Risk_Code_Repos_ID') ,
+ TRUST_FUND_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Trust_Fund_Repos_ID', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Trust_Fund_Repos_ID') ,
+ FILCODE_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.FilCode1_Repos_ID', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.FilCode1_Repos_ID') ,
+ INW_CLAIM_MOVEMENT_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.INW_CLAIM_MOVEMENT_REPOS_ID', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.INW_CLAIM_MOVEMENT_REPOS_ID') ,
+ ORIGINAL_INW_CLAIM_MOVEMENT_REPOS_ID INT  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Original_Inw_Claim_Movement_Repos_ID', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Original_Inw_Claim_Movement_Repos_ID') ,
+ MOVEMENT_DT DATETIME(9)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Movement_DT', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Movement_DT') ,
+ ADVISED_DT DATETIME(9)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Advised_DT', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Advised_DT') ,
+ PERIOD VARCHAR(50)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD', "ui_pasting" = 'TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD') ,
+ MOVEMENT_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'rtrim(TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Movement_Reference,\' \')', "ui_pasting" = 'rtrim(TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Movement_Reference,\' \')') ,
+ MANUAL_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Manual_IND', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Manual_IND') ,
+ ROE_ORIGINAL_TO_SETTLEMENT_OUTSTANDING DECIMAL(18, 9)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.ROE_ORIGINAL_TO_SETTLEMENT_OUTSTANDING', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.ROE_ORIGINAL_TO_SETTLEMENT_OUTSTANDING') ,
+ ORIGINAL_SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.ORIGINAL_SIGNING_NUMBER', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.ORIGINAL_SIGNING_NUMBER') ,
+ ORIGINAL_SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.ORIGINAL_SIGNING_DT', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.ORIGINAL_SIGNING_DT') ,
+ IS_CONTRA_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Is_Contra_IND', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Is_Contra_IND') ,
+ HAS_CONTRA_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Has_Contra_IND', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Has_Contra_IND') ,
+ IS_REPLACEMENT_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Is_Replacement_IND', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Is_Replacement_IND') ,
+ EARLY_RI_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Early_RI_Ind', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Early_RI_Ind') ,
+ SIGNING_DT DATETIME(9)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SIGNING_DT', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SIGNING_DT') ,
+ ROE_ORIGINAL_TO_SETTLEMENT_PAID_THIS_TIME DECIMAL(18, 9)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.ROE_ORIGINAL_TO_SETTLEMENT_PAID_THIS_TIME', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.ROE_ORIGINAL_TO_SETTLEMENT_PAID_THIS_TIME') ,
+ SIGNING_NUMBER VARCHAR(50)  SET( "ui_mapping_text" = 'rtrim(TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SIGNING_NUMBER,\'\')', "ui_pasting" = 'rtrim(TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SIGNING_NUMBER,\'\')') ,
+ SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT') ,
+ SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT') ,
+ SHARE_ORIGINAL_OUTSTANDING_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Share_Original_Outstanding_Delta_AMT', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Share_Original_Outstanding_Delta_AMT') ,
+ SHARE_SETTLEMENT_OUTSTANDING_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Share_Settlement_Outstanding_Delta_AMT', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Share_Settlement_Outstanding_Delta_AMT') ,
+ SHARE_ORIGINAL_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Share_Original_Indem_Outstanding_Kiln_Addnl_Delta_AMT', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Share_Original_Indem_Outstanding_Kiln_Addnl_Delta_AMT') ,
+ SHARE_SETTLEMENT_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Share_Settlement_Indem_Outstanding_Kiln_Addnl_Delta_AMT', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Share_Settlement_Indem_Outstanding_Kiln_Addnl_Delta_AMT') ,
+ CURRENT_NARRATIVE VARCHAR(500)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.CURRENT_NARRATIVE', "ui_pasting" = 'TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.CURRENT_NARRATIVE') ,
+ SCM_PAID_ORIGINAL_LOSS_FUND_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'IfThenElse (TMP_REP_LANDED_FILCODE_LOOKUP.FILCODE LIKE \'LF%\', TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT, 0.0)', "ui_pasting" = 'IfThenElse (TMP_REP_LANDED_FILCODE_LOOKUP.FILCODE LIKE \'LF%\', TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT, 0.0)') ,
+ SCM_PAID_SETTLEMENT_LOSS_FUND_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'IfThenElse (TMP_REP_LANDED_FILCODE_LOOKUP.FILCODE LIKE \'LF%\', TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT, 0.0)', "ui_pasting" = 'IfThenElse (TMP_REP_LANDED_FILCODE_LOOKUP.FILCODE LIKE \'LF%\', TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT, 0.0)') ,
+ lookup_ext AL_RFC_SCHEMA_GROUP (CATASTROPHE VARCHAR(50) ) ,
+ SYNDICATE VARCHAR(50)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_SYNDICATE.SYNDICATE', "ui_pasting" = 'TMP_REP_LANDED_SYNDICATE.SYNDICATE') ,
+ UNDERWRITING_DIVISION VARCHAR(50)  SET( "ui_mapping_text" = 'TMP_REP_LANDED_UNDERWRITING_DIVISION.UNDERWRITING_DIVISION', "ui_pasting" = 'TMP_REP_LANDED_UNDERWRITING_DIVISION.UNDERWRITING_DIVISION')  )
+ AS
+SELECT TMP_REP_LANDED_INW_CLAIM.INW_CLAIM_SOURCE_ID, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Year_Of_Account, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Original_Currency_Repos_ID, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Settlement_Currency_Repos_ID, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Inw_Claim_Repos_ID, TMP_REP_LANDED_INW_CLAIM.INW_CONTRACT_REPOS_ID, TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD_REPOS_ID, TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD_END_DT, TMP_REP_LANDED_INW_CONTRACT.DURG_REPOS_ID, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Outw_Contract_Repos_Id, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Risk_Code_Repos_ID, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Trust_Fund_Repos_ID, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.FilCode1_Repos_ID, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.INW_CLAIM_MOVEMENT_REPOS_ID, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Original_Inw_Claim_Movement_Repos_ID, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Movement_DT, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Advised_DT, TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD, rtrim(TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Movement_Reference, ' '), TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Manual_IND, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.ROE_ORIGINAL_TO_SETTLEMENT_OUTSTANDING, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.ORIGINAL_SIGNING_NUMBER, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.ORIGINAL_SIGNING_DT, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Is_Contra_IND, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Has_Contra_IND, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Is_Replacement_IND, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Early_RI_Ind, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SIGNING_DT, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.ROE_ORIGINAL_TO_SETTLEMENT_PAID_THIS_TIME, rtrim(TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SIGNING_NUMBER, ''), TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Share_Original_Outstanding_Delta_AMT, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Share_Settlement_Outstanding_Delta_AMT, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Share_Original_Indem_Outstanding_Kiln_Addnl_Delta_AMT, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.Share_Settlement_Indem_Outstanding_Kiln_Addnl_Delta_AMT, TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.CURRENT_NARRATIVE, ifthenelse((TMP_REP_LANDED_FILCODE_LOOKUP.FILCODE like 'LF%'), TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT, 0.00000000000000e+00), ifthenelse((TMP_REP_LANDED_FILCODE_LOOKUP.FILCODE like 'LF%'), TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT, 0.00000000000000e+00), __AL_LOOKUPEX_TRAN lookup_ext([KDR.DBO.CLAIM_EVENT_LOOKUP, 'PRE_LOAD_CACHE', 'MAX'], [ CLAIM_EVENT_CODE ], [ 0 ], [ CLAIM_EVENT_REPOS_ID, '=', TMP_REP_LANDED_INW_CLAIM.CLAIM_EVENT_REPOS_ID, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, TMP_REP_LANDED_SYNDICATE.SYNDICATE, TMP_REP_LANDED_UNDERWRITING_DIVISION.UNDERWRITING_DIVISION FROM TMP_REP_LANDED_INW_CONTRACT , TMP_REP_LANDED_INW_CLAIM , TMP_REP_LANDED_PERIOD_LOOKUP_1 , TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA , TMP_REP_LANDED_SYNDICATE , TMP_REP_LANDED_UNDERWRITING_DIVISION , TMP_REP_LANDED_CONTRACT_RECORD_TYPE_LOOKUP , TMP_REP_LANDED_FILCODE_LOOKUP  WHERE (((((((((((((((((TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.INW_CLAIM_REPOS_ID = TMP_REP_LANDED_INW_CLAIM.INW_CLAIM_REPOS_ID) AND
+   (TMP_REP_LANDED_INW_CLAIM.INW_CONTRACT_REPOS_ID = TMP_REP_LANDED_INW_CONTRACT.INW_CONTRACT_REPOS_ID)) AND
+   (TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD_REPOS_ID = TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.PROCESSING_PERIOD_REPOS_ID)) AND
+   (TMP_REP_LANDED_PERIOD_LOOKUP_1.PERIOD_TYPE = 'MONTH')) AND
+   (TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.CURRENT_IND = 'Y')) AND
+   (TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.DELETED_IND = 'N')) AND
+   (TMP_REP_LANDED_INW_CONTRACT.CURRENT_IND = 'Y')) AND
+   (TMP_REP_LANDED_INW_CONTRACT.DELETED_IND = 'N')) AND
+   (TMP_REP_LANDED_INW_CLAIM.CURRENT_IND = 'Y')) AND
+   (TMP_REP_LANDED_INW_CLAIM.DELETED_IND = 'N')) AND
+   (TMP_REP_LANDED_INW_CONTRACT.SYNDICATE_REPOS_ID = TMP_REP_LANDED_SYNDICATE.SYNDICATE_REPOS_ID)) AND
+   (TMP_REP_LANDED_INW_CONTRACT.UNDERWRITING_DIVISION_REPOS_ID = TMP_REP_LANDED_UNDERWRITING_DIVISION.UNDERWRITING_DIVISION_REPOS_ID)) AND
+   (TMP_REP_LANDED_INW_CONTRACT.Contract_Record_Type_Repos_ID = TMP_REP_LANDED_CONTRACT_RECORD_TYPE_LOOKUP.Contract_Record_Type_Repos_ID)) AND
+   (TMP_REP_LANDED_CONTRACT_RECORD_TYPE_LOOKUP.Contract_Record_Type = 'Syndicate Contract')) AND
+   (TMP_REP_LANDED_CONTRACT_RECORD_TYPE_LOOKUP.CURRENT_IND = 'Y')) AND
+   (TMP_REP_LANDED_CONTRACT_RECORD_TYPE_LOOKUP.Deleted_IND = 'N')) AND
+   (TMP_REP_LANDED_INW_CLAIM_MOVEMENT_DELTA.FILCODE1_REPOS_ID = TMP_REP_LANDED_FILCODE_LOOKUP.FILCODE_REPOS_ID))
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '39', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '416', "Input_Width_Type" = '85', "ObjectDesc" = 'All DIM key lookups are performed.', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Name" = '379', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>422</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-170</Y></LOCATION><SIZE><CX>317</CX><CY>110</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '67', "ui_acta_from_schema_0" = 'QRY_SynDiv_Lookup', "ui_display_name" = 'QRY_Lookup_Dim_Keys', "ui_where_text" = '#Query_summing.LOOKUP_INW_CLAIM_MOVEMENT_REPOS_ID = RTL_DIM_INW_CLAIM_MOVEMENT.INW_CLAIM_MOVEMENT_SOURCE_ID
+', "x" = '2381', "y" = '-821')
+GUID::'cd8e7215-0c97-48fd-b04e-d5b069cfa9e0' CREATE VIEW QRY_Lookup_Dim_Keys( lookup_ext AL_RFC_SCHEMA_GROUP (DIM_YEAR_OF_ACCOUNT_KEY INT  KEY ) ,
+ lookup_ext_1 AL_RFC_SCHEMA_GROUP (DIM_Settlement_Currency_Key INT  KEY ) ,
+ lookup_ext_2 AL_RFC_SCHEMA_GROUP (DIM_Original_Currency_Key INT  KEY ) ,
+ lookup_ext_3 AL_RFC_SCHEMA_GROUP (DIM_Underwriting_Division_Key INT  KEY ) ,
+ lookup_ext_4 AL_RFC_SCHEMA_GROUP (DIM_CATASTROPHE_KEY INT  KEY ) ,
+ lookup_ext_5 AL_RFC_SCHEMA_GROUP (DIM_Syndicate_Key INT  KEY ) ,
+ lookup_ext_6 AL_RFC_SCHEMA_GROUP (DIM_Actual_Inw_Claim_Key INT  KEY ) ,
+ lookup_ext_7 AL_RFC_SCHEMA_GROUP (DIM_INW_SYNDICATE_CONTRACT_KEY INT  KEY ) ,
+ lookup_ext_8 AL_RFC_SCHEMA_GROUP (DIM_DURG_CLASS_KEY INT  KEY ) ,
+ lookup_ext_9 AL_RFC_SCHEMA_GROUP (DIM_OUTW_CONTRACT_KEY INT  KEY ) ,
+ lookup_ext_10 AL_RFC_SCHEMA_GROUP (DIM_RISK_CODE_KEY INT  KEY ) ,
+ lookup_ext_11 AL_RFC_SCHEMA_GROUP (DIM_TRUST_FUND_KEY INT  KEY ) ,
+ lookup_ext_12 AL_RFC_SCHEMA_GROUP (DIM_TRUST_FUND_GROUP_KEY INT  KEY ) ,
+ lookup_ext_13 AL_RFC_SCHEMA_GROUP (DIM_FIL_Code_Key INT  KEY ) ,
+ lookup_ext_14 AL_RFC_SCHEMA_GROUP (DIM_INW_CLAIM_MOVEMENT_KEY INT  KEY ) ,
+ lookup_ext_15 AL_RFC_SCHEMA_GROUP (DIM_Date_Advised_Key INT  KEY ) ,
+ lookup_ext_16 AL_RFC_SCHEMA_GROUP (DIM_Movement_Date_Key INT  KEY ) ,
+ lookup_ext_19 AL_RFC_SCHEMA_GROUP (DIM_MISCELLANEOUS_KEY INT  KEY ) ,
+ MOVEMENT_REFERENCE VARCHAR(50)  SET( "ui_mapping_text" = 'nvl(QRY_SynDiv_Lookup.MOVEMENT_REFERENCE, \'\')', "ui_pasting" = 'nvl(QRY_SynDiv_Lookup.MOVEMENT_REFERENCE, \'\')') ,
+ lookup_ext_17 AL_RFC_SCHEMA_GROUP (DIM_CALENDAR_KEY INT  KEY ) ,
+ SCM_Paid_This_Time_Original_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDiv_Lookup.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT', "ui_pasting" = 'QRY_SynDiv_Lookup.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT') ,
+ SCM_Paid_This_Time_Settlement_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDiv_Lookup.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT', "ui_pasting" = 'QRY_SynDiv_Lookup.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT') ,
+ OS_Delta_Original_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDiv_Lookup.SHARE_ORIGINAL_OUTSTANDING_DELTA_AMT', "ui_pasting" = 'QRY_SynDiv_Lookup.SHARE_ORIGINAL_OUTSTANDING_DELTA_AMT') ,
+ OS_Delta_Settlement_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDiv_Lookup.SHARE_SETTLEMENT_OUTSTANDING_DELTA_AMT', "ui_pasting" = 'QRY_SynDiv_Lookup.SHARE_SETTLEMENT_OUTSTANDING_DELTA_AMT') ,
+ OS_Delta_Additional_Original_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDiv_Lookup.SHARE_ORIGINAL_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT', "ui_pasting" = 'QRY_SynDiv_Lookup.SHARE_ORIGINAL_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT') ,
+ OS_Delta_Additional_Settlement_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDiv_Lookup.SHARE_SETTLEMENT_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT', "ui_pasting" = 'QRY_SynDiv_Lookup.SHARE_SETTLEMENT_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT') ,
+ SCM_PAID_ORIGINAL_LOSS_FUND_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDiv_Lookup.SCM_PAID_ORIGINAL_LOSS_FUND_AMT', "ui_pasting" = 'QRY_SynDiv_Lookup.SCM_PAID_ORIGINAL_LOSS_FUND_AMT') ,
+ SCM_PAID_SETTLEMENT_LOSS_FUND_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_SynDiv_Lookup.SCM_PAID_SETTLEMENT_LOSS_FUND_AMT', "ui_pasting" = 'QRY_SynDiv_Lookup.SCM_PAID_SETTLEMENT_LOSS_FUND_AMT') ,
+ EARLY_RI_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_SynDiv_Lookup.EARLY_RI_IND', "ui_pasting" = 'QRY_SynDiv_Lookup.EARLY_RI_IND') ,
+ LOAD_ID INT  SET( "ui_mapping_text" = '#$G_LOAD_ID
+1', "ui_pasting" = '#$G_LOAD_ID
+1') ,
+ INSERTED_DT DATETIME(9)  SET( "ui_mapping_text" = '#$G_SYSDATE
+sysdate()', "ui_pasting" = '#$G_SYSDATE
+sysdate()') ,
+ LAST_UPDATED_DT DATETIME(9)  SET( "ui_mapping_text" = '#$G_SYSDATE
+sysdate()', "ui_pasting" = '#$G_SYSDATE
+sysdate()')  )
+ AS
+SELECT __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.DIM_YEAR_OF_ACCOUNT, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_YEAR_OF_ACCOUNT_KEY ], [ 0 ], [ YEAR_YYYY, '=', QRY_SynDiv_Lookup.YEAR_OF_ACCOUNT ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_CURRENCY, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_CURRENCY_KEY ], [ 0 ], [ CURRENCY_SOURCE_ID, '=', QRY_SynDiv_Lookup.SETTLEMENT_CURRENCY_REPOS_ID ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_CURRENCY, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_CURRENCY_KEY ], [ 0 ], [ CURRENCY_SOURCE_ID, '=', QRY_SynDiv_Lookup.ORIGINAL_CURRENCY_REPOS_ID ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_UNDERWRITING_DIVISION, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_UNDERWRITING_DIVISION_KEY ], [ 0 ], [ UNDERWRITING_DIVISION_SOURCE_ID, '=', QRY_SynDiv_Lookup.UNDERWRITING_DIVISION_REPOS_ID, CURRENT_IND, '=', 'Y', OUTWARDS_IND, '=', 'N' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_CATASTROPHE, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_CATASTROPHE_KEY ], [ 0 ], [ CATASTROPHE_CODE, '=', QRY_SynDiv_Lookup.CATASTROPHE, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_SYNDICATE, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_SYNDICATE_KEY ], [ 0 ], [ SYNDICATE_SOURCE_ID, '=', QRY_SynDiv_Lookup.SYNDICATE_REPOS_ID, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_ACTUAL_INW_CLAIM, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_ACTUAL_INW_CLAIM_KEY ], [ 0 ], [ INW_CLAIM_SOURCE_ID, '=', QRY_SynDiv_Lookup.INW_CLAIM_REPOS_ID, CURRENT_IND, '=', 'Y', IBNR_CLAIM_IND, '=', 'N' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_INW_SYNDICATE_CONTRACT, 'PRE_LOAD_CACHE', 'MIN-NS'], [ DIM_INW_SYNDICATE_CONTRACT_KEY ], [ 0 ], [ INW_SYNDICATE_CONTRACT_SOURCE_ID, '=', QRY_SynDiv_Lookup.INW_CONTRACT_REPOS_ID, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_DURG_CLASS, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_DURG_CLASS_KEY ], [ 0 ], [ DURG_CLASS_SOURCE_ID, '=', QRY_SynDiv_Lookup.DURG_REPOS_ID, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_OUTW_CONTRACT, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_OUTW_CONTRACT_KEY ], [ 0 ], [ OUTW_CONTRACT_SOURCE_ID, '=', QRY_SynDiv_Lookup.OUTW_CONTRACT_REPOS_ID, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_RISK_CODE, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_RISK_CODE_KEY ], [ 0 ], [ RISK_CODE_SOURCE_ID, '=', QRY_SynDiv_Lookup.RISK_CODE_REPOS_ID, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_TRUST_FUND, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_TRUST_FUND_KEY ], [ 0 ], [ TRUST_FUND_SOURCE_ID, '=', QRY_SynDiv_Lookup.TRUST_FUND_GROUP_REPOS_ID, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_TRUST_FUND_GROUP, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_TRUST_FUND_GROUP_KEY ], [ 0 ], [ TRUST_FUND_GROUP_SOURCE_ID, '=', QRY_SynDiv_Lookup.TRUST_FUND_GROUP_REPOS_ID, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_FIL_CODE, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_FIL_CODE_KEY ], [ 0 ], [ FIL_CODE_SOURCE_ID, '=', QRY_SynDiv_Lookup.FILCODE_REPOS_ID, CURRENT_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.RTL_DIM_INW_CLAIM_MOVEMENT, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_INW_CLAIM_MOVEMENT_KEY ], [ 0 ], [ INW_CLAIM_MOVEMENT_SOURCE_ID, '=', QRY_SynDiv_Lookup.INW_CLAIM_MOVEMENT_REPOS_ID ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.DIM_CALENDAR, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_CALENDAR_KEY ], [ 0 ], [ EFFECTIVE_DT, '=', QRY_SynDiv_Lookup.ADVISED_DT ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.DIM_CALENDAR, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_CALENDAR_KEY ], [ 0 ], [ EFFECTIVE_DT, '=', QRY_SynDiv_Lookup.MOVEMENT_DT ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.DIM_MISCELLANEOUS, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_MISCELLANEOUS_KEY ], [ 0 ], [ IS_CONTRA, '=', QRY_SynDiv_Lookup.IS_CONTRA_IND, IS_REPLACEMENT, '=', QRY_SynDiv_Lookup.IS_REPLACEMENT_IND, HAS_CONTRA, '=', QRY_SynDiv_Lookup.HAS_CONTRA_IND, MANUAL_MOVEMENT_IND, '=', QRY_SynDiv_Lookup.MANUAL_IND ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, nvl(QRY_SynDiv_Lookup.MOVEMENT_REFERENCE, ''), __AL_LOOKUPEX_TRAN lookup_ext([REP_MART.DBO.DIM_CALENDAR, 'PRE_LOAD_CACHE', 'MAX'], [ DIM_CALENDAR_KEY ], [ 0 ], [ PERIOD_LOOKUP_MONTH_REPOS_ID, '=', QRY_SynDiv_Lookup.PERIOD_REPOS_ID, END_OF_MONTH_IND, '=', 'Y' ]) 
+SET("output_cols_info" = '<?xml version="1.0" encoding="UTF-8"?><output_cols_info><col index="1" expression="no"/>
+</output_cols_info>', "run_as_separate_process" = 'yes')
+, QRY_SynDiv_Lookup.SHARE_ORIGINAL_PAID_TO_DATE_DELTA_AMT, QRY_SynDiv_Lookup.SHARE_SETTLEMENT_PAID_TO_DATE_DELTA_AMT, QRY_SynDiv_Lookup.SHARE_ORIGINAL_OUTSTANDING_DELTA_AMT, QRY_SynDiv_Lookup.SHARE_SETTLEMENT_OUTSTANDING_DELTA_AMT, QRY_SynDiv_Lookup.SHARE_ORIGINAL_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT, QRY_SynDiv_Lookup.SHARE_SETTLEMENT_INDEM_OUTSTANDING_KILN_ADDNL_DELTA_AMT, QRY_SynDiv_Lookup.SCM_PAID_ORIGINAL_LOSS_FUND_AMT, QRY_SynDiv_Lookup.SCM_PAID_SETTLEMENT_LOSS_FUND_AMT, QRY_SynDiv_Lookup.EARLY_RI_IND, 1, sysdate(), sysdate() FROM QRY_SynDiv_Lookup 
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+END
+ SET ("Cache_type" = 'pageable_cache', "Parallelism_degree" = '2', "allows_both_input_and_output" = 'yes', "dataflow_loader_bulk_load" = 'no', "dataflow_loader_commit_size" = 'default', "dataflow_loader_row_size_bytes" = '0', "dataflow_number_of_loaders" = '0', "run_once" = 'no', "use_dataflow_links" = 'no', "use_datastore_links" = 'yes', "validation_xform_exists" = 'no', "validation_xform_stats" = 'no')

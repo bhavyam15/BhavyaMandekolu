@@ -1,0 +1,686 @@
+#__AW_Repository_Version '14.2.11.0000';
+#__AW_Product_Version '14.2.11.2138';
+#__AW_ATL_Locale 'eng_gb.utf-8';
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'349\', y = \'-1409\',ObjectDesc=\'Dataflow:         DF_KDR_WRK_Inw_Claim_Movement_Part1
+Created by:      D Lloyd
+Date:                7/12/2009
+
+Description: Reads in the next Claim Movement tables from Eclipse. The data is sorted into a standard order and given a sequence number which allows queries to take the latest movement within a claim line and settlement currency. The sequencing of movements is separate for Early_RI records to non-early RI, therefore there are no gaps in either sequencing. This dataflow uses a function and therefore passes parameters to it.
+
+
+Modification History
+
+Version 	Date        		By	Description
+--------      -------------              ---------    -----------------------------------------------------------------------------------------------------------------------------------------------
+v1.000	07/12/2009	D Lloyd	Initial Version
+v1.001     30/03/2010              D Lloyd     Jira DC-140 - changed mapping for Outw_Policy_Ref to use upper() as the later lookup needs the case to match.
+v1.002     16/12/2012              Dushyant ECLR-299-     GENERATED_IND column was added to the DF and target table was set to "Delete before loading" To address a BODS bug fix. When Bulk load is used on MS SQL Server database, BODS loads data using "Compare by position" rather than "Compare by name". This causes it to load data in wrong column if sequence is not correct or if there is a missing sequence.
+V1.003    15/01/2014	R Schertle  KMI Underwriting -- Added column MOVEMENT_TYPE_CODE
+V 1.004    14/03/2017             Chandrakanth N , As part of 3CR modified QRY_Eclipse_Source_Join to Split the movements based on percentage set by  DF_KDR_WRK_Inw_ClaimLineShare_Split_Transactions
+V 1.005    05/04/2017              Chandrakanth N Removed Split against Market_Original Amount , as they are at policy Level and Splits are requiredonly at PolicyLine leve granularity
+V 1.006	09/04/2019	Usha Hovale	Modified the query transform QRY_Eclipse_Source_Join and dataflow property as part of SQL-2016 upgared project.\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-349</X><Y>1409</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>2564</CX><CY>1285</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ANNOTATION_1" = 'ALGUICOMMENT( x = \'1828\', y = \'-744\',ObjectDesc=\'Do Not delete and Load\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-1828</X><Y>744</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RSavedAfterCheckOut', "ActaName_2" = 'RDate_created', "ActaName_3" = 'RDescription', "ActaName_4" = 'RDate_modified', "ActaValue_1" = 'YES', "ActaValue_2" = 'Mon Apr  6 02:45:54 2020', "ActaValue_3" = 'Reads in the landed movement and claimLineShare data, sorts the results and uses a function call to assign a movement sequence number to each record.
+Data flow also uses local variables', "ActaValue_4" = 'Wed Apr  8 20:24:51 2020', "x" = '-1', "y" = '-1')
+CREATE  DATAFLOW DF_KDR_WRK_Inw_Claim_Movement_Part1::'34d2aef5-0567-468c-9c11-bbbb8ba1dc5b'($P_Movement_Sequence INT  IN OUT, $P_Previous_Settlement_Currency VARCHAR(50)  IN OUT, $P_Previous_ClaimLineID INT  IN OUT, $P_Current_Settlement_Currency VARCHAR(50)  IN, $P_Current_ClaimLineID INT  IN, $P_Previous_MovementID INT  IN OUT, $P_Current_MovementID INT  IN, $P_EarlyRIIND VARCHAR(1)  IN )
+BEGIN
+
+ALGUIComment ("InputSchema_WidthProp" = '55', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Business_Name', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '85', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '348', "Input_Width_Type" = '85', "ObjectDesc" = 'Get next unload data from Eclipse', "Output_1st_Column_Name" = 'Description', "Output_2nd_Column_Name" = 'Type', "Output_3rd_Column_Name" = 'Mapping', "Output_Column_Name_4" = 'Business_Name', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '120', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '565', "Output_Width_Name" = '352', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>138</X><Y>0</Y></LOCATION><SIZE><CX>457</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-169</Y></LOCATION><SIZE><CX>551</CX><CY>84</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '51', "ui_acta_from_schema_0" = 'TMP_ECL_LANDED_MOVEMENT', "ui_acta_from_schema_1" = 'TMP_ECL_LANDED_CLAIMLINESHARE', "ui_display_name" = 'QRY_Eclipse_Source_Join', "ui_where_text" = 'TMP_ECL_LANDED_MOVEMENT.MOVEMENTID = TMP_ECL_LANDED_CLAIMLINESHARE.MOVEMENTID
+and TMP_ECL_LANDED_CLAIMLINESHARE.LOAD_ID = TMP_ECL_LANDED_MOVEMENT.LOAD_ID
+and TMP_ECL_LANDED_MOVEMENT.DELDATE is null 
+and TMP_ECL_LANDED_CLAIMLINESHARE.DELDATE is null
+and TMP_ECL_LANDED_MOVEMENT.LOAD_ID = $G_UNLOAD_ID', "x" = '461', "y" = '-563')
+GUID::'e64be11b-bc14-4cc9-a8c6-513f10263826' CREATE VIEW QRY_Eclipse_Source_Join( CLAIMLINESHAREID INT  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.CLAIMLINESHAREID') ,
+ ORIGINALCLAIMLINESHAREID INT  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.ORIGINALCLAIMLINESHAREID') ,
+ CLAIMLINEID INT  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.CLAIMLINEID') ,
+ MOVEMENTID INT  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.MOVEMENTID') ,
+ Trust_Fund_Code VARCHAR(4)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.TRUSTFUNDCODE') ,
+ Risk_Code VARCHAR(2)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.POLICYCODE') ,
+ OSCCYISO VARCHAR(3)  SET( "ui_mapping_text" = 'upper(TMP_ECL_LANDED_CLAIMLINESHARE.OSCCYISO)') ,
+ SETTCCYISO VARCHAR(3)  SET( "ui_mapping_text" = 'upper(TMP_ECL_LANDED_CLAIMLINESHARE.SETTCCYISO)') ,
+ PROCESSPERIOD VARCHAR(8)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.PROCESSPERIOD') ,
+ OUTW_POLICY_REF VARCHAR(50)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.OUTPOLICYREF') ,
+ CLAIM_LINE_SHARE_LASTUPD DATETIME(9)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.LASTUPD') ,
+ MOVEMENT_INSDATE DATETIME(9)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.INSDATE') ,
+ MOVEMENT_LASTUPD DATETIME(9)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.LASTUPD') ,
+ Share_Original_Indem_Outstanding_AMT DECIMAL(21, 6)  SET( "Description" = 'This is only needed so that the merge can succeed', "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREOSINDEMORIGCCY,0.0))') ,
+ Share_Original_Fee_Outstanding_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREOSFEEORIGCCY,0.0))') ,
+ Share_Original_Indem_Outstanding_Kiln_Addnl_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREUWADDOSORIGCCY,0.0))') ,
+ Share_Original_Indem_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "Description" = 'Needed for o/w IBNR', "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTHISTIMEINDEMORIGCCY,0.0))') ,
+ Share_Original_Fee_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTHISTIMEFEEORIGCCY,0.0))') ,
+ Share_Original_Indem_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTODATEINDEMORIGCCY,0.0))') ,
+ Share_Original_Fee_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTODATEFEEORIGCCY,0.0))') ,
+ Share_Settlement_Indem_Outstanding_Amt DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREOSINDEMSETTCCY,0.0))') ,
+ Share_Settlement_Fee_Outstanding_Amt DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREOSFEESETTCCY,0.0))') ,
+ Share_Settlement_Indem_Outstanding_Kiln_Addnl_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREUWADDOSSETTCCY,0.0))') ,
+ Share_Settlement_Indem_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTHISTIMEINDEMSETTCCY,0.0))') ,
+ Share_Settlement_Fee_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTHISTIMEFEESETTCCY,0.0))') ,
+ Share_Settlement_Indem_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTODATEINDEMSETTCCY,0.0))') ,
+ Share_Settlement_Fee_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTODATEFEESETTCCY,0.0))') ,
+ Market_Original_Indem_Outstanding_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_MOVEMENT.MARKETOSINDEMORIGCCY,0.0))') ,
+ Market_Original_Fee_Outstanding_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_MOVEMENT.MARKETOSFEEORIGCCY,0.0))') ,
+ Market_Original_Indem_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTHISTIMEINDEMORIGCCY,0.0))') ,
+ Market_Original_Fee_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTHISTIMEFEEORIGCCY,0.0))') ,
+ Market_Original_Indem_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTODATEINDEMORIGCCY,0.0))') ,
+ Market_Original_Fee_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTODATEFEEORIGCCY,0.0))') ,
+ Market_Settlement_Indem_Outstanding_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_MOVEMENT.MARKETOSINDEMSETTCCY,0.0))') ,
+ Market_Settlement_Fee_Outstanding_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_MOVEMENT.MARKETOSFEESETTCCY,0.0))') ,
+ Market_Settlement_Indem_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTHISTIMEINDEMSETTCCY,0.0))') ,
+ Market_Settlement_Fee_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTHISTIMEFEESETTCCY,0.0))') ,
+ Market_Settlement_Indem_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTODATEINDEMSETTCCY,0.0))') ,
+ Market_Settlement_Fee_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'convert(decimal(21,6),nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTODATEFEESETTCCY,0.0))') ,
+ Market_Indem_Outstanding_TBA VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.MARKETOSINDEMTBA') ,
+ Market_Fee_Outstanding_TBA VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.MARKETOSFEETBA') ,
+ ROE_Original_To_Settlement_Paid_This_Time DECIMAL(15, 8)  SET( "Description" = 'Rate of Exchange for Paid This Time values from original to settlement', "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.SETTCCYROE') ,
+ ROE_Original_To_Settlement_Outstanding DECIMAL(15, 8)  SET( "Description" = 'Rate of Exchange for outstanding values from original to settlement', "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.OSCCYROE') ,
+ Movement_DT DATETIME(9)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.MOVEMENTDATE') ,
+ Advised_DT DATETIME(9)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.ADVISEDDATE') ,
+ SSMVMNTNUM INT  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.SSMVMNTNUM') ,
+ SCMTRANSID INT  SET( "ui_mapping_text" = 'nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SCMTRANSID, 0)') ,
+ Manual_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.MANUALMOVEMENT') ,
+ Early_RI_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.EARLYRIIND') ,
+ Year_of_Account INT  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.YOA') ,
+ FIL_Code VARCHAR(4)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.FILMARKETCODE') ,
+ FIL1_Code VARCHAR(4)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.FILCODE') ,
+ FIL2_Code VARCHAR(4)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.FILCODE2') ,
+ Current_Narrative VARCHAR(105)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.CURRENTNARR') ,
+ Movement_Reference VARCHAR(50)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.MOVEMENTREF') ,
+ Market_Outstanding_Qualifier VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.MARKETOSQUAL') ,
+ Signing_DT DATETIME(9)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.SIGNEDDATE') ,
+ Signing_Number VARCHAR(50)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.SIGNEDNUM') ,
+ Signing_Version VARCHAR(50)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.BUREAUSIGNINGVERSION') ,
+ Is_Contra_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.ISCONTRA') ,
+ Has_Contra_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.HASCONTRA') ,
+ Is_Replacement_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.ISREPL') ,
+ GENERATED_IND VARCHAR(1)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_CLAIMLINESHARE.GENERATED_IND') ,
+ MOVEMENTTYPE VARCHAR(3)  SET( "ui_mapping_text" = 'TMP_ECL_LANDED_MOVEMENT.MOVEMENTTYPE')  )
+ AS
+SELECT TMP_ECL_LANDED_CLAIMLINESHARE.CLAIMLINESHAREID, TMP_ECL_LANDED_CLAIMLINESHARE.ORIGINALCLAIMLINESHAREID, TMP_ECL_LANDED_CLAIMLINESHARE.CLAIMLINEID, TMP_ECL_LANDED_CLAIMLINESHARE.MOVEMENTID, TMP_ECL_LANDED_MOVEMENT.TRUSTFUNDCODE, TMP_ECL_LANDED_MOVEMENT.POLICYCODE, upper(TMP_ECL_LANDED_CLAIMLINESHARE.OSCCYISO), upper(TMP_ECL_LANDED_CLAIMLINESHARE.SETTCCYISO), TMP_ECL_LANDED_CLAIMLINESHARE.PROCESSPERIOD, TMP_ECL_LANDED_CLAIMLINESHARE.OUTPOLICYREF, TMP_ECL_LANDED_CLAIMLINESHARE.LASTUPD, TMP_ECL_LANDED_MOVEMENT.INSDATE, TMP_ECL_LANDED_CLAIMLINESHARE.LASTUPD, CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREOSINDEMORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREOSFEEORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREUWADDOSORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTHISTIMEINDEMORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTHISTIMEFEEORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTODATEINDEMORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTODATEFEEORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREOSINDEMSETTCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREOSFEESETTCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREUWADDOSSETTCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTHISTIMEINDEMSETTCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTHISTIMEFEESETTCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTODATEINDEMSETTCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SHAREPAIDTODATEFEESETTCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_MOVEMENT.MARKETOSINDEMORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_MOVEMENT.MARKETOSFEEORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTHISTIMEINDEMORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTHISTIMEFEEORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTODATEINDEMORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTODATEFEEORIGCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_MOVEMENT.MARKETOSINDEMSETTCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_MOVEMENT.MARKETOSFEESETTCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTHISTIMEINDEMSETTCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTHISTIMEFEESETTCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTODATEINDEMSETTCCY, 0.00000000000000e+00)), CONVERT( DECIMAL(21, 6) , nvl(TMP_ECL_LANDED_MOVEMENT.MARKETPAIDTODATEFEESETTCCY, 0.00000000000000e+00)), TMP_ECL_LANDED_MOVEMENT.MARKETOSINDEMTBA, TMP_ECL_LANDED_MOVEMENT.MARKETOSFEETBA, TMP_ECL_LANDED_CLAIMLINESHARE.SETTCCYROE, TMP_ECL_LANDED_CLAIMLINESHARE.OSCCYROE, TMP_ECL_LANDED_MOVEMENT.MOVEMENTDATE, TMP_ECL_LANDED_MOVEMENT.ADVISEDDATE, TMP_ECL_LANDED_MOVEMENT.SSMVMNTNUM, nvl(TMP_ECL_LANDED_CLAIMLINESHARE.SCMTRANSID, 0), TMP_ECL_LANDED_MOVEMENT.MANUALMOVEMENT, TMP_ECL_LANDED_CLAIMLINESHARE.EARLYRIIND, TMP_ECL_LANDED_MOVEMENT.YOA, TMP_ECL_LANDED_MOVEMENT.FILMARKETCODE, TMP_ECL_LANDED_MOVEMENT.FILCODE, TMP_ECL_LANDED_MOVEMENT.FILCODE2, TMP_ECL_LANDED_MOVEMENT.CURRENTNARR, TMP_ECL_LANDED_MOVEMENT.MOVEMENTREF, TMP_ECL_LANDED_MOVEMENT.MARKETOSQUAL, TMP_ECL_LANDED_MOVEMENT.SIGNEDDATE, TMP_ECL_LANDED_MOVEMENT.SIGNEDNUM, TMP_ECL_LANDED_MOVEMENT.BUREAUSIGNINGVERSION, TMP_ECL_LANDED_CLAIMLINESHARE.ISCONTRA, TMP_ECL_LANDED_CLAIMLINESHARE.HASCONTRA, TMP_ECL_LANDED_CLAIMLINESHARE.ISREPL, TMP_ECL_LANDED_CLAIMLINESHARE.GENERATED_IND, TMP_ECL_LANDED_MOVEMENT.MOVEMENTTYPE FROM TMP_ECL_LANDED_CLAIMLINESHARE , TMP_ECL_LANDED_MOVEMENT  WHERE (((((TMP_ECL_LANDED_MOVEMENT.MOVEMENTID = TMP_ECL_LANDED_CLAIMLINESHARE.MOVEMENTID) AND
+   (TMP_ECL_LANDED_CLAIMLINESHARE.LOAD_ID = TMP_ECL_LANDED_MOVEMENT.LOAD_ID)) AND
+   (TMP_ECL_LANDED_MOVEMENT.DELDATE IS  NULL )) AND
+   (TMP_ECL_LANDED_CLAIMLINESHARE.DELDATE IS  NULL )) AND
+   (TMP_ECL_LANDED_MOVEMENT.LOAD_ID = $G_UNLOAD_ID)) ORDER BY TMP_ECL_LANDED_CLAIMLINESHARE.EARLYRIIND ASC , TMP_ECL_LANDED_CLAIMLINESHARE.SETTCCYISO ASC , TMP_ECL_LANDED_CLAIMLINESHARE.CLAIMLINEID ASC , TMP_ECL_LANDED_MOVEMENT.MOVEMENTDATE ASC , TMP_ECL_LANDED_MOVEMENT.LASTUPD ASC , TMP_ECL_LANDED_MOVEMENT.SSMVMNTNUM ASC , TMP_ECL_LANDED_MOVEMENT.MOVEMENTID ASC , TMP_ECL_LANDED_CLAIMLINESHARE.SCMTRANSID ASC , TMP_ECL_LANDED_CLAIMLINESHARE.PROCESSPERIOD ASC , TMP_ECL_LANDED_CLAIMLINESHARE.CLAIMLINESHAREID ASC 
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'yes', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '45', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Business_Name', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '85', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "ObjectDesc" = 'Assigns a movement_sequence number using a function call which is ordered by the sort in the previous transform
+', "Output_1st_Column_Name" = 'Description', "Output_2nd_Column_Name" = 'Type', "Output_3rd_Column_Name" = 'Mapping', "Output_Column_Name_4" = 'Business_Name', "Output_Column_Name_5" = 'Business_Name', "Output_Column_Width_4" = '120', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Name" = '279', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>72</X><Y>0</Y></LOCATION><SIZE><CX>469</CX><CY>-164</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-163</Y></LOCATION><SIZE><CX>524</CX><CY>227</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '55', "ui_acta_from_schema_0" = 'QRY_Eclipse_Source_Join', "ui_display_name" = 'QRY_Movement_Sequence', "x" = '1126', "y" = '-563')
+GUID::'4fe85ca4-0808-47f1-9a91-d648f0120d7b' CREATE VIEW QRY_Movement_Sequence( MOVEMENT_SEQUENCE INT  KEY  SET( "ui_mapping_text" = 'Fn_Inw_Claim_Movement_Sequence($P_Previous_Settlement_Currency,$P_Previous_ClaimLineID,$P_Previous_MovementID,QRY_Eclipse_Source_Join.SETTCCYISO,QRY_Eclipse_Source_Join.CLAIMLINEID,QRY_Eclipse_Source_Join.MOVEMENTID,QRY_Eclipse_Source_Join.Early_RI_IND,$P_Movement_Sequence)') ,
+ ORIGINAL_CLAIMLINESHAREID INT  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.ORIGINALCLAIMLINESHAREID') ,
+ CLAIMLINESHAREID INT  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.CLAIMLINESHAREID') ,
+ CLAIMLINEID INT  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.CLAIMLINEID') ,
+ MOVEMENTID INT  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.MOVEMENTID') ,
+ Trust_Fund_Code VARCHAR(4)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Trust_Fund_Code') ,
+ Risk_Code VARCHAR(2)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Risk_Code') ,
+ OSCCYISO VARCHAR(3)  SET( "ui_mapping_text" = 'ifthenelse(QRY_Eclipse_Source_Join.OSCCYISO = \'CCY\',\'GBP\', QRY_Eclipse_Source_Join.OSCCYISO)') ,
+ SETTCCYISO VARCHAR(3)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.SETTCCYISO') ,
+ PROCESSPERIOD VARCHAR(8)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.PROCESSPERIOD') ,
+ OUTW_POLICY_REF VARCHAR(50)  SET( "ui_mapping_text" = 'upper(QRY_Eclipse_Source_Join.OUTW_POLICY_REF)') ,
+ CLAIM_LINE_SHARE_LASTUPD DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.CLAIM_LINE_SHARE_LASTUPD') ,
+ MOVEMENT_INSDATE DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.MOVEMENT_INSDATE') ,
+ MOVEMENT_LASTUPD DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.MOVEMENT_LASTUPD') ,
+ Share_Original_Indem_Outstanding_AMT DECIMAL(21, 6)  SET( "Description" = 'This is only needed so that the merge can succeed', "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Original_Indem_Outstanding_AMT') ,
+ Share_Original_Fee_Outstanding_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Original_Fee_Outstanding_AMT') ,
+ Share_Original_Indem_Outstanding_Kiln_Addnl_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Original_Indem_Outstanding_Kiln_Addnl_AMT') ,
+ Share_Original_Indem_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "Description" = 'Needed for o/w IBNR', "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Original_Indem_Paid_This_Time_AMT') ,
+ Share_Original_Fee_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Original_Fee_Paid_This_Time_AMT') ,
+ Share_Original_Indem_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Original_Indem_Paid_To_Date_AMT') ,
+ Share_Original_Fee_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Original_Fee_Paid_To_Date_AMT') ,
+ Share_Settlement_Indem_Outstanding_Amt DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Settlement_Indem_Outstanding_Amt') ,
+ Share_Settlement_Fee_Outstanding_Amt DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Settlement_Fee_Outstanding_Amt') ,
+ Share_Settlement_Indem_Outstanding_Kiln_Addnl_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Settlement_Indem_Outstanding_Kiln_Addnl_AMT') ,
+ Share_Settlement_Indem_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Settlement_Indem_Paid_This_Time_AMT') ,
+ Share_Settlement_Fee_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Settlement_Fee_Paid_This_Time_AMT') ,
+ Share_Settlement_Indem_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Settlement_Indem_Paid_To_Date_AMT') ,
+ Share_Settlement_Fee_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Share_Settlement_Fee_Paid_To_Date_AMT') ,
+ Market_Original_Indem_Outstanding_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Original_Indem_Outstanding_AMT') ,
+ Market_Original_Fee_Outstanding_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Original_Fee_Outstanding_AMT') ,
+ Market_Original_Indem_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Original_Indem_Paid_This_Time_AMT') ,
+ Market_Original_Fee_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Original_Fee_Paid_This_Time_AMT') ,
+ Market_Original_Indem_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Original_Indem_Paid_To_Date_AMT') ,
+ Market_Original_Fee_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Original_Fee_Paid_To_Date_AMT') ,
+ Market_Settlement_Indem_Outstanding_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Settlement_Indem_Outstanding_AMT') ,
+ Market_Settlement_Fee_Outstanding_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Settlement_Fee_Outstanding_AMT') ,
+ Market_Settlement_Indem_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Settlement_Indem_Paid_This_Time_AMT') ,
+ Market_Settlement_Fee_Paid_This_Time_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Settlement_Fee_Paid_This_Time_AMT') ,
+ Market_Settlement_Indem_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Settlement_Indem_Paid_To_Date_AMT') ,
+ Market_Settlement_Fee_Paid_To_Date_AMT DECIMAL(21, 6)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Settlement_Fee_Paid_To_Date_AMT') ,
+ Market_Indem_Outstanding_TBA_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Indem_Outstanding_TBA') ,
+ Market_Fee_Outstanding_TBA_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Fee_Outstanding_TBA') ,
+ ROE_Original_To_Settlement_Paid_This_Time DECIMAL(15, 8)  SET( "Description" = 'Rate of Exchange for Paid This Time values from original to settlement', "ui_mapping_text" = 'QRY_Eclipse_Source_Join.ROE_Original_To_Settlement_Paid_This_Time') ,
+ ROE_Original_To_Settlement_Outstanding DECIMAL(15, 8)  SET( "Description" = 'Rate of Exchange for outstanding values from original to settlement', "ui_mapping_text" = 'QRY_Eclipse_Source_Join.ROE_Original_To_Settlement_Outstanding') ,
+ Movement_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Movement_DT') ,
+ Advised_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Advised_DT') ,
+ SSMVMNTNUM INT  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.SSMVMNTNUM') ,
+ SCMTRANSID INT  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.SCMTRANSID') ,
+ Manual_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Manual_IND') ,
+ Early_RI_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Early_RI_IND') ,
+ Year_of_Account INT  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Year_of_Account') ,
+ FIL_Code VARCHAR(4)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.FIL_Code') ,
+ FIL1_Code VARCHAR(4)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.FIL1_Code') ,
+ FIL2_Code VARCHAR(4)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.FIL2_Code') ,
+ Current_Narrative VARCHAR(105)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Current_Narrative') ,
+ Movement_Reference VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Movement_Reference') ,
+ Market_Outstanding_Qualifier VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Market_Outstanding_Qualifier') ,
+ Signing_DT DATETIME(9)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Signing_DT') ,
+ Signing_Number VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Signing_Number') ,
+ Signing_Version VARCHAR(50)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Signing_Version') ,
+ Is_Contra_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Is_Contra_IND') ,
+ Has_Contra_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Has_Contra_IND') ,
+ Is_Replacement_IND VARCHAR(1)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.Is_Replacement_IND') ,
+ GENERATED_IND VARCHAR(1)  SET( "ui_mapping_text" = '# Column added as part of ECLR-299
+QRY_Eclipse_Source_Join.GENERATED_IND') ,
+ MOVEMENT_TYPE_CODE VARCHAR(3)  SET( "ui_mapping_text" = 'QRY_Eclipse_Source_Join.MOVEMENTTYPE')  )
+ AS
+SELECT fn_inw_claim_movement_sequence($P_Previous_Settlement_Currency, $P_Previous_ClaimLineID, $P_Previous_MovementID, QRY_Eclipse_Source_Join.SETTCCYISO, QRY_Eclipse_Source_Join.CLAIMLINEID, QRY_Eclipse_Source_Join.MOVEMENTID, QRY_Eclipse_Source_Join.Early_RI_IND, $P_Movement_Sequence), QRY_Eclipse_Source_Join.ORIGINALCLAIMLINESHAREID, QRY_Eclipse_Source_Join.CLAIMLINESHAREID, QRY_Eclipse_Source_Join.CLAIMLINEID, QRY_Eclipse_Source_Join.MOVEMENTID, QRY_Eclipse_Source_Join.Trust_Fund_Code, QRY_Eclipse_Source_Join.Risk_Code, ifthenelse((QRY_Eclipse_Source_Join.OSCCYISO = 'CCY'), 'GBP', QRY_Eclipse_Source_Join.OSCCYISO), QRY_Eclipse_Source_Join.SETTCCYISO, QRY_Eclipse_Source_Join.PROCESSPERIOD, upper(QRY_Eclipse_Source_Join.OUTW_POLICY_REF), QRY_Eclipse_Source_Join.CLAIM_LINE_SHARE_LASTUPD, QRY_Eclipse_Source_Join.MOVEMENT_INSDATE, QRY_Eclipse_Source_Join.MOVEMENT_LASTUPD, QRY_Eclipse_Source_Join.Share_Original_Indem_Outstanding_AMT, QRY_Eclipse_Source_Join.Share_Original_Fee_Outstanding_AMT, QRY_Eclipse_Source_Join.Share_Original_Indem_Outstanding_Kiln_Addnl_AMT, QRY_Eclipse_Source_Join.Share_Original_Indem_Paid_This_Time_AMT, QRY_Eclipse_Source_Join.Share_Original_Fee_Paid_This_Time_AMT, QRY_Eclipse_Source_Join.Share_Original_Indem_Paid_To_Date_AMT, QRY_Eclipse_Source_Join.Share_Original_Fee_Paid_To_Date_AMT, QRY_Eclipse_Source_Join.Share_Settlement_Indem_Outstanding_Amt, QRY_Eclipse_Source_Join.Share_Settlement_Fee_Outstanding_Amt, QRY_Eclipse_Source_Join.Share_Settlement_Indem_Outstanding_Kiln_Addnl_AMT, QRY_Eclipse_Source_Join.Share_Settlement_Indem_Paid_This_Time_AMT, QRY_Eclipse_Source_Join.Share_Settlement_Fee_Paid_This_Time_AMT, QRY_Eclipse_Source_Join.Share_Settlement_Indem_Paid_To_Date_AMT, QRY_Eclipse_Source_Join.Share_Settlement_Fee_Paid_To_Date_AMT, QRY_Eclipse_Source_Join.Market_Original_Indem_Outstanding_AMT, QRY_Eclipse_Source_Join.Market_Original_Fee_Outstanding_AMT, QRY_Eclipse_Source_Join.Market_Original_Indem_Paid_This_Time_AMT, QRY_Eclipse_Source_Join.Market_Original_Fee_Paid_This_Time_AMT, QRY_Eclipse_Source_Join.Market_Original_Indem_Paid_To_Date_AMT, QRY_Eclipse_Source_Join.Market_Original_Fee_Paid_To_Date_AMT, QRY_Eclipse_Source_Join.Market_Settlement_Indem_Outstanding_AMT, QRY_Eclipse_Source_Join.Market_Settlement_Fee_Outstanding_AMT, QRY_Eclipse_Source_Join.Market_Settlement_Indem_Paid_This_Time_AMT, QRY_Eclipse_Source_Join.Market_Settlement_Fee_Paid_This_Time_AMT, QRY_Eclipse_Source_Join.Market_Settlement_Indem_Paid_To_Date_AMT, QRY_Eclipse_Source_Join.Market_Settlement_Fee_Paid_To_Date_AMT, QRY_Eclipse_Source_Join.Market_Indem_Outstanding_TBA, QRY_Eclipse_Source_Join.Market_Fee_Outstanding_TBA, QRY_Eclipse_Source_Join.ROE_Original_To_Settlement_Paid_This_Time, QRY_Eclipse_Source_Join.ROE_Original_To_Settlement_Outstanding, QRY_Eclipse_Source_Join.Movement_DT, QRY_Eclipse_Source_Join.Advised_DT, QRY_Eclipse_Source_Join.SSMVMNTNUM, QRY_Eclipse_Source_Join.SCMTRANSID, QRY_Eclipse_Source_Join.Manual_IND, QRY_Eclipse_Source_Join.Early_RI_IND, QRY_Eclipse_Source_Join.Year_of_Account, QRY_Eclipse_Source_Join.FIL_Code, QRY_Eclipse_Source_Join.FIL1_Code, QRY_Eclipse_Source_Join.FIL2_Code, QRY_Eclipse_Source_Join.Current_Narrative, QRY_Eclipse_Source_Join.Movement_Reference, QRY_Eclipse_Source_Join.Market_Outstanding_Qualifier, QRY_Eclipse_Source_Join.Signing_DT, QRY_Eclipse_Source_Join.Signing_Number, QRY_Eclipse_Source_Join.Signing_Version, QRY_Eclipse_Source_Join.Is_Contra_IND, QRY_Eclipse_Source_Join.Has_Contra_IND, QRY_Eclipse_Source_Join.Is_Replacement_IND, QRY_Eclipse_Source_Join.GENERATED_IND, QRY_Eclipse_Source_Join.MOVEMENTTYPE FROM QRY_Eclipse_Source_Join 
+SET("distinct_run_as_separate_process" = 'no', "group_by_run_as_separate_process" = 'no', "join_run_as_separate_process" = 'no', "order_by_run_as_separate_process" = 'no', "run_as_separate_process" = 'no')
+;
+
+ALGUIComment ("InputSchema_WidthProp" = '45', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Mapping', "Output_3rd_Column_Name" = 'Description', "Output_Column_Name_4" = 'Content_Type', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '100', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>869</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '55', "x" = '162', "y" = '-391')
+GUID::'ea815a4e-afcf-4c28-bd79-b8dced0ed96d' READ TABLE KDRStaging.DBO.TMP_ECL_LANDED_CLAIMLINESHARE OUTPUT(TMP_ECL_LANDED_CLAIMLINESHARE)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'yes', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'KDRStaging', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '45', "Input_1st_Column_Name" = 'Description', "Input_2nd_Column_Name" = 'Type', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Description', "Output_3rd_Column_Name" = 'Content_Type', "Output_Column_Name_4" = 'Description', "Output_Column_Name_5" = '', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '10', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Name" = '278', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>775</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UpperContainer_HeightProp" = '55', "x" = '166', "y" = '-879')
+GUID::'046ac02e-5b89-4230-9163-087f87572a4f' READ TABLE KDRStaging.DBO.TMP_ECL_LANDED_MOVEMENT OUTPUT(TMP_ECL_LANDED_MOVEMENT)
+SET("Initial_Load" = 'no', "array_fetch_size" = '1000', "cache" = 'yes', "connection_port" = 'no', "enable_partitioning" = 'no', "name" = 'KDRStaging', "package_size" = '0', "parallel_sap_connections" = '0', "reader_is_DB2CDC_table" = 'no', "reader_overflow_file" = 'overflow_file', "reader_template_table" = 'no', "reader_use_overflow_file" = 'no', "reader_use_trex_transaction" = 'no', "sap_odp_cwf_delay" = '5', "table_weight" = '0', "teradata_bulk_rdr_cleanup" = 'yes');
+
+ALGUIComment ("InputSchema_WidthProp" = '37', "Input_1st_Column_Name" = 'Type', "Input_2nd_Column_Name" = 'Description', "Input_Column_Name_3" = 'Content_Type', "Input_Column_Name_4" = 'Business_Name', "Input_Column_Width_3" = '100', "Input_Column_Width_4" = '100', "Input_Width_Description" = '130', "Input_Width_Name" = '302', "Input_Width_Type" = '85', "Output_1st_Column_Name" = 'Type', "Output_2nd_Column_Name" = 'Description', "Output_3rd_Column_Name" = 'Content_Type', "Output_Column_Name_4" = 'Description', "Output_Column_Name_5" = 'Description', "Output_Column_Width_4" = '100', "Output_Column_Width_5" = '10', "Output_Width_Decsription" = '130', "Output_Width_Mapping" = '85', "Output_Width_Name" = '389', "Output_Width_Type" = '80', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>878</CX><CY>-183</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-174</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "UI_PASSTHRU_VSPLIT_PCT" = '50', "UpperContainer_HeightProp" = '68', "x" = '1783', "y" = '-563')
+GUID::'4d4901c3-8d22-4def-be81-1e36e4e137f6' LOAD TABLE KDRStaging.DBO.WRK_ECL_INW_CLAIM_MOVEMENT INPUT(QRY_Movement_Sequence)
+SET("LDRLiveLoad" = 'no', "Table_Type" = 'TABLE', "connection_port" = 'no', "ldr_configuration_enabled" = 'yes', "ldr_configurations" = '<?xml version="1.0" encoding="UTF-8"?>
+<LDRConfigurations>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2016">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit></bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load>0</loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>no</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>replace</loader_load_choice>
+<loader_num_parallel_loaders>4</loader_num_parallel_loaders>
+<loader_overflow_file>KDRStaging_DBO_WRK_ECL_INW_CLAIM_MOVEMENT.txt</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>100000</loader_xact_size>
+<mssql_bulk_ldr_mode>truncate</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>4</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+<LDRConfiguration database_type="Microsoft_SQL_Server" database_version="Microsoft SQL Server 2008">
+<auto_correct_using_merge>yes</auto_correct_using_merge>
+<bulk_col_delimiter>/127</bulk_col_delimiter>
+<bulk_ldr_all_rows></bulk_ldr_all_rows>
+<bulk_ldr_cleanup>yes</bulk_ldr_cleanup>
+<bulk_ldr_max_errors></bulk_ldr_max_errors>
+<bulk_ldr_rows_per_commit>10000</bulk_ldr_rows_per_commit>
+<enable_partitioning>no</enable_partitioning>
+<ignore_column_case>yes</ignore_column_case>
+<ignore_columns_null>no</ignore_columns_null>
+<ignore_columns_value></ignore_columns_value>
+<loader_auto_correct>no</loader_auto_correct>
+<loader_bulk_load>1</loader_bulk_load>
+<loader_compare_column>compare_by_name</loader_compare_column>
+<loader_delete_map></loader_delete_map>
+<loader_drop_and_create_table>no</loader_drop_and_create_table>
+<loader_fl_object_name></loader_fl_object_name>
+<loader_insert_map></loader_insert_map>
+<loader_load_choice>append</loader_load_choice>
+<loader_num_parallel_loaders>1</loader_num_parallel_loaders>
+<loader_overflow_file>KDRStaging_DBO_WRK_ECL_INW_CLAIM_MOVEMENT.txt</loader_overflow_file>
+<loader_post_load1></loader_post_load1>
+<loader_pre_load1></loader_pre_load1>
+<loader_quote_names>0</loader_quote_names>
+<loader_transactional>no</loader_transactional>
+<loader_transactional_order>0</loader_transactional_order>
+<loader_update_key_columns>no</loader_update_key_columns>
+<loader_update_map></loader_update_map>
+<loader_use_user_defined_keys>no</loader_use_user_defined_keys>
+<loader_xact_size>1000</loader_xact_size>
+<mssql_bulk_ldr_mode>truncate</mssql_bulk_ldr_mode>
+<mssql_bulk_ldr_packet_size>4</mssql_bulk_ldr_packet_size>
+<mssql_ldr_identity_insert>off</mssql_ldr_identity_insert>
+<overflow_file_format>write_data</overflow_file_format>
+<overriding_substitution_parameter_for_tablename></overriding_substitution_parameter_for_tablename>
+<text_delimiter></text_delimiter>
+<use_overflow_file>no</use_overflow_file>
+<use_unicode_varchar>no</use_unicode_varchar>
+<sql_text></sql_text>
+</LDRConfiguration>
+</LDRConfigurations>', "loader_template_table" = 'no', "name" = 'KDRStaging', "use_unicode_varchar" = 'no');
+
+END
+ SET ("Audit" = '<Audit>
+
+<AuditObjects>
+
+</AuditObjects>
+
+<AuditRules>
+
+</AuditRules>
+
+<Notifications>
+
+<RaiseException Enabled="true">
+
+</RaiseException>
+
+<Mail Enabled="false"/>
+
+<Script Enabled="false"/>
+
+</Notifications>
+
+</Audit>', "Cache_type" = 'in_memory_cache', "Parallelism_degree" = '2', "allows_both_input_and_output" = 'yes', "dataflow_loader_bulk_load" = 'no', "dataflow_loader_commit_size" = 'default', "dataflow_loader_row_size_bytes" = '0', "dataflow_number_of_loaders" = '0', "run_once" = 'no', "use_dataflow_links" = 'no', "use_datastore_links" = 'yes', "validation_xform_exists" = 'no', "validation_xform_stats" = 'no')
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'10\', y = \'-1287\',ObjectDesc=\'Data Flow Name	:     WF_KDR_Build_BAS_Underwriting_Division
+Created By	:     Dinesh Vimal
+Date Created	:     22/01/2010
+Description	:     Load the BAS Underwriting Division reference data into the KDR BAS Underwriting Division table. Includes processing for Default Record processing and take the standard CDC RTL approach
+
+Modification History:
+================
+
+Version	 Date		By                	Description
+------------------------------------------------------------------------------------------------------------------------------------------
+1.000         22/01/2010	D Vimal		Initial Version\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-10</X><Y>1287</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>2437</CX><CY>622</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RDescription', "ActaName_2" = 'RSavedAfterCheckOut', "ActaName_3" = 'RDate_created', "ActaName_4" = 'RDate_modified', "ActaValue_1" = 'Build the BAS_Underwriting_Division table from reference data. Includes Default record processing', "ActaValue_2" = 'YES', "ActaValue_3" = 'Fri Jan 22 15:21:01 2010', "ActaValue_4" = 'Tue Jul 02 11:39:44 2013', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_KDR_Build_BAS_Underwriting_Division::'92d90126-6163-4ade-adf8-0eff8c7a6b47'( )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>422</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Pre_Build_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Attempting load of BAS_UNDERWRITING_DIVISION from MRD\');
+', "x" = '54', "y" = '-184')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Attempting load of BAS_UNDERWRITING_DIVISION from MRD');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>828</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '447', "y" = '-406')
+CALL DATAFLOW DF_KDR_Build_BAS_Underwriting_Division_Default::'c85d902e-25ed-4e35-8b76-7b688d075c2f'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>33</X><Y>0</Y></LOCATION><SIZE><CX>782</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-182</Y></LOCATION><SIZE><CX>359</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '820', "y" = '-634')
+CALL DATAFLOW DF_KDR_Build_RTL_BAS_Underwriting_Division::'bedbfdf3-24e9-4320-a33e-a66fc362c360'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>703</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>392</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1349', "y" = '-806')
+CALL DATAFLOW DF_KDR_Build_BAS_Underwriting_Division::'a04360fa-3a04-47c4-9002-ae531d1dd2a3'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>438</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Post_Build_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Completed load of BAS_UNDERWRITING_DIVISION from MRD\');
+', "x" = '1995', "y" = '-869')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Completed load of BAS_UNDERWRITING_DIVISION from MRD');END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no')
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'84\', y = \'-1340\',ObjectDesc=\'Data Flow Name	:     WF_KDR_Build_IBNR_Claims_Profile_Outw
+Created By	:     Steve Osmond
+Date Created	:     23/09/2009
+Description	:     Load the IBNR Claims Profile Outward data into the KDR Forecast_Outw_Claim_Profile_Loss_Ratio  table. 
+
+Modification History:
+================
+
+Version	 Date		By                	Description
+------------------------------------------------------------------------------------------------------------------------------------------
+1.000         23/09/2009	S Osmond	Initial Version\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-84</X><Y>1340</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>2331</CX><CY>766</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RDescription', "ActaName_2" = 'RSavedAfterCheckOut', "ActaName_3" = 'RDate_created', "ActaName_4" = 'RDate_modified', "ActaValue_1" = 'Build the Forecast_Outw_Claim_Profile_Loss_Ratio  table from reference data.', "ActaValue_2" = 'YES', "ActaValue_3" = 'Wed Sep 23 16:06:19 2009', "ActaValue_4" = 'Tue Jul 02 11:39:50 2013', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_KDR_Build_IBNR_Claims_Profile_Outw::'6ade7944-7ac7-47ba-8f47-b83224c970ff'( )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>375</CX><CY>-173</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Pre_Build_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Attempting load of FORECAST_OUTW_CLAIMS_PROFILE_LOSS_RATIO from MRD\');
+', "x" = '59', "y" = '-472')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Attempting load of FORECAST_OUTW_CLAIMS_PROFILE_LOSS_RATIO from MRD');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>145</X><Y>0</Y></LOCATION><SIZE><CX>625</CX><CY>-173</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-180</Y></LOCATION><SIZE><CX>389</CX><CY>263</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '396', "y" = '-472')
+CALL DATAFLOW DF_KDR_Build_RTL_IBNR_Claims_Profile_Outw::'926ebacf-942c-41b2-9ff1-a8cc9d5cfa0e'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>124</X><Y>0</Y></LOCATION><SIZE><CX>625</CX><CY>-173</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-180</Y></LOCATION><SIZE><CX>428</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1078', "y" = '-472')
+CALL DATAFLOW DF_KDR_Build_IBNR_Claims_Profile_Outw::'0857f2ec-5570-4270-b810-642c8d1fb269'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>391</CX><CY>-173</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Post_Build_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Completed load of FORECAST_OUTW_CLAIMS_PROFILE_LOSS_RATIO from MRD\');
+', "x" = '1874', "y" = '-473')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Completed load of FORECAST_OUTW_CLAIMS_PROFILE_LOSS_RATIO from MRD');END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no')
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'84\', y = \'-1340\',ObjectDesc=\'Data Flow Name	:     WF_KDR_Build_Target_ULR_Outw_Contract
+Created By	:     Steve Osmond
+Date Created	:     30/09/2009
+Description	:     Load the Forecast Target ULR Outw Contract data into the KDR Forecast_Target_ULR_Outw_Contract table
+
+Modification History:
+================
+
+Version	 Date		By                	Description
+------------------------------------------------------------------------------------------------------------------------------------------
+1.000         30/09/2009	S Osmond	Initial Version\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-84</X><Y>1340</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>2035</CX><CY>766</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RDescription', "ActaName_2" = 'RSavedAfterCheckOut', "ActaName_3" = 'RDate_created', "ActaName_4" = 'RDate_modified', "ActaValue_1" = 'Build the Forecast_Target_ULR_Outw_contract
+table from reference data.', "ActaValue_2" = 'YES', "ActaValue_3" = 'Wed Sep 30 14:23:20 2009', "ActaValue_4" = 'Tue Jul 09 09:21:07 2013', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_KDR_Build_Target_ULR_Outw_Contract::'26698af7-21d1-4d09-bf7d-7e67083ff53d'( )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>422</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Pre_Build_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Attempting load of FORECAST_TARGET_ULR_OUTW_CONTRACT from MRD\');
+', "x" = '59', "y" = '-472')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Attempting load of FORECAST_TARGET_ULR_OUTW_CONTRACT from MRD');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>116</X><Y>0</Y></LOCATION><SIZE><CX>794</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-180</Y></LOCATION><SIZE><CX>360</CX><CY>257</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '359', "y" = '-472')
+CALL DATAFLOW DF_KDR_Build_RTL_Target_ULR_Outw_Contract::'4d2be97f-c1c5-4ef6-816c-e4bde967fb64'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>38</X><Y>0</Y></LOCATION><SIZE><CX>716</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>313</CX><CY>232</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1084', "y" = '-472')
+CALL DATAFLOW DF_KDR_Build_Target_ULR_Outw_Contract::'e6ee6454-3c67-4314-8c16-459431d9a1f8'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>438</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Post_Build_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Completed load of FORECAST_TARGET_ULR_OUTW_CONTRACT from MRD\');
+', "x" = '1752', "y" = '-473')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Completed load of FORECAST_TARGET_ULR_OUTW_CONTRACT from MRD');END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no')
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'361\', y = \'-1766\',ObjectDesc=\'Workflow	: WF_KDR_Load_Oldest_Unloaded_Data
+
+======================================================================================
+Modification History
+======================================================================================
+
+V 1.0 09/07/2013 Chandrakanth N As part of batch improvement project  following changes were done 
+
+- Created WF named WF_KDR_BUILD_CONTRACT_DATA , which contains WF_KDR_Build_Inw_Contract_Data, WF_KDR_Build_Outw_Contract_Data these WF\\\'s are grouped to run in parallel , WF_KDR_Build_Inw_Contract_Data build data related to Inwards , WF_KDR_Build_Outw_Contract_Data build data related to Outwards 
+
+- DF_KDR_WRK_Inw_Contract_Risk_Code_Prep is now run prior to WF_KDR_BUILD_CONTRACT_DATA so as to enable parallelism between WF_KDR_Build_Inw_Contract_Data, WF_KDR_Build_Outw_Contract_Data
+
+- Created WF WF_KDR_Build_Transactions  which conatins WF_KDR_Build_Claim_Movement , WF_KDR_Build_USM_Transactions these are grouped to run in parallel 
+
+V1.1	14/08/2014	Soujanya B	EUI-ITEM-34: Added the workflow WF_KDR_Land_Eclipse_Policy.
+
+V1.2	25/05/2015	Aruna N		BAU-143: Added a new Workflow, WF_KDR_Build_Inw_To_Outw_Contract to load Inw_To_Outward_Contract for deriving the true inward to outward cession percentage for a given inward outward involvement.
+
+v 1.3        15/03/2017              Chandrakanth N        Added following  SCR_Set_Globals ,  WF_KDR_Land_GeneratedId , SCR_CleanUp_SplitData_From_LandedTables,  WF_KDR_Build_Transactions_GeneratedId ,  WF_KDR_Build_ClaimLine_Split ,  WF_KDR_Build_TmpTransaction_Split , WF_KDR_Build_Inw_Outw_Involvement_Split (inside  WF_KDR_Build_Inw_Outw_Involvement > WF_KDR_Build_Inw_Outw_Involvement_Prop) 
+
+v.1.4         29/03/207               Chandrakanth N         Updated SCR_CleanUp_SplitData_From_LandedTables script to delete Subpolicyline data from  inw_Outw_Involvement Tablle
+v.15          03/04/2017             Chandrakanth N         Updated  SCR_CleanUp_SplitData_From_LandedTables  script to use TMP_KDR_LANDED_MASTER_GENERATED_CLAIMLINESHAREID_MAPPING\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-361</X><Y>1766</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>3513</CX><CY>1390</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RDescription', "ActaName_2" = 'RSavedAfterCheckOut', "ActaName_3" = 'RDate_created', "ActaName_4" = 'RDate_modified', "ActaValue_1" = 'Load the KDR with the oldest unloaded data in the KDR.', "ActaValue_2" = 'YES', "ActaValue_3" = 'Wed Sep 02 17:02:04 2009', "ActaValue_4" = 'Mon Apr  6 02:17:18 2020', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_KDR_Load_Oldest_Unloaded_Data::'38be8772-eaae-4d2d-8629-03b96e8e1ef2'( )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>422</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Pre_Build_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Starting - Loading the KDR tables that source from Eclipse\');
+
+', "x" = '80', "y" = '-140')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Starting - Loading the KDR tables that source from Eclipse');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>319</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Set_Globals', "ui_script_text" = '# Set a global holding the repos ID of the market.
+# This global should be used as the Market_Repos_ID.
+$G_MARKET_REPOS_ID = NVL( SQL( \'KDR\',\'select Market_Repos_ID from dbo.Market_Lookup where Market = {$G_MARKET} and Current_IND = \\\'Y\\\' and Deleted_IND = \\\'N\\\'\'),0);
+
+# Set a global for the GMT timezone
+$G_TIMEZONE_REPOS_ID = NVL ( SQL( \'KDR\',\'select Timezone_Repos_ID from Timezone_Lookup where Timezone = \\\'GMT\\\' and Current_IND = \\\'Y\\\' and Deleted_IND = \\\'N\\\'\' ), 0 );
+
+# Set globals for contract record type repos ID for syndicate contracts
+$G_CONTRACT_RECORD_SYNDICATE_CONTRACT_REPOS_ID = NVL( sql(\'KDR\',\'select contract_record_type_repos_id from dbo.contract_record_type_lookup where contract_record_type = \\\'Syndicate Contract\\\' and current_ind = \\\'Y\\\' and deleted_ind = \\\'N\\\'\'), 0 );
+$G_CONTRACT_RECORD_SECTION_REPOS_ID = NVL( sql(\'KDR\',\'select contract_record_type_repos_id from dbo.contract_record_type_lookup where contract_record_type = \\\'Section\\\' and current_ind = \\\'Y\\\' and deleted_ind = \\\'N\\\'\'), 0 );
+$G_CONTRACT_RECORD_POLICY_REPOS_ID = NVL( sql(\'KDR\',\'select contract_record_type_repos_id from dbo.contract_record_type_lookup where contract_record_type = \\\'Policy\\\' and current_ind = \\\'Y\\\' and deleted_ind = \\\'N\\\'\'), 0 );
+$G_CONTRACT_RECORD_DEC_REPOS_ID = NVL( sql(\'KDR\',\'select contract_record_type_repos_id from dbo.contract_record_type_lookup where contract_record_type = \\\'Declaration\\\' and current_ind = \\\'Y\\\' and deleted_ind = \\\'N\\\'\'), 0 );
+$G_CONTRACT_RECORD_LAYER_REPOS_ID = NVL( sql(\'KDR\',\'select contract_record_type_repos_id from dbo.contract_record_type_lookup where contract_record_type = \\\'Layer\\\' and current_ind = \\\'Y\\\' and deleted_ind = \\\'N\\\'\'), 0 );
+
+
+# FORE-353 - establish Early RI Switch period
+$G_PERIOD_EARLY_RI_SWITCH_DT = NVL( sql( \'KDR\', \'select Period_End_DT from dbo.Period_Lookup where Period_Type = \\\'MONTH\\\' and Period_Early_RI_Switch=\\\'Y\\\'\' ), $G_START_OF_TIME );
+if ($G_PERIOD_EARLY_RI_SWITCH_DT > $G_START_OF_TIME)
+	load_message($G_LOAD_ID,\'Early RI Switch Date set to [$G_PERIOD_EARLY_RI_SWITCH_DT]\');
+else
+	load_message($G_LOAD_ID,\'Early RI Switch Date not defined in Period_Lookup, therefore defaulting to [$G_PERIOD_EARLY_RI_SWITCH_DT]\');
+
+', "x" = '581', "y" = '-1')
+BEGIN_SCRIPT
+$G_MARKET_REPOS_ID = nvl(sql('KDR', 'select Market_Repos_ID from dbo.Market_Lookup where Market = {$G_MARKET} and Current_IND = \'Y\' and Deleted_IND = \'N\''), 0);$G_TIMEZONE_REPOS_ID = nvl(sql('KDR', 'select Timezone_Repos_ID from Timezone_Lookup where Timezone = \'GMT\' and Current_IND = \'Y\' and Deleted_IND = \'N\''), 0);$G_CONTRACT_RECORD_SYNDICATE_CONTRACT_REPOS_ID = nvl(sql('KDR', 'select contract_record_type_repos_id from dbo.contract_record_type_lookup where contract_record_type = \'Syndicate Contract\' and current_ind = \'Y\' and deleted_ind = \'N\''), 0);$G_CONTRACT_RECORD_SECTION_REPOS_ID = nvl(sql('KDR', 'select contract_record_type_repos_id from dbo.contract_record_type_lookup where contract_record_type = \'Section\' and current_ind = \'Y\' and deleted_ind = \'N\''), 0);$G_CONTRACT_RECORD_POLICY_REPOS_ID = nvl(sql('KDR', 'select contract_record_type_repos_id from dbo.contract_record_type_lookup where contract_record_type = \'Policy\' and current_ind = \'Y\' and deleted_ind = \'N\''), 0);$G_CONTRACT_RECORD_DEC_REPOS_ID = nvl(sql('KDR', 'select contract_record_type_repos_id from dbo.contract_record_type_lookup where contract_record_type = \'Declaration\' and current_ind = \'Y\' and deleted_ind = \'N\''), 0);$G_CONTRACT_RECORD_LAYER_REPOS_ID = nvl(sql('KDR', 'select contract_record_type_repos_id from dbo.contract_record_type_lookup where contract_record_type = \'Layer\' and current_ind = \'Y\' and deleted_ind = \'N\''), 0);$G_PERIOD_EARLY_RI_SWITCH_DT = nvl(sql('KDR', 'select Period_End_DT from dbo.Period_Lookup where Period_Type = \'MONTH\' and Period_Early_RI_Switch=\'Y\''), $G_START_OF_TIME);IF (($G_PERIOD_EARLY_RI_SWITCH_DT > $G_START_OF_TIME) )
+load_message($G_LOAD_ID, 'Early RI Switch Date set to [$G_PERIOD_EARLY_RI_SWITCH_DT]');ELSE
+load_message($G_LOAD_ID, 'Early RI Switch Date not defined in Period_Lookup, therefore defaulting to [$G_PERIOD_EARLY_RI_SWITCH_DT]');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>485</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '905', "y" = '-130')
+CALL PLAN WF_KDR_Land_GeneratedId::'3dfe4dbd-33c2-4611-ac82-9aa150de355c'();
+ AlGUIComment ("ObjectDesc" = 'Added as part of AMWINS project to clean-up landed tables if they already have split data populated due to previous Job-11 faliure', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>738</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_CleanUp_SplitData_From_LandedTables', "ui_script_text" = '######################################################################################################################################
+# Script Name:	SCR_CleanUp_SplitData_From_LandedTables
+# Created by:	Surya Immadi
+# Date Created:	02/04/2017
+# Description:	Added as part of 3PCR project to clean-up landed tables if they already have split data populated due to previous Job-11 faliure
+#
+# Modification Log
+# ===============================
+# Date				By				Description
+# 02/04/2017	Surya Immadi		Initial
+
+######################################################################################################################################
+
+sql(\'KDRStaging\',\'delete s from TMP_ECL_LANDED_POLICYLINE s where exists ( select 1 from  TMP_MRD_CONTRACT_SPLIT_GENERATED_POLICYLINEID lkp where LKP.GENERATED_POLICYLINE_ID  = s.POLICYLINEID)\');
+
+# Added as part of 3PCR project to clean-up landed tables if they already have split data populated due to previous Job-11 faliure
+sql(\'KDRStaging\',\'delete s from TMP_ECL_LANDED_CLAIMLINE s where exists ( select 1 from  TMP_KDR_LANDED_MASTER_GENERATED_CLAIMLINEID_MAPPING lkp where lkp.Generated_ClaimLineId = s.CLAIMLINEID)\');
+
+#modified on 03/04/2017 to use TMP_KDR_LANDED_MASTER_GENERATED_CLAIMLINESHAREID_MAPPING instead of TMP_KDR_LANDED_MASTER_GENERATED_MOVEMENTID_MAPPING
+sql(\'KDRStaging\',\'delete s from TMP_ECL_LANDED_CLAIMLINESHARE s where exists ( select 1 from  TMP_KDR_LANDED_MASTER_GENERATED_CLAIMLINESHAREID_MAPPING lkp where lkp.Generated_ClaimLineShareId = s.CLAIMLINESHAREID)\');
+
+#not required as we are not loading TMP_KDR_LANDED_MASTER_GENERATED_MOVEMENTID_MAPPING
+#sql(\'KDRStaging\',\'delete s from TMP_ECL_LANDED_MOVEMENT s where exists ( select 1 from  TMP_KDR_LANDED_MASTER_GENERATED_MOVEMENTID_MAPPING lkp where lkp.Generated_MovementId = s.MOVEMENTID)\');
+
+sql(\'KDRStaging\',\'delete s from TMP_ECL_LANDED_USMSIGNINGTRANS s where exists ( select 1 from  TMP_KDR_LANDED_MASTER_GENERATED_USMSIGNINGTRANSID_MAPPING lkp where lkp.Generated_USMsigningTransId = s.USMSIGNINGTRANSID)\');
+
+sql(\'KDR\',\'delete s from INW_OUTW_INVOLVEMENT s where s.Inw_Outw_Involvement_Repos_ID < 0 \');', "x" = '1587', "y" = '-2')
+BEGIN_SCRIPT
+sql('KDRStaging', 'delete s from TMP_ECL_LANDED_POLICYLINE s where exists ( select 1 from  TMP_MRD_CONTRACT_SPLIT_GENERATED_POLICYLINEID lkp where LKP.GENERATED_POLICYLINE_ID  = s.POLICYLINEID)');sql('KDRStaging', 'delete s from TMP_ECL_LANDED_CLAIMLINE s where exists ( select 1 from  TMP_KDR_LANDED_MASTER_GENERATED_CLAIMLINEID_MAPPING lkp where lkp.Generated_ClaimLineId = s.CLAIMLINEID)');sql('KDRStaging', 'delete s from TMP_ECL_LANDED_CLAIMLINESHARE s where exists ( select 1 from  TMP_KDR_LANDED_MASTER_GENERATED_CLAIMLINESHAREID_MAPPING lkp where lkp.Generated_ClaimLineShareId = s.CLAIMLINESHAREID)');sql('KDRStaging', 'delete s from TMP_ECL_LANDED_USMSIGNINGTRANS s where exists ( select 1 from  TMP_KDR_LANDED_MASTER_GENERATED_USMSIGNINGTRANSID_MAPPING lkp where lkp.Generated_USMsigningTransId = s.USMSIGNINGTRANSID)');sql('KDR', 'delete s from INW_OUTW_INVOLVEMENT s where s.Inw_Outw_Involvement_Repos_ID < 0 ');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>697</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1928', "y" = '-296')
+CALL PLAN WF_KDR_Build_Transactions_GeneratedId::'2fb71b75-0032-4a72-ae13-2d767f2b9e6e'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>519</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '2522', "y" = '-2')
+CALL PLAN WF_KDR_Build_ClaimLine_Split::'e3ef273c-5f46-49a1-b67a-2f06b8093aaa'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>71</X><Y>0</Y></LOCATION><SIZE><CX>760</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-193</Y></LOCATION><SIZE><CX>243</CX><CY>103</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '3203', "y" = '-279')
+CALL DATAFLOW DF_KDR_WRK_Inw_Contract_Risk_Code_Prep::'eb450370-fffc-442e-a690-d16a8098befd'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>513</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>7</X><Y>-213</Y></LOCATION><SIZE><CX>200</CX><CY>109</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '4126', "y" = '-173')
+CALL PLAN WF_KDR_Land_Eclipse_Policy::'3bb6d3ad-4ed4-49e8-b88c-6ec6df55f769'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>600</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>266</X><Y>-131</Y></LOCATION><SIZE><CX>700</CX><CY>100</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '4730', "y" = '-175')
+CALL PLAN WF_KDR_BUILD_CONTRACT_DATA::'706f2b06-5c85-414e-b151-3d452395e577'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>603</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '217', "y" = '-538')
+CALL PLAN WF_KDR_WRK_Inw_Contract_3PCR::'64edf3b4-f19d-413d-a387-e193780f6585'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>140</X><Y>0</Y></LOCATION><SIZE><CX>653</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-191</Y></LOCATION><SIZE><CX>320</CX><CY>221</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '385', "y" = '-834')
+CALL PLAN WF_KDR_Build_Inw_Outw_Involvement::'b7d3f9ab-4fde-4459-aa42-de821638feff'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>660</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1020', "y" = '-856')
+CALL PLAN WF_KDR_Build_Inw_To_Outw_Contract::'325a655a-0503-44c6-a7fb-f58f9eeb6b6f'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>619</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1885', "y" = '-853')
+CALL PLAN WF_KDR_Build_TmpTransaction_Split::'d8be9242-cfdf-4c2b-9773-40f152bc2f02'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>494</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>574</CX><CY>152</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '2702', "y" = '-861')
+CALL PLAN WF_KDR_Build_Transactions::'371292d6-7fe7-4b8b-8924-bb595f182b20'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>53</X><Y>0</Y></LOCATION><SIZE><CX>507</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-191</Y></LOCATION><SIZE><CX>430</CX><CY>270</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '437', "y" = '-1454')
+CALL PLAN WF_KDR_Build_Outw_Advice::'576dd06e-1163-45fe-9067-a8ee139cd4b4'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>438</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Post_Build_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Completed - Loading the KDR tables that source from Eclipse\');
+', "x" = '1836', "y" = '-1453')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Completed - Loading the KDR tables that source from Eclipse');END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no', "workflow_type" = 'Regular')
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'1013\', y = \'-1319\',ObjectDesc=\'V1.0 09/07/2013 Chandrakanth N Grouped the following work flows to run in parallel \',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-1013</X><Y>1319</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>1334</CX><CY>147</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RSavedAfterCheckOut', "ActaName_2" = 'RDate_created', "ActaName_3" = 'RDate_modified', "ActaName_4" = 'RDescription', "ActaValue_1" = 'YES', "ActaValue_2" = 'Tue Jul 09 12:44:28 2013', "ActaValue_3" = 'Tue Jul 09 14:59:37 2013', "ActaValue_4" = 'Added this WF as part of Batch Improvement project , this groups existing WF\'s that can be run in parallel', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_KDR_Load_SecondaryRef_Parallel::'75ba3328-5138-4f1d-9c06-d6ba9063f153'( )
+BEGIN
+PARALLEL
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>474</X><Y>0</Y></LOCATION><SIZE><CX>869</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-181</Y></LOCATION><SIZE><CX>646</CX><CY>165</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1090', "y" = '-227')
+CALL PLAN WF_KDR_Secondary_Refresh_KDR_From_Reference::'06862c4e-afef-40a5-953c-51befbcbcc7b'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>194</X><Y>0</Y></LOCATION><SIZE><CX>575</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-185</Y></LOCATION><SIZE><CX>549</CX><CY>172</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1332', "y" = '-755')
+CALL PLAN WF_KDR_Prepare_For_Next_Load::'cb540419-2aa5-43ae-9995-90ae914f07e3'();
+END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no')
+ AlGUIComment ("ActaName_1" = 'RDescription', "ActaName_2" = 'RSavedAfterCheckOut', "ActaName_3" = 'RDate_created', "ActaName_4" = 'RDate_modified', "ActaValue_1" = 'Copy the natural keys for each unloaded Eclipse table to the _PreviousKey_ staging tables ready for the detection of deletes in the next load.', "ActaValue_2" = 'YES', "ActaValue_3" = 'Wed Sep 02 17:02:04 2009', "ActaValue_4" = 'Tue Jul 02 11:39:50 2013', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_KDR_Prepare_For_Next_Load::'cb540419-2aa5-43ae-9995-90ae914f07e3'( )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>238</CX><CY>-173</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_PreLoad', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Copying the natural keys for each unload Eclipse table to the _PreviousKey_ staging tables\');
+
+', "x" = '185', "y" = '-250')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Copying the natural keys for each unload Eclipse table to the _PreviousKey_ staging tables');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>165</X><Y>0</Y></LOCATION><SIZE><CX>503</CX><CY>-173</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>562</CX><CY>178</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '607', "y" = '-251')
+CALL DATAFLOW DF_KDR_Prepare_For_Next_Load::'c5fad943-aaec-4bdb-b13e-07f339b34888'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>253</CX><CY>-173</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_PostLoad', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'End of _PreviousKey_ Copy\');
+', "x" = '1383', "y" = '-251')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'End of _PreviousKey_ Copy');END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no')
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'1577\', y = \'-837\',ObjectDesc=\'V 1.0 Chandrakanth N 02/07/2013  As part of batch improvement project  added Workflow WF_KDR_Refresh_KDR_From_Reference_Parallel which would encapsulate list of WF\\\'s that can be run in parallel\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-1577</X><Y>837</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>1460</CX><CY>216</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RDescription', "ActaName_2" = 'RSavedAfterCheckOut', "ActaName_3" = 'RDate_created', "ActaName_4" = 'RDate_modified', "ActaValue_1" = 'Process the latest reference data into the KDR', "ActaValue_2" = 'YES', "ActaValue_3" = 'Fri Sep 04 14:45:58 2009', "ActaValue_4" = 'Tue May 05 15:31:42 2015', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_KDR_Refresh_KDR_From_Reference::'93dca3e7-5b9c-431a-8b2e-7d2e06e5907b'( )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>422</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Pre_Build_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Starting - Refreshing the KDR tables that source from MRD\');
+', "x" = '138', "y" = '-311')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Starting - Refreshing the KDR tables that source from MRD');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>308</X><Y>0</Y></LOCATION><SIZE><CX>494</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-177</Y></LOCATION><SIZE><CX>487</CX><CY>145</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '472', "y" = '-312')
+CALL PLAN WF_KDR_Build_Data_Source::'26f2ffdd-2946-4b67-aa7b-2bd1f6e9129c'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>491</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-187</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Set_MRD_Data_Source', "ui_script_text" = '# Set a global holding the repos ID of the MasterReferenceData data source.
+# This global should be used as the Data_Source_Repos_ID of each lookup table sourced from the MRD.
+$G_KDR_MRD_DATA_SOURCE_REPOS_ID = NVL( SQL( \'KDR\',\'select Data_Source_Repos_ID from dbo.Data_Source_Lookup where Data_Source = \\\'MasterReferenceData\\\' and Current_IND = \\\'Y\\\' and Deleted_IND = \\\'N\\\'\'),0);
+
+# Set a global holding the repos ID of the Eclipse data source.
+$G_KDR_ECLIPSE_DATA_SOURCE_REPOS_ID = NVL( SQL( \'KDR\',\'select Data_Source_Repos_ID from dbo.Data_Source_Lookup where Data_Source = \\\'Eclipse\\\' and Current_IND = \\\'Y\\\' and Deleted_IND = \\\'N\\\'\'),0);
+
+# Set a global holding the repos ID of the Generated data source.
+$G_GENERATED_DATA_SOURCE_REPOS_ID = NVL( SQL( \'KDR\',\'select Data_Source_Repos_ID from dbo.Data_Source_Lookup where Data_Source = \\\'Generated\\\' and Current_IND = \\\'Y\\\' and Deleted_IND = \\\'N\\\'\'),0);
+
+#Global variable to set CBS data source repos id from Data Source table.
+$G_CBS_DATA_SOURCE_REPOS_ID = NVL( sql(\'KDR\',\'Select Data_Source_Repos_ID from dbo.Data_Source_Lookup where Data_Source = \\\'CBS\\\' and Data_Source_DESC = \\\'Core Business System\\\'\'), 0 );
+
+# Set a variable with the key value of the MetaData source. As Part of CA-13
+# This is used as the value for Ref_Data_Source_1_Key in tables populated by spreadsheets.
+# This saves having to do many lookup_ext() calls for the same value.
+$G_METADATA_SOURCE_KEY = NVL( SQL( \'MRD\',\'select Ref_Data_Source_Key from DBO.Ref_Data_Source where Ref_Data_Source = \\\'MetaData\\\'\'),0);
+
+', "x" = '1420', "y" = '-312')
+BEGIN_SCRIPT
+$G_KDR_MRD_DATA_SOURCE_REPOS_ID = nvl(sql('KDR', 'select Data_Source_Repos_ID from dbo.Data_Source_Lookup where Data_Source = \'MasterReferenceData\' and Current_IND = \'Y\' and Deleted_IND = \'N\''), 0);$G_KDR_ECLIPSE_DATA_SOURCE_REPOS_ID = nvl(sql('KDR', 'select Data_Source_Repos_ID from dbo.Data_Source_Lookup where Data_Source = \'Eclipse\' and Current_IND = \'Y\' and Deleted_IND = \'N\''), 0);$G_GENERATED_DATA_SOURCE_REPOS_ID = nvl(sql('KDR', 'select Data_Source_Repos_ID from dbo.Data_Source_Lookup where Data_Source = \'Generated\' and Current_IND = \'Y\' and Deleted_IND = \'N\''), 0);$G_CBS_DATA_SOURCE_REPOS_ID = nvl(sql('KDR', 'Select Data_Source_Repos_ID from dbo.Data_Source_Lookup where Data_Source = \'CBS\' and Data_Source_DESC = \'Core Business System\''), 0);$G_METADATA_SOURCE_KEY = nvl(sql('MRD', 'select Ref_Data_Source_Key from DBO.Ref_Data_Source where Ref_Data_Source = \'MetaData\''), 0);END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>87</X><Y>0</Y></LOCATION><SIZE><CX>397</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-189</Y></LOCATION><SIZE><CX>378</CX><CY>176</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '2000', "y" = '-311')
+CALL PLAN WF_KDR_Build_Market::'36924200-3d10-46b4-b083-2b6f484529a6'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>469</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-191</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Set_Market_Repos_ID', "ui_script_text" = '# Set a global holding the repos ID of the market.
+# This global should be used as the Market_Repos_ID.
+$G_MARKET_REPOS_ID = NVL( SQL( \'KDR\',\'select Market_Repos_ID from dbo.Market_Lookup where Market = {$G_MARKET} and Current_IND = \\\'Y\\\' and Deleted_IND = \\\'N\\\'\'),0);
+
+', "x" = '2653', "y" = '-316')
+BEGIN_SCRIPT
+$G_MARKET_REPOS_ID = nvl(sql('KDR', 'select Market_Repos_ID from dbo.Market_Lookup where Market = {$G_MARKET} and Current_IND = \'Y\' and Deleted_IND = \'N\''), 0);END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>810</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "x" = '3222', "y" = '-318')
+CALL PLAN WF_KDR_Refresh_KDR_From_Reference_Parallel::'0f66c539-7ee9-4eac-8450-2f1919b837d7'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>438</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Post_Build_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Completed - Refreshing the KDR tables that source from MRD\');
+', "x" = '4249', "y" = '-318')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Completed - Refreshing the KDR tables that source from MRD');END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no', "workflow_type" = 'Regular')
+ AlGUIComment ("ActaName_1" = 'RSavedAfterCheckOut', "ActaName_2" = 'RDate_created', "ActaName_3" = 'RDate_modified', "ActaName_4" = 'RDescription', "ActaValue_1" = 'YES', "ActaValue_2" = 'Fri Jan 27 14:40:16 2012', "ActaValue_3" = 'Wed Jul 10 10:32:00 2013', "ActaValue_4" = 'This Workflow is used to send exception reports for USM Durg Allocation Exceptions to the recipients declared in the Global variable \'$G_NOTIFICATION_EMAIL_RECIPIENT\'', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_KDR_Report_Exceptions::'d07b8cf6-6132-4b70-809d-039a4cf18940'( )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>482</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Report_Exceptions_Init', "ui_script_text" = '
+
+Load_Message( $G_LOAD_ID, \'Start processes for exception reporting.\');', "x" = '294', "y" = '-237')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Start processes for exception reporting.');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>688</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "x" = '911', "y" = '-441')
+CALL PLAN WF_KDR_Report_Exceptions_USM_DURG::'a2580902-e1df-4de4-83fd-c73bf35fdaf8'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>497</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Report_Exceptions_End', "ui_script_text" = '
+
+Load_Message( $G_LOAD_ID, \'End of processing for exception reporting.\');', "x" = '1569', "y" = '-662')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'End of processing for exception reporting.');END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no')
+ AlGUIComment ("ActaName_1" = 'RDescription', "ActaName_2" = 'RSavedAfterCheckOut', "ActaName_3" = 'RDate_created', "ActaName_4" = 'RDate_modified', "ActaValue_1" = 'Process reference data items that are dependant on non reference data KDR items. These are mainly Forecast related tables that rely on latest contract information', "ActaValue_2" = 'YES', "ActaValue_3" = 'Thu Sep 24 09:26:39 2009', "ActaValue_4" = 'Tue Jul 09 09:21:07 2013', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_KDR_Secondary_Refresh_KDR_From_Reference::'06862c4e-afef-40a5-953c-51befbcbcc7b'( )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>422</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Pre_Build_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Starting - Secondary Refresh of the KDR tables that source from MRD\');
+
+# Set a global holding the repos ID of the MasterReferenceData data source.
+# This global should be used as the Data_Source_Repos_ID of each lookup table sourced from the MRD.
+# This has already been set earlier but it reloads it here to allow this workflow to be execute in isolation if required.
+$G_KDR_MRD_DATA_SOURCE_REPOS_ID = nvl( SQL( \'KDR\',\'select Data_Source_Repos_ID from dbo.Data_Source_Lookup where Data_Source = \\\'MasterReferenceData\\\' and Current_IND = \\\'Y\\\' and Deleted_IND = \\\'N\\\'\'),0);', "x" = '26', "y" = '-356')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Starting - Secondary Refresh of the KDR tables that source from MRD');$G_KDR_MRD_DATA_SOURCE_REPOS_ID = nvl(sql('KDR', 'select Data_Source_Repos_ID from dbo.Data_Source_Lookup where Data_Source = \'MasterReferenceData\' and Current_IND = \'Y\' and Deleted_IND = \'N\''), 0);END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>56</X><Y>0</Y></LOCATION><SIZE><CX>700</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-186</Y></LOCATION><SIZE><CX>322</CX><CY>214</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '404', "y" = '-356')
+CALL PLAN WF_KDR_Build_IBNR_Claims_Profile_Outw::'6ade7944-7ac7-47ba-8f47-b83224c970ff'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>50</X><Y>0</Y></LOCATION><SIZE><CX>725</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-180</Y></LOCATION><SIZE><CX>294</CX><CY>216</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1066', "y" = '-357')
+CALL PLAN WF_KDR_Build_Target_ULR_Outw_Contract::'26698af7-21d1-4d09-bf7d-7e67083ff53d'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>438</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Post_Build_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Completed - Secondary Refresh of the KDR tables that source from MRD\');
+', "x" = '1864', "y" = '-356')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Completed - Secondary Refresh of the KDR tables that source from MRD');END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no')
+ AlGUIComment ("ActaName_1" = 'RSavedAfterCheckOut', "ActaName_2" = 'RDate_created', "ActaName_3" = 'RDate_modified', "ActaValue_1" = 'YES', "ActaValue_2" = 'Tue Apr  7 21:35:29 2020', "ActaValue_3" = 'Thu Apr  9 20:52:32 2020', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_Load_KDR::'19b17c28-96bc-4ec5-a86f-9796277e47a0'( )
+BEGIN
+PARALLEL
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>403</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "x" = '727', "y" = '-334')
+CALL PLAN WF_Load_KDR_Master::'0354a38c-d9b5-49a5-aca1-50152a847dd4'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>653</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "x" = '888', "y" = '-738')
+CALL PLAN WF_Preload_Wrk_inw_claim_movement::'0280e3ce-7dd6-44d4-8d09-abe814ccbed8'();
+END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no', "workflow_type" = 'Regular')
+ AlGUIComment ("ActaName_1" = 'RSavedAfterCheckOut', "ActaName_2" = 'RDate_created', "ActaValue_1" = 'YES', "ActaValue_2" = 'Tue Apr  7 20:59:19 2020', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_Load_KDR_Master::'0354a38c-d9b5-49a5-aca1-50152a847dd4'( )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>94</X><Y>0</Y></LOCATION><SIZE><CX>685</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-181</Y></LOCATION><SIZE><CX>407</CX><CY>102</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '143', "y" = '-265')
+CALL PLAN WF_KDR_Refresh_KDR_From_Reference::'93dca3e7-5b9c-431a-8b2e-7d2e06e5907b'();
+ AlGUIComment ("If_condition" = '$G_KDR_BINDER_LOAD = \'Y\'', "ObjectDesc" = 'Loads BAS_Underwriting_Dvision if $G_KDR_BINDER_LOAD is set to \'Y\'', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>328</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>272</X><Y>-61</Y></LOCATION><SIZE><CX>660</CX><CY>104</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'CND_Binder_Load', "x" = '812', "y" = '-392')
+IF (($G_KDR_BINDER_LOAD = 'Y') )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>713</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1203', "y" = '-387')
+CALL PLAN WF_KDR_Build_BAS_Underwriting_Division::'92d90126-6163-4ade-adf8-0eff8c7a6b47'();
+END
+ AlGUIComment ("If_condition" = '$G_MAIN_KDR_TABLE_LOAD=\'Y\'', "ObjectDesc" = 'Loads Main KDR tables', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>156</X><Y>0</Y></LOCATION><SIZE><CX>385</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-186</Y></LOCATION><SIZE><CX>200</CX><CY>75</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'CND_Main_KDR_Load', "x" = '1412', "y" = '-669')
+IF (($G_MAIN_KDR_TABLE_LOAD = 'Y') )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>332</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Pre_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Processing main KDR tables build started\');', "x" = '150', "y" = '-416')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Processing main KDR tables build started');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>63</X><Y>0</Y></LOCATION><SIZE><CX>644</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>304</CX><CY>140</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '497', "y" = '-421')
+CALL PLAN WF_KDR_Load_Oldest_Unloaded_Data::'38be8772-eaae-4d2d-8629-03b96e8e1ef2'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>644</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>619</CX><CY>407</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1250', "y" = '-419')
+CALL PLAN WF_KDR_Load_SecondaryRef_Parallel::'75ba3328-5138-4f1d-9c06-d6ba9063f153'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>491</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1951', "y" = '-421')
+CALL PLAN WF_KDR_Report_Exceptions::'d07b8cf6-6132-4b70-809d-039a4cf18940'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>347</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Post_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Processing main KDR tables build completed\');', "x" = '2593', "y" = '-420')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Processing main KDR tables build completed');END
+END
+ELSE
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>216</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Exit', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'$G_KDR_LOAD is set to N - KDR data load skipped\');
+', "x" = '898', "y" = '-421')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, '$G_KDR_LOAD is set to N - KDR data load skipped');END
+END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no', "workflow_type" = 'Regular')
+ AlGUIComment ("ActaName_1" = 'RSavedAfterCheckOut', "ActaName_2" = 'RDate_created', "ActaName_3" = 'RDate_modified', "ActaName_4" = 'RDescription', "ActaValue_1" = 'YES', "ActaValue_2" = 'Tue Apr  7 21:36:08 2020', "ActaValue_3" = 'Tue Apr  7 22:40:48 2020', "ActaValue_4" = 'Workflow to build Inw_Claim_Movement and Inw_Ceded_Claim_Movement. Dependant on inw & outw contract repos_ids', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_Preload_Wrk_inw_claim_movement::'0280e3ce-7dd6-44d4-8d09-abe814ccbed8'( )
+DECLARE
+     $WF_Movement_Sequence INT ;
+     $WF_Previous_Settlement_Currency VARCHAR(50) ;
+     $WF_Previous_ClaimLineID INT ;
+     $WF_Current_Settlement_Currency VARCHAR(50) ;
+     $WF_Current_ClaimLineID INT ;
+     $WF_Previous_MovementID INT ;
+     $WF_Current_MovementID INT ;
+     $WF_EarlyRIIND VARCHAR(1) ;
+BEGIN
+ AlGUIComment ("ParmDefaulted_01" = 'FALSE', "ParmDefaulted_02" = 'FALSE', "ParmDefaulted_03" = 'FALSE', "ParmDefaulted_04" = 'FALSE', "ParmDefaulted_05" = 'FALSE', "ParmDefaulted_06" = 'FALSE', "ParmDefaulted_07" = 'FALSE', "ParmDefaulted_08" = 'FALSE', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>713</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '358', "y" = '-269')
+CALL DATAFLOW DF_KDR_WRK_Inw_Claim_Movement_Part1::'34d2aef5-0567-468c-9c11-bbbb8ba1dc5b'($WF_Movement_Sequence, $WF_Previous_Settlement_Currency, $WF_Previous_ClaimLineID, $WF_Current_Settlement_Currency, $WF_Current_ClaimLineID, $WF_Previous_MovementID, $WF_Current_MovementID, $WF_EarlyRIIND);
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>253</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'Script559398', "ui_script_text" = '
+
+$G_SYSDATE = to_date(sql(\'KDR\',\'select getdate()\'),\'YYYY-MM-DD HH24:MI:SS.FF\');
+
+$G_PRELOAD_CLAIMMOVEMENT_DONE = 1;
+', "x" = '1406', "y" = '-375')
+BEGIN_SCRIPT
+$G_SYSDATE = to_date(sql('KDR', 'select getdate()'), 'YYYY-MM-DD HH24:MI:SS.FF');$G_PRELOAD_CLAIMMOVEMENT_DONE = 1;END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no', "workflow_type" = 'Regular')

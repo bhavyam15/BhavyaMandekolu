@@ -1,0 +1,25 @@
+#__AW_Repository_Version '14.2.11.0000';
+#__AW_Product_Version '14.2.11.2138';
+#__AW_ATL_Locale 'eng_gb.utf-8';
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'806\', y = \'-1438\',ObjectDesc=\'17/1/2020 PSurendran - Added general Adjustments load ahead of FACT loads for CA 30
+20/04/2020 Savita Rawat : CA540 added a script abefore DF_REP_FACT_CUML_General_Adjustment_LOAD_WRK to have a delta load\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-806</X><Y>1438</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>1475</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RSavedAfterCheckOut', "ActaName_2" = 'RDate_created', "ActaName_3" = 'RDate_modified', "ActaValue_1" = 'YES', "ActaValue_2" = 'Thu Sep 19 12:07:10 2013', "ActaValue_3" = 'Sun Apr 26 16:35:07 2020', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_REP_LOAD_Actuarial_Facts::'3ea6107c-0c2c-4e25-8fd0-d11acb6baf85'( )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>800</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>24</X><Y>-185</Y></LOCATION><SIZE><CX>319</CX><CY>251</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '57', "y" = '-394')
+CALL PLAN WF_REP_Actuals_Facts_Load_and_USM_Extract::'57aeca79-6994-4db6-844a-292236c29412'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>313</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'Script_delta_load', "ui_script_text" = '
+#CA 540 Added aglobal variable to have a delta load
+$G_DELTA_LOAD = SQL(\'KDR\', \'select Load_id from DBO.CTRL_Load_Management where Load_ID = (select MAX(Load_ID) from DBO.CTRL_Load_Management where Job_Name = \\\'JOB_KDR_80_PRTL_to_KDR_Loop\\\' and
+  Load_Status = \\\'Finished\\\')\');', "x" = '478', "y" = '-528')
+BEGIN_SCRIPT
+$G_DELTA_LOAD = sql('KDR', 'select Load_id from DBO.CTRL_Load_Management where Load_ID = (select MAX(Load_ID) from DBO.CTRL_Load_Management where Job_Name = \'JOB_KDR_80_PRTL_to_KDR_Loop\' and
+  Load_Status = \'Finished\')');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>910</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "x" = '872', "y" = '-637')
+CALL DATAFLOW DF_REP_FACT_CUML_General_Adjustment_LOAD_WRK::'1e93f198-b97a-436d-b90f-6858331008e5'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>897</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>3</X><Y>-205</Y></LOCATION><SIZE><CX>486</CX><CY>347</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1518', "y" = '-914')
+CALL PLAN WF_REP_FACT_CUML_SCM_USM_and_FC_Facts_Load::'49752e88-812a-4543-b424-34e53351d3e3'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>697</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "x" = '2575', "y" = '-1044')
+CALL PLAN WF_REP_FACT_CUML_FReD_Adjustments::'81987c41-6ea0-4622-b043-a50c45e09493'();
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no', "workflow_type" = 'Regular')

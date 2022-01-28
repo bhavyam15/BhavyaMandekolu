@@ -1,0 +1,517 @@
+#__AW_Repository_Version '14.2.11.0000';
+#__AW_Product_Version '14.2.11.2138';
+#__AW_ATL_Locale 'eng_gb.utf-8';
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'232\', y = \'-1089\',ObjectDesc=\'JOB:	JOB_REP_100_Load_Actuarial_Mart
+Created:	13/10/2011
+By:	Bindu.K
+
+Description :
+This job retrieves data from the KDR sources and views and populates the corresponding RTL tables for the fact tables into REP_MART
+RTL_FACT_INW_CLAIM_MOVEMENT, RTL_FACT_INW_CLAIM_ORIGINAL_LRC_LTF_MONTH,RTL_FACT_INW_CLAIM_SETTLEMENT_LRC_LTF_MONTH, RTL_FACT_CUML_INW_CLAIM_ORIGINAL_LRC_LTF_MONTH,RTL_FACT_CUML_INW_CLAIM_SETTLEMENT_LRC_LTF_MONTH, RTL_FACT_CUML_INW_CONTRACT_ORIGINAL_LRC_LTF_MONTH and RTL_FACT_CUML_INW_CONTRACT_SETTLEMENT_LRC_LTF_MONTH,
+
+
+================================================================
+
+
+Modification Log
+Date		Modified By		Comment
+
+13/10/2011	Bindu.K			 Initial Version
+
+25/01/2012	JSS			Added DF_Rep_FACT_Cuml_Outw_Contract_Claim_Quarter_LOAD_Fact under WF_REP_LOAD_ACTUARIAL_FACT	
+22/08/2012	Meera Giri		REPT-454 ADM-172  WF_RE_LOAD_FC_CHK_STATUS_CLAIMS_FACT checks the FC status and gets the current 								quarter last month data if FC status is closed
+23/08/2012	Venmani			REPT-454 added WF_FACT_Cuml_Inw_Contract_Quarter so it executes even when the quarters are all closed.
+03/09/2012	Meera Giri		REPT-454 ADM-172  Conditional check for Forecasting status. If forecasting status is \\\'CLOSED\\\', only the facts 									Fact_Inw_Claim_Movement_LOAD_FACT and FACT_Cuml_Inw_Contract_Quarter_LOAD_FACT are loaded. If 									forecasting status is \\\'OPEN\\\' then all the facts are loaded.	
+27/09/2012	Meera Giri		REPT-454 ADM137 Removed the dependency on the Forecasting_status=\\\'OPEN\\\' by removing the conditional check			31/01/2013	Hema GV			Jira ADM 185: Added a global variale $G_SLIPSTREAM_CONVERSION_DT and assigned a value in script SCR_Set_Globals .
+24/-6/2013	Chandrakanth N		Added WF called WF_REP_Load_CD_Parameter
+05/07/2013	Chandrakanth N		Added Global parameter $G_INCREMENTAL_LOAD
+05/12/2014	Nikheel T			BAU-10:Added two new Global variables $G_PREV_QRTR_CALENDAR_KEY & $G_PREV_QRTR_MONTH_END_DATE in the script
+					SCR_Set_Globals to ensure the previous closed quarter\\\'s data is also updated along with current quarter\\\'s data.
+ 08/18/2015	Soujanya B		CRM Project Phase 2: Create new workflow WF_REP_FACT_AND_DIM_INW_CONTRACT_LOAD to load required columns.
+02/12/2016              David KJ                                  BAU-523 : Changed the logic in script SCR_Set_Globals to freeze KMI data based on FRED_SOFT_CLOSE_DT.
+29/09/2017	Jasdeep S	                BAU-948Added the workflowsWF_REP_FACT_Cuml_Contract_Cat_Lrc_Tfg_Load_Facts,WF_REP_Inw_Contract_Load_USM_Aggr_TEMP,
+                                                                               WF_REP_FACT_Cuml_Outw_Early_RI_Settlement_LOAD_FACT,WF_REP_FACT_Cuml_Outw_Early_RI_Original_LOAD_FACT,
+                                                                               WF_Cuml_Inw_Contract_LRC_LTF_Month_LOAD_FACT,WF_REP_FACT_Inw_Claim_Original_LRC_LTF_Month_LOAD_FACT,
+                                                                               WF_REP_FACT_Inw_Claim_Settlement_LRC_LTF_Month_LOAD_FACT,WF_REP_FACT_Inw_Syndicate_Contract_Snapshots_01 ,
+                                                                               WF_REP_FACT_Inw_Syndicate_Contract_Snapshots_02,WF_REP_FACT_Cuml_Inw_Claim_LRC_LTF_Month_01,
+                                                                               WF_REP_FACT_Cuml_Inw_Claim_LRC_LTF_Month_02 to split the existing dfs into multiple dfs for better pushdown to db server
+
+			   			  		\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-232</X><Y>1089</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>3427</CX><CY>1892</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RSavedAfterCheckOut', "ActaName_2" = 'RDate_created', "ActaName_3" = 'RDate_modified', "ActaValue_1" = 'YES', "ActaValue_2" = 'Fri May 10 15:56:34 2013', "ActaValue_3" = 'Sun Apr 26 16:28:04 2020', "x" = '-1', "y" = '-1')
+CREATE SESSION JOB_REP_100_Load_Actuarial_Fact::'44e113c2-d460-45cd-ba7e-2e012b3c0dc3'( )
+DECLARE
+     GLOBAL $G_LOAD_ID INT ;
+     GLOBAL $G_SYSDATE DATETIME(9) ;
+     GLOBAL $G_START_OF_TIME DATETIME(9) ;
+     GLOBAL $G_END_OF_TIME DATETIME(9) ;
+     GLOBAL $G_LOAD_START_DT DATETIME(9) ;
+     GLOBAL $G_DEPENDANT_JOB_STATUS VARCHAR(10) ;
+     GLOBAL $G_DEPENDANT_JOB VARCHAR(50) ;
+     GLOBAL $G_DATE_DEPENDANT_JOB VARCHAR(50) ;
+     GLOBAL $G_DATA_SOURCE VARCHAR(20) ;
+     GLOBAL $G_SLEEP_INTERVAL INT ;
+     GLOBAL $G_OVERRIDE_SLEEP_IND VARCHAR(1) ;
+     GLOBAL $G_MAX_LOAD_ID INT ;
+     GLOBAL $G_JOB_TERMINATION_TYPE VARCHAR(4) ;
+     GLOBAL $G_Target_Table VARCHAR(500) ;
+     GLOBAL $G_Full_Outer_SQL VARCHAR(50000) ;
+     GLOBAL $G_YOA INT ;
+     GLOBAL $G_Drop_Table_SQL VARCHAR(200) ;
+     GLOBAL $G_OPEN_PERIOD_REPOS_ID INT ;
+     GLOBAL $G_OPEN_MONTH_PERIOD_REPOS_ID INT ;
+     GLOBAL $G_MAX_Month_Key INT ;
+     GLOBAL $G_QUARTER_END_DT DATETIME(9) ;
+     GLOBAL $G_MAX_QTR_PERIOD_REPOS_ID INT ;
+     GLOBAL $G_PREV_QTR_LAST_MTH VARCHAR(50) ;
+     GLOBAL $G_SOFT_CLOSE_DT DATETIME(9) ;
+     GLOBAL $G_KDR_CURRENT_FC_PERIOD_REPOS_ID INT ;
+     GLOBAL $G_QTR_END_DT DATETIME(9) ;
+     GLOBAL $G_MONTH_PERIOD_END_DT DATETIME(9) ;
+     GLOBAL $G_MONTH_PERIOD VARCHAR(50) ;
+     GLOBAL $G_SYNDICATE_CONTRACT_REPOS_ID INT ;
+     GLOBAL $G_HISTORY_MONTH_END_DT DATETIME(9) ;
+     GLOBAL $G_HISTORY_SOFT_CLOSE_DT DATETIME(9) ;
+     GLOBAL $G_OPEN_MONTH_KEY INT ;
+     GLOBAL $G_OUTW_ACTUALS_ADHOC_MODE VARCHAR(1) ;
+     GLOBAL $G_PERIOD_EARLY_RI_SWITCH_DATE DATETIME(9) ;
+     GLOBAL $G_SLIPSTREAM_CONVERSION_DT DATETIME(9) ;
+     GLOBAL $G_CALENDAR_MONTH_END_DT DATETIME(9) ;
+     GLOBAL $G_OUTW_ACTUAL_START_PERIOD_KEY INT ;
+     GLOBAL $G_INCREMENTAL_LOAD VARCHAR(1) ;
+     GLOBAL $G_PREV_QRTR_CALENDAR_KEY INT ;
+     GLOBAL $G_PREV_QRTR_MONTH_END_DATE DATETIME(9) ;
+     GLOBAL $G_OPEN_CALENDAR_KEY INT ;
+     GLOBAL $G_OLDEST_YEAR INT ;
+     GLOBAL $G_MIDDLE_YEAR INT ;
+     GLOBAL $G_YOUNG_YEAR INT ;
+     GLOBAL $G_DELTA_LOAD INT ;
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>216</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-191</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'Try', "x" = '90', "y" = '-629')
+TRY
+BEGIN
+ AlGUIComment ("ObjectDesc" = 'Creates New Entries in the Load Management Table', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>303</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>42</X><Y>-205</Y></LOCATION><SIZE><CX>446</CX><CY>114</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Load_Start', "ui_script_text" = '
+# Function: Load_Start (1,2,3)
+# 1: Name of the project
+# 2: (DI) Name of dependant job
+# 3: Flag to indicate that the job should fail if the dependant job failed the last time it was run (Y|N)
+
+# This global is used to determine the message logged in SCR_Load_Failed
+# in case a job fails or is skipped. The default is FAIL.
+$G_JOB_TERMINATION_TYPE = \'FAIL\';
+
+# Create a new load in the load management control table
+$G_DEPENDANT_JOB =\'JOB_KDR_15_Load_KDR_Derived_Tables\';
+
+
+$G_LOAD_ID = Load_Start(\'REPORTING\',$G_DEPENDANT_JOB,\'N\', $G_DEPENDANT_JOB_STATUS);
+Load_Message($G_LOAD_ID,\'Load is running as load id [$G_LOAD_ID].\');
+
+# Removed the complete_refresh variable as the incremental load flow is not being used
+#IF ($G_COMPLETE_REFRESH = \'N\')
+#	begin
+#			Load_Message( $G_LOAD_ID ,\'Incremental load of cumulative fact tables $G_COMPLETE_REFRESH =[$G_COMPLETE_REFRESH]\');
+#	end
+#
+#IF ($G_COMPLETE_REFRESH = \'Y\')
+#	begin
+#			Load_Message( $G_LOAD_ID ,\'Complete refresh of all fact tables $G_COMPLETE_REFRESH =[$G_COMPLETE_REFRESH]\');
+#
+#	end
+
+# $G_DEPENDANT_JOB_STATUS is set in Load_Start() with a default of NULL.
+# If Load_Start is called with a dependant and \'Y\' as the flag then if the 
+# dependant has failed $G_DEPENDANT_JOB_STATUS will return FAILED. In this
+# case terminate this job with a raise_exception() call which will be caught by the
+# catch transform allowing the job to terminate gracefully. In Load_Failed the run of this
+# job in CTRL_Load_Management will be set to Failed.
+
+IF ($G_OUTW_ACTUALS_ADHOC_MODE = \'N\')
+	begin
+			Load_Message( $G_LOAD_ID ,\'Load the OUTW ACTUALS FACT Table Running For Current Month \');
+	end
+
+IF ($G_OUTW_ACTUALS_ADHOC_MODE = \'Y\')
+	begin
+			Load_Message( $G_LOAD_ID ,\'Load the OUTW ACTUALS FACT Table Running in Historical Mode\');
+	end
+
+
+#IF ($G_OUTW_ACTUALS_COMPLETE_REFRESH = \'N\')
+#	begin
+#			Load_Message( $G_LOAD_ID ,\'Load the OUTW ACTUALS FACT Table for the Current Month With Cumulation $G_OUTW_ACTUALS_COMPLETE_REFRESH= [$G_OUTW_ACTUALS_COMPLETE_REFRESH]\');
+#	end
+
+#IF ($G_OUTW_ACTUALS_COMPLETE_REFRESH = \'Y\')
+#	begin
+#			Load_Message( $G_LOAD_ID ,\'Load the OUTW ACTUALS FACT Table for All Months With Cumulation $G_OUTW_ACTUALS_COMPLETE_REFRESH= [$G_OUTW_ACTUALS_COMPLETE_REFRESH]\');
+#	end
+
+
+IF ($G_HISTORY_MONTH_END_DT = \'1992-01-31 23:59:59.000\')
+	begin
+			Load_Message( $G_LOAD_ID ,\'The OUTW ACTUALS FACT Table is running from the default period $G_HISTORY_MONTH_END_DT= [$G_HISTORY_MONTH_END_DT]\');
+	end
+
+else
+			Load_Message( $G_LOAD_ID ,\'The OUTW ACTUALS FACT Table is running from the Period $G_HISTORY_MONTH_END_DT= [$G_HISTORY_MONTH_END_DT]\');
+	
+
+if ( $G_DEPENDANT_JOB_STATUS = \'FAILED\' )
+       begin	
+	   		Load_Message( $G_LOAD_ID ,\'ERROR: The dependant job [$G_DEPENDANT_JOB] did not complete successfully. This job is terminated without starting.\');
+            raise_exception( \'ERROR: The dependant job [$G_DEPENDANT_JOB] did not complete successfully. This job is terminated without starting.\');
+       end
+
+# RD 01/02/2011 Jira FR-105
+if ( $G_DEPENDANT_JOB_STATUS = \'SKIPPED\' )
+		begin
+			$G_JOB_TERMINATION_TYPE = \'SKIP\';
+			Load_Message( $G_LOAD_ID ,\'INFO: The dependant job [$G_DEPENDANT_JOB] was skipped and the load messages for this will provide the reason why. The execution of [job_name()] will also be skipped.\');
+            raise_exception( \'INFO: The dependant job [$G_DEPENDANT_JOB] was skipped and the load messages for this will provide the reason why. The execution of [job_name()] will also be skipped.\');
+		end
+
+
+# Check if there is an open period. 
+#$G_OPEN_PERIOD_REPOS_ID = nvl( sql( \'REP_MART\', \'select Period_Repos_ID from dbo.TMP_REP_LANDED_PERIOD_LOOKUP where Forecasting_Status = \\\'OPEN\\\' and Period_Type = \\\'QUARTER\\\'\' ), 0 );
+
+', "x" = '553', "y" = '-631')
+BEGIN_SCRIPT
+$G_JOB_TERMINATION_TYPE = 'FAIL';$G_DEPENDANT_JOB = 'JOB_KDR_15_Load_KDR_Derived_Tables';$G_LOAD_ID = load_start('REPORTING', $G_DEPENDANT_JOB, 'N', $G_DEPENDANT_JOB_STATUS);load_message($G_LOAD_ID, 'Load is running as load id [$G_LOAD_ID].');IF (($G_OUTW_ACTUALS_ADHOC_MODE = 'N') )
+BEGIN
+load_message($G_LOAD_ID, 'Load the OUTW ACTUALS FACT Table Running For Current Month ');END
+IF (($G_OUTW_ACTUALS_ADHOC_MODE = 'Y') )
+BEGIN
+load_message($G_LOAD_ID, 'Load the OUTW ACTUALS FACT Table Running in Historical Mode');END
+IF (($G_HISTORY_MONTH_END_DT = '1992-01-31 23:59:59.000') )
+BEGIN
+load_message($G_LOAD_ID, 'The OUTW ACTUALS FACT Table is running from the default period $G_HISTORY_MONTH_END_DT= [$G_HISTORY_MONTH_END_DT]');END
+ELSE
+load_message($G_LOAD_ID, 'The OUTW ACTUALS FACT Table is running from the Period $G_HISTORY_MONTH_END_DT= [$G_HISTORY_MONTH_END_DT]');IF (($G_DEPENDANT_JOB_STATUS = 'FAILED') )
+BEGIN
+load_message($G_LOAD_ID, 'ERROR: The dependant job [$G_DEPENDANT_JOB] did not complete successfully. This job is terminated without starting.');raise_exception('ERROR: The dependant job [$G_DEPENDANT_JOB] did not complete successfully. This job is terminated without starting.');END
+IF (($G_DEPENDANT_JOB_STATUS = 'SKIPPED') )
+BEGIN
+$G_JOB_TERMINATION_TYPE = 'SKIP';load_message($G_LOAD_ID, 'INFO: The dependant job [$G_DEPENDANT_JOB] was skipped and the load messages for this will provide the reason why. The execution of [job_name()] will also be skipped.');raise_exception('INFO: The dependant job [$G_DEPENDANT_JOB] was skipped and the load messages for this will provide the reason why. The execution of [job_name()] will also be skipped.');END
+END
+ AlGUIComment ("ObjectDesc" = 'Setting Global Variables', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>319</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>27</X><Y>-187</Y></LOCATION><SIZE><CX>295</CX><CY>107</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Set_Globals', "ui_script_text" = '# Check if there is an open period. If not, the job will terminate here!!!
+
+#$G_OPEN_PERIOD_REPOS_ID = nvl( sql( \'REP_MART\', \'select Period_Repos_ID from dbo.TMP_REP_LANDED_PERIOD_LOOKUP where Forecasting_Status = \\\'OPEN\\\' and Period_Type = \\\'QUARTER\\\'\' ), 0 );
+
+#if ($G_OPEN_PERIOD_REPOS_ID = 0)
+#begin
+#	$G_JOB_TERMINATION_TYPE = \'SKIP\';
+#	Load_Message( $G_LOAD_ID ,\'INFO : There is no open Forecasting quarter in KDR table Period_Lookup. Job execution will be skipped.\');
+#	raise_exception(\'INFO : There is no open Forecasting quarter in KDR table Period_Lookup. Job execution will be skipped.\');
+#end
+ 
+#$G_OPEN_MONTH_PERIOD_REPOS_ID = nvl( sql( \'REP_MART\', \'select  mth.Period_Repos_ID from TMP_REP_LANDED_PERIOD_LOOKUP mth,TMP_REP_LANDED_PERIOD_LOOKUP qtr where mth.Period_Type=\\\'MONTH\\\' and qtr.Period_Repos_ID=[$G_OPEN_PERIOD_REPOS_ID] and mth.Period_End_DT = qtr.Period_End_DT\' ), 0 );
+
+#if ($G_OPEN_PERIOD_REPOS_ID = 0)
+#begin
+#	$G_JOB_TERMINATION_TYPE = \'SKIP\';
+#	Load_Message( $G_LOAD_ID ,\'INFO : There is no open Forecasting month in KDR table Period_Lookup. Job execution will be skipped.\');
+#	raise_exception(\'INFO : There is no open Forecasting month in KDR table Period_Lookup. Job execution will be skipped.\');
+#end
+
+# Check if there is an open period. If not,still point to closed period until Fred soft close dt is breached, after that  get the reposid of current quarter latest month
+begin
+ $G_OPEN_PERIOD_REPOS_ID= nvl( sql( \'KDR\', \'select Period_Repos_ID from dbo.PERIOD_LOOKUP where Forecasting_Status = \\\'OPEN\\\'\'), 0 );
+ if ($G_OPEN_PERIOD_REPOS_ID <> 0 )
+        begin
+	       $G_OPEN_MONTH_PERIOD_REPOS_ID = nvl(sql(\'KDR\',\'select m.Period_Repos_ID from dbo.PERIOD_LOOKUP m,dbo.PERIOD_LOOKUP q where m.Period_Type = \\\'MONTH\\\' and q.Period_type = \\\'QUARTER\\\' and m.Period_End_DT between q.Period_Start_DT and q.Period_End_DT and q.Forecasting_Status = \\\'OPEN\\\' and DATEADD (HOUR,-8,getdate()) between m.Period_Start_DT and m.Period_End_DT\'), 0);
+#        print( \'This is for open quarter month data\' || $G_OPEN_MONTH_PERIOD_REPOS_ID );
+		if ($G_OPEN_MONTH_PERIOD_REPOS_ID = 0)
+	       $G_OPEN_MONTH_PERIOD_REPOS_ID = sql(\'KDR\',\'select m.Period_Repos_ID from dbo.PERIOD_LOOKUP m, dbo.PERIOD_LOOKUP q where m.Period_Type = \\\'MONTH\\\' and q.Period_type = \\\'QUARTER\\\' and m.Period_End_DT between q.Period_Start_DT and q.Period_End_DT and q.Forecasting_Status = \\\'OPEN\\\' and m.Period = q.Period\');
+#    print( \'This is for quarter open\' || $G_OPEN_MONTH_PERIOD_REPOS_ID );
+	    end 
+	 else
+    begin
+
+# BAU-523 : Added new logic to freeze KMI data based on Fred_Soft_Close_DT
+# BAU-523 : Begin of code
+#    $G_OPEN_MONTH_PERIOD_REPOS_ID = sql(\'KDR\',\'select m.Period_Repos_ID from dbo.PERIOD_LOOKUP m where m.Period_Type = \\\'MONTH\\\' and DATEADD (HOUR,-8,getdate()) between m.Period_Start_DT and m.Period_End_DT\');
+     $G_OPEN_MONTH_PERIOD_REPOS_ID = nvl(sql(\'KDR\',\'select m.Period_Repos_ID from dbo.PERIOD_LOOKUP m,dbo.PERIOD_LOOKUP q where m.Period_Type = \\\'MONTH\\\' and q.Period_type = \\\'QUARTER\\\' and m.Period_End_DT between q.Period_Start_DT and q.Period_End_DT and q.Fred_Soft_Close_Dt between GETDATE() and DATEADD(DAY,30,GETDATE()) and m.Period =q.Period\'), 0);
+     
+	 if ($G_OPEN_MONTH_PERIOD_REPOS_ID = 0)
+	 begin 
+	 $G_OPEN_MONTH_PERIOD_REPOS_ID = sql(\'KDR\',\'select m.Period_Repos_ID from dbo.PERIOD_LOOKUP m where m.Period_Type = \\\'MONTH\\\' and DATEADD (HOUR,-8,getdate()) between m.Period_Start_DT and m.Period_End_DT\');
+
+ 
+	 end	
+# BAU-523 : End of code
+	end
+end
+
+print(\'Current month repos id: \' || $G_OPEN_MONTH_PERIOD_REPOS_ID );
+
+$G_OPEN_PERIOD_REPOS_ID = sql(\'KDR\',\'select q.Period_Repos_ID from Period_Lookup q, Period_Lookup m where m.Period_Type = \\\'MONTH\\\' and q.Period_Type = \\\'QUARTER\\\' and m.Period_End_DT between q.Period_Start_DT and q.Period_End_DT and m.Period_Repos_ID = [$G_OPEN_MONTH_PERIOD_REPOS_ID]\');
+
+print(\'Current quarter repos id: \' || $G_OPEN_PERIOD_REPOS_ID );
+
+# As part of KMI Phase-3 $G_OPEN_QUARTER_KEY has been removed from this job and $G_OPEN_MONTH_KEY is changed to point to DIM_CALENDAR instead of DIM_MONTH
+
+#$G_OPEN_QUARTER_KEY = SQL(\'REP_MART\',\'SELECT DIM_QUARTER_KEY FROM dbo.RTL_DIM_QUARTER WHERE QUARTER_SOURCE_ID = [$G_OPEN_PERIOD_REPOS_ID]\');
+
+$G_OPEN_MONTH_KEY = SQL(\'REP_MART\',\'Select DIM_CALENDAR_KEY from DIM_CALENDAR WHERE PERIOD_LOOKUP_MONTH_REPOS_ID = [$G_OPEN_MONTH_PERIOD_REPOS_ID] and END_OF_MONTH_IND = \\\'Y\\\'\');
+
+ 
+# Set global variables
+$G_SYSDATE = to_date(sql(\'KDR\',\'select getdate()\'),\'YYYY-MM-DD HH24:MI:SS.FF\');
+$G_MAX_LOAD_ID  =  sql (\'KDR\', \'select max(load_id) from dbo.CTRL_Load_Management where Job_Name = \\\'JOB_KDR_11_Build_Reference_And_KDR_For_Eclipse\\\' and Load_Status =\\\'Finished\\\'\');
+
+#Setting the $G_QUARTER_END_DT to current open Quarter for Forecasting Status and retrieve the key from RTL_DIM_QUARTER
+$G_QUARTER_END_DT = SQL(\'REP_MART\',\'SELECT PERIOD_END_DT FROM dbo.TMP_REP_LANDED_PERIOD_LOOKUP WHERE PERIOD_REPOS_ID= [$G_OPEN_PERIOD_REPOS_ID]\');
+#$G_OPEN_QUARTER_KEY = SQL(\'REP_MART\',\'SELECT DIM_QUARTER_KEY FROM dbo.RTL_DIM_QUARTER WHERE QUARTER_SOURCE_ID = [$G_OPEN_PERIOD_REPOS_ID]\');
+
+#if ($G_QUARTER_END_DT IS NULL )
+#begin
+#	$G_JOB_TERMINATION_TYPE = \'SKIP\';
+#    Load_Message( $G_LOAD_ID ,\'INFO : There is no open Forecasting quarter in KDR table Period_Lookup. Job execution will be skipped.\');
+#	raise_exception( \'INFO : There is no open Forecasting quarter in KDR table Period_Lookup. Job execution will be skipped.\');
+#end
+
+
+#Load_Message( $G_LOAD_ID ,\'INFO - The global variable specifying the quarter end date for the current open quarter,$G_QUARTER_END_DT, is set to : \'|| $G_QUARTER_END_DT);
+
+$G_START_OF_TIME = to_date(\'1800-01-01 00:00:00\',\'YYYY-MM-DD HH24:MI:SS\');
+$G_END_OF_TIME = to_date(\'9999-12-31 23:59:59\',\'YYYY-MM-DD HH24:MI:SS\');
+
+#Get the status of the date dependancy job
+$G_LOAD_START_DT = Load_Start_Date($G_DATE_DEPENDANT_JOB);
+Load_Message($G_LOAD_ID,$G_DATA_SOURCE||\' - Datamart build Start Date set to: \' || $G_LOAD_START_DT);
+
+#Setting $G_PERIOD_REPOS_ID to get Current Quarter data 
+
+# BAU-523 : Added new logic to freeze KMI data based on Fred_Soft_Close_DT.
+# BAU-523 : Begin of code
+#$G_KDR_CURRENT_FC_PERIOD_REPOS_ID = sql(\'KDR\', \'select period_repos_id from dbo.period_lookup where forecasting_status <> \\\'CLOSED\\\' and period_type = \\\'QUARTER\\\'\');
+$G_KDR_CURRENT_FC_PERIOD_REPOS_ID = sql(\'KDR\', \'select period_repos_id from dbo.period_lookup where FReD_Soft_Close_DT between GETDATE() and DATEADD(DAY,30,GETDATE()) and period_type = \\\'QUARTER\\\'\');
+# BAU-523 : End of code
+$G_QTR_END_DT = sql(\'KDR\',\'select period_end_dt from dbo.period_lookup where period_repos_id = [$G_OPEN_PERIOD_REPOS_ID]\');
+
+ 
+# BAU-523 : Added new logic to freeze KMI data based on Fred_Soft_Close_DT.
+# BAU-523 : Begin of code
+#$G_SOFT_CLOSE_DT = nvl( sql( \'KDR\', \'select Period_Soft_Close_DT from dbo.Period_Lookup where Period_Type = \\\'QUARTER\\\' and period_end_dt = {$G_QTR_END_DT}\' ), $G_SYSDATE );
+$G_SOFT_CLOSE_DT = nvl( sql( \'KDR\', \'select Fred_Soft_Close_DT from dbo.Period_Lookup where Period_Type = \\\'QUARTER\\\' and period_end_dt = {$G_QTR_END_DT}\' ), $G_SYSDATE );
+# BAU-523 : End of code
+
+#If we haven\'t breached the soft close date then use todays date
+
+if ($G_SOFT_CLOSE_DT > $G_SYSDATE)
+
+begin 
+
+             load_message($G_LOAD_ID,\'Forecasting Soft Close Date ([$G_SOFT_CLOSE_DT]) not breached, landing records that are effective for [$G_SYSDATE].\');
+
+             $G_SOFT_CLOSE_DT=$G_SYSDATE;
+
+end
+
+else load_message($G_LOAD_ID,\'Forecasting Soft Close Date ([$G_SOFT_CLOSE_DT]) breached, landing records that are effective for [$G_SOFT_CLOSE_DT].\');
+
+$G_MONTH_PERIOD_END_DT = SQL(\'REP_MART\',\'SELECT PERIOD_END_DT FROM dbo.TMP_REP_LANDED_PERIOD_LOOKUP WHERE PERIOD_REPOS_ID= [$G_OPEN_MONTH_PERIOD_REPOS_ID]\');
+
+$G_MONTH_PERIOD = SQL(\'REP_MART\',\'SELECT PERIOD FROM dbo.TMP_REP_LANDED_PERIOD_LOOKUP WHERE PERIOD_REPOS_ID= [$G_OPEN_MONTH_PERIOD_REPOS_ID]\');
+
+$G_SYNDICATE_CONTRACT_REPOS_ID = nvl( sql( \'KDR\', \'select Contract_Record_Type_Repos_ID from dbo.Contract_Record_Type_Lookup where upper(Contract_Record_Type) = \\\'SYNDICATE CONTRACT\\\' and Current_IND = \\\'Y\\\' and Deleted_IND = \\\'N\\\'\'), 0 );
+
+$G_PERIOD_EARLY_RI_SWITCH_DATE = nvl(sql(\'KDR\',\'select max(Period_End_DT) from dbo.PERIOD_LOOKUP where period_early_ri_switch = \\\'Y\\\'\'), \'1800-01-01 00:00:00\');
+
+#Jira ADM-185: With this date slipstream conversion happens and this variable is used in DF_REP_INW_Syndicate_Contract_LOAD_FACT
+$G_SLIPSTREAM_CONVERSION_DT = to_date(\'2001-09-04 00:00:00\',\'YYYY-MM-DD HH24:MI:SS\');
+
+
+$G_CALENDAR_MONTH_END_DT = SQL(\'REP_MART\',\'SELECT DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,\\\'1900-01-01 00:00:00\\\',DATEADD (HOUR,-8,getdate()))+1,\\\'1900-01-01 00:00:00\\\'))\');
+
+#JIRA BAU-10 : Adding 2 new Global Varialbes $G_PREV_QRTR_CALENDAR_KEY & $G_PREV_QRTR_MONTH_END_DATE
+
+$G_PREV_QRTR_MONTH_END_DATE=SQL(\'REP_MART\',\'SELECT PERIOD_END_DT FROM dbo.TMP_REP_LANDED_PERIOD_LOOKUP WHERE PERIOD_REPOS_ID=( SELECT Period_Repos_ID-1 FROM dbo.TMP_REP_LANDED_PERIOD_LOOKUP WHERE PERIOD_REPOS_ID = [$G_OPEN_PERIOD_REPOS_ID] ) \');
+
+$G_PREV_QRTR_CALENDAR_KEY=SQL(\'REP_MART\',\'SELECT MAX(A.DIM_CALENDAR_KEY) FROM dbo.TMP_REP_LANDED_PERIOD_LOOKUP P JOIN  DIM_CALENDAR A ON A.PERIOD_LOOKUP_QUARTER_REPOS_ID = P.Period_Repos_ID WHERE A.END_OF_MONTH_IND=\\\'Y\\\' and P.Period_End_DT = \\\'[$G_PREV_QRTR_MONTH_END_DATE]\\\' \');
+
+
+
+#CRM Phase 2: Created the variable to get the previous quarter key.
+$G_OPEN_CALENDAR_KEY = SQL(\'REP_MART\',\'select DIM_CALENDAR_KEY from DIM_CALENDAR where END_OF_MONTH_IND =\\\'Y\\\' and effective_dt= ISNULL ((select effective_dt from dim_Calendar where forecasting_status = \\\'OPEN\\\' AND END_OF_QUARTER_IND = \\\'Y\\\'),(SELECT DATEADD(DAY,-1,DATEADD(QUARTER, DATEDIFF(QUARTER,0,GETDATE()),0))) )\');
+
+
+#Added the 3 variables for oldest, middle and young year as part of CA-49	 
+	 
+
+$G_OLDEST_YEAR = sql(\'KDR\',\'select YEAR(Period_End_DT)-2  from dbo.PERIOD_LOOKUP m where m.Fred_Current_IND = \\\'Y\\\'\');
+print(\'Oldest Year is: \' || $G_OLDEST_YEAR );
+
+
+$G_MIDDLE_YEAR  = sql(\'KDR\',\'select YEAR(Period_End_DT)-1  from dbo.PERIOD_LOOKUP m where m.Fred_Current_IND = \\\'Y\\\' \');
+print(\'Middle Year is: \' || $G_MIDDLE_YEAR );
+
+$G_YOUNG_YEAR  = sql(\'KDR\',\'select YEAR(Period_End_DT)  from dbo.PERIOD_LOOKUP m where m.Fred_Current_IND = \\\'Y\\\' \');
+print(\'Youngest Year is: \' || $G_YOUNG_YEAR );	 ', "x" = '1229', "y" = '-631')
+BEGIN_SCRIPT
+BEGIN
+$G_OPEN_PERIOD_REPOS_ID = nvl(sql('KDR', 'select Period_Repos_ID from dbo.PERIOD_LOOKUP where Forecasting_Status = \'OPEN\''), 0);IF (($G_OPEN_PERIOD_REPOS_ID != 0) )
+BEGIN
+$G_OPEN_MONTH_PERIOD_REPOS_ID = nvl(sql('KDR', 'select m.Period_Repos_ID from dbo.PERIOD_LOOKUP m,dbo.PERIOD_LOOKUP q where m.Period_Type = \'MONTH\' and q.Period_type = \'QUARTER\' and m.Period_End_DT between q.Period_Start_DT and q.Period_End_DT and q.Forecasting_Status = \'OPEN\' and DATEADD (HOUR,-8,getdate()) between m.Period_Start_DT and m.Period_End_DT'), 0);IF (($G_OPEN_MONTH_PERIOD_REPOS_ID = 0) )
+$G_OPEN_MONTH_PERIOD_REPOS_ID = sql('KDR', 'select m.Period_Repos_ID from dbo.PERIOD_LOOKUP m, dbo.PERIOD_LOOKUP q where m.Period_Type = \'MONTH\' and q.Period_type = \'QUARTER\' and m.Period_End_DT between q.Period_Start_DT and q.Period_End_DT and q.Forecasting_Status = \'OPEN\' and m.Period = q.Period');END
+ELSE
+BEGIN
+$G_OPEN_MONTH_PERIOD_REPOS_ID = nvl(sql('KDR', 'select m.Period_Repos_ID from dbo.PERIOD_LOOKUP m,dbo.PERIOD_LOOKUP q where m.Period_Type = \'MONTH\' and q.Period_type = \'QUARTER\' and m.Period_End_DT between q.Period_Start_DT and q.Period_End_DT and q.Fred_Soft_Close_Dt between GETDATE() and DATEADD(DAY,30,GETDATE()) and m.Period =q.Period'), 0);IF (($G_OPEN_MONTH_PERIOD_REPOS_ID = 0) )
+BEGIN
+$G_OPEN_MONTH_PERIOD_REPOS_ID = sql('KDR', 'select m.Period_Repos_ID from dbo.PERIOD_LOOKUP m where m.Period_Type = \'MONTH\' and DATEADD (HOUR,-8,getdate()) between m.Period_Start_DT and m.Period_End_DT');END
+END
+END
+print(('Current month repos id: ' || $G_OPEN_MONTH_PERIOD_REPOS_ID));$G_OPEN_PERIOD_REPOS_ID = sql('KDR', 'select q.Period_Repos_ID from Period_Lookup q, Period_Lookup m where m.Period_Type = \'MONTH\' and q.Period_Type = \'QUARTER\' and m.Period_End_DT between q.Period_Start_DT and q.Period_End_DT and m.Period_Repos_ID = [$G_OPEN_MONTH_PERIOD_REPOS_ID]');print(('Current quarter repos id: ' || $G_OPEN_PERIOD_REPOS_ID));$G_OPEN_MONTH_KEY = sql('REP_MART', 'Select DIM_CALENDAR_KEY from DIM_CALENDAR WHERE PERIOD_LOOKUP_MONTH_REPOS_ID = [$G_OPEN_MONTH_PERIOD_REPOS_ID] and END_OF_MONTH_IND = \'Y\'');$G_SYSDATE = to_date(sql('KDR', 'select getdate()'), 'YYYY-MM-DD HH24:MI:SS.FF');$G_MAX_LOAD_ID = sql('KDR', 'select max(load_id) from dbo.CTRL_Load_Management where Job_Name = \'JOB_KDR_11_Build_Reference_And_KDR_For_Eclipse\' and Load_Status =\'Finished\'');$G_QUARTER_END_DT = sql('REP_MART', 'SELECT PERIOD_END_DT FROM dbo.TMP_REP_LANDED_PERIOD_LOOKUP WHERE PERIOD_REPOS_ID= [$G_OPEN_PERIOD_REPOS_ID]');$G_START_OF_TIME = to_date('1800-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS');$G_END_OF_TIME = to_date('9999-12-31 23:59:59', 'YYYY-MM-DD HH24:MI:SS');$G_LOAD_START_DT = load_start_date($G_DATE_DEPENDANT_JOB);load_message($G_LOAD_ID, (($G_DATA_SOURCE || ' - Datamart build Start Date set to: ') || $G_LOAD_START_DT));$G_KDR_CURRENT_FC_PERIOD_REPOS_ID = sql('KDR', 'select period_repos_id from dbo.period_lookup where FReD_Soft_Close_DT between GETDATE() and DATEADD(DAY,30,GETDATE()) and period_type = \'QUARTER\'');$G_QTR_END_DT = sql('KDR', 'select period_end_dt from dbo.period_lookup where period_repos_id = [$G_OPEN_PERIOD_REPOS_ID]');$G_SOFT_CLOSE_DT = nvl(sql('KDR', 'select Fred_Soft_Close_DT from dbo.Period_Lookup where Period_Type = \'QUARTER\' and period_end_dt = {$G_QTR_END_DT}'), $G_SYSDATE);IF (($G_SOFT_CLOSE_DT > $G_SYSDATE) )
+BEGIN
+load_message($G_LOAD_ID, 'Forecasting Soft Close Date ([$G_SOFT_CLOSE_DT]) not breached, landing records that are effective for [$G_SYSDATE].');$G_SOFT_CLOSE_DT = $G_SYSDATE;END
+ELSE
+load_message($G_LOAD_ID, 'Forecasting Soft Close Date ([$G_SOFT_CLOSE_DT]) breached, landing records that are effective for [$G_SOFT_CLOSE_DT].');$G_MONTH_PERIOD_END_DT = sql('REP_MART', 'SELECT PERIOD_END_DT FROM dbo.TMP_REP_LANDED_PERIOD_LOOKUP WHERE PERIOD_REPOS_ID= [$G_OPEN_MONTH_PERIOD_REPOS_ID]');$G_MONTH_PERIOD = sql('REP_MART', 'SELECT PERIOD FROM dbo.TMP_REP_LANDED_PERIOD_LOOKUP WHERE PERIOD_REPOS_ID= [$G_OPEN_MONTH_PERIOD_REPOS_ID]');$G_SYNDICATE_CONTRACT_REPOS_ID = nvl(sql('KDR', 'select Contract_Record_Type_Repos_ID from dbo.Contract_Record_Type_Lookup where upper(Contract_Record_Type) = \'SYNDICATE CONTRACT\' and Current_IND = \'Y\' and Deleted_IND = \'N\''), 0);$G_PERIOD_EARLY_RI_SWITCH_DATE = nvl(sql('KDR', 'select max(Period_End_DT) from dbo.PERIOD_LOOKUP where period_early_ri_switch = \'Y\''), '1800-01-01 00:00:00');$G_SLIPSTREAM_CONVERSION_DT = to_date('2001-09-04 00:00:00', 'YYYY-MM-DD HH24:MI:SS');$G_CALENDAR_MONTH_END_DT = sql('REP_MART', 'SELECT DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,\'1900-01-01 00:00:00\',DATEADD (HOUR,-8,getdate()))+1,\'1900-01-01 00:00:00\'))');$G_PREV_QRTR_MONTH_END_DATE = sql('REP_MART', 'SELECT PERIOD_END_DT FROM dbo.TMP_REP_LANDED_PERIOD_LOOKUP WHERE PERIOD_REPOS_ID=( SELECT Period_Repos_ID-1 FROM dbo.TMP_REP_LANDED_PERIOD_LOOKUP WHERE PERIOD_REPOS_ID = [$G_OPEN_PERIOD_REPOS_ID] ) ');$G_PREV_QRTR_CALENDAR_KEY = sql('REP_MART', 'SELECT MAX(A.DIM_CALENDAR_KEY) FROM dbo.TMP_REP_LANDED_PERIOD_LOOKUP P JOIN  DIM_CALENDAR A ON A.PERIOD_LOOKUP_QUARTER_REPOS_ID = P.Period_Repos_ID WHERE A.END_OF_MONTH_IND=\'Y\' and P.Period_End_DT = \'[$G_PREV_QRTR_MONTH_END_DATE]\' ');$G_OPEN_CALENDAR_KEY = sql('REP_MART', 'select DIM_CALENDAR_KEY from DIM_CALENDAR where END_OF_MONTH_IND =\'Y\' and effective_dt= ISNULL ((select effective_dt from dim_Calendar where forecasting_status = \'OPEN\' AND END_OF_QUARTER_IND = \'Y\'),(SELECT DATEADD(DAY,-1,DATEADD(QUARTER, DATEDIFF(QUARTER,0,GETDATE()),0))) )');$G_OLDEST_YEAR = sql('KDR', 'select YEAR(Period_End_DT)-2  from dbo.PERIOD_LOOKUP m where m.Fred_Current_IND = \'Y\'');print(('Oldest Year is: ' || $G_OLDEST_YEAR));$G_MIDDLE_YEAR = sql('KDR', 'select YEAR(Period_End_DT)-1  from dbo.PERIOD_LOOKUP m where m.Fred_Current_IND = \'Y\' ');print(('Middle Year is: ' || $G_MIDDLE_YEAR));$G_YOUNG_YEAR = sql('KDR', 'select YEAR(Period_End_DT)  from dbo.PERIOD_LOOKUP m where m.Fred_Current_IND = \'Y\' ');print(('Youngest Year is: ' || $G_YOUNG_YEAR));END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>510</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1717', "y" = '-629')
+CALL PLAN WF_REP_Load_CD_Parameter::'b98da598-ac04-487e-8d05-f8565ac61aa7'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>444</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'While_Active_Jobs_Sleep', "x" = '2322', "y" = '-631')
+WHILE (((is_any_other_job_active($G_LOAD_ID, '\'JOB_REP_20_Publish_Dimensions\',\'JOB_REP_05_Land_KDR_For_Reporting\'') > 0) AND
+   ($G_OVERRIDE_SLEEP_IND = 'N')) )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>222</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Sleep', "ui_script_text" = '# Cause this job to sleep for the predefined interval
+sleep($G_SLEEP_INTERVAL);', "x" = '1072', "y" = '-481')
+BEGIN_SCRIPT
+sleep($G_SLEEP_INTERVAL);END
+END
+ AlGUIComment ("If_condition" = '$G_OUTW_ACTUALS_ADHOC_MODE=\'Y\'', "ObjectDesc" = 'Setting the facts whether to run in historical to FACT_CUML_OUTW_CONTRACT_CLAIM_ACTUALS', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>109</X><Y>0</Y></LOCATION><SIZE><CX>535</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-196</Y></LOCATION><SIZE><CX>534</CX><CY>204</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'CND_ACTUALS_ADHOC_MODE', "x" = '2767', "y" = '-631')
+IF (($G_OUTW_ACTUALS_ADHOC_MODE = 'Y') )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>391</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Truncate_Tables', "ui_script_text" = '# ########################################################################################################
+# Script Name  : SCR_Truncate_Tables
+# Created By   : Sudheer V
+# Date Created : 05/12/2012
+# Description  : This Script will truncate the data from the WRK tables
+#                 
+# Modification Log
+# ================
+# Date              By            Vesrion         Description
+# 05/12/2012      Sudheer V         0.1          Initial version
+
+# ##########################################################################################################
+
+
+
+
+#Truncating data from WRK tables
+Load_Message( $G_LOAD_ID ,\'Truncate data from WRK tables...\');
+sql(\'REP_MART\',\'Truncate table dbo.WRK_OUTW_CONTRACT_PREM_CLAIM_OS\');
+sql(\'REP_MART\',\'Truncate table dbo.WRK_OUTW_CONTRACT_PREM_CLAIM_SIGNED_GROSS_NETT\');
+sql(\'REP_MART\',\'Truncate table dbo.WRK_OUTW_CONTRACT_PREM_CLAIM_PAID_ACCRUAL\');
+
+Load_Message( $G_LOAD_ID ,\'Truncate data from RTL_FACT_CUML_OUTW_CONTRACT_CLAIM_ACTUALS\');
+
+sql(\'REP_MART\',\'Truncate table dbo.RTL_FACT_CUML_OUTW_CONTRACT_CLAIM_ACTUALS\');
+
+Load_Message( $G_LOAD_ID ,\'INFO - Truncating tables completed.\');
+
+$G_OUTW_ACTUAL_START_PERIOD_KEY = sql(\'REP_MART\',\'Select DIM_CALENDAR_KEY from DIM_CALENDAR D , TMP_REP_LANDED_PERIOD_LOOKUP P WHERE D.PERIOD_LOOKUP_MONTH_REPOS_ID = P.Period_Repos_ID AND P.Period_Type = \\\'MONTH\\\' AND D.END_OF_MONTH_IND = \\\'Y\\\' AND P.Period_End_DT = {$G_HISTORY_MONTH_END_DT}\');
+
+print(\'OUTWARD ACTUALS START KEY: \' || $G_OUTW_ACTUAL_START_PERIOD_KEY );
+
+
+Load_Message( $G_LOAD_ID ,\'$G_OUTW_ACTUALS_ADHOC_MODE=[$G_OUTW_ACTUALS_ADHOC_MODE]\');', "x" = '171', "y" = '-253')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Truncate data from WRK tables...');sql('REP_MART', 'Truncate table dbo.WRK_OUTW_CONTRACT_PREM_CLAIM_OS');sql('REP_MART', 'Truncate table dbo.WRK_OUTW_CONTRACT_PREM_CLAIM_SIGNED_GROSS_NETT');sql('REP_MART', 'Truncate table dbo.WRK_OUTW_CONTRACT_PREM_CLAIM_PAID_ACCRUAL');load_message($G_LOAD_ID, 'Truncate data from RTL_FACT_CUML_OUTW_CONTRACT_CLAIM_ACTUALS');sql('REP_MART', 'Truncate table dbo.RTL_FACT_CUML_OUTW_CONTRACT_CLAIM_ACTUALS');load_message($G_LOAD_ID, 'INFO - Truncating tables completed.');$G_OUTW_ACTUAL_START_PERIOD_KEY = sql('REP_MART', 'Select DIM_CALENDAR_KEY from DIM_CALENDAR D , TMP_REP_LANDED_PERIOD_LOOKUP P WHERE D.PERIOD_LOOKUP_MONTH_REPOS_ID = P.Period_Repos_ID AND P.Period_Type = \'MONTH\' AND D.END_OF_MONTH_IND = \'Y\' AND P.Period_End_DT = {$G_HISTORY_MONTH_END_DT}');print(('OUTWARD ACTUALS START KEY: ' || $G_OUTW_ACTUAL_START_PERIOD_KEY));load_message($G_LOAD_ID, '$G_OUTW_ACTUALS_ADHOC_MODE=[$G_OUTW_ACTUALS_ADHOC_MODE]');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>478</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'WHILE_LOAD_Historic_Data', "x" = '695', "y" = '-253')
+WHILE (($G_HISTORY_MONTH_END_DT <= $G_MONTH_PERIOD_END_DT) )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>419</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>44</X><Y>-186</Y></LOCATION><SIZE><CX>687</CX><CY>176</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '785', "y" = '-475')
+CALL PLAN WF_REP_WRK_Extract_Outw_Actuals::'f516ed85-7b07-4444-8f7d-6bf8cab67bc7'();
+END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>700</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'WHILE_LOAD_History_Outw_Advice_Data', "x" = '1272', "y" = '-253')
+WHILE (($G_PREV_QRTR_MONTH_END_DATE <= $G_CALENDAR_MONTH_END_DT) )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>382</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Set_Soft_Close_Dt', "ui_script_text" = 'print(\'Before while loop $G_PREV_QRTR_MONTH_END_DATE : \'|| $G_PREV_QRTR_MONTH_END_DATE ) ;
+
+#BAU-523 : Changed the logic to freeze KMI data based on Fred_Soft_Close_DT.
+#BAU-523 : Begin of code.
+#$G_HISTORY_SOFT_CLOSE_DT = sql( \'Rep_Mart\',\'select (case when MONTH( mon.Period_End_DT) IN (3,6,9,12) THEN isnull(qtr.Period_Soft_Close_DT,mon.Period_End_DT) else mon.Period_End_DT end ) G_history_Soft_Close_Dt from TMP_REP_LANDED_PERIOD_LOOKUP mon inner join TMP_REP_LANDED_PERIOD_LOOKUP qtr on (mon.Period_End_DT between qtr.Period_Start_DT and qtr.Period_End_DT) where mon.Period_Type=\\\'MONTH\\\' and qtr.Period_Type=\\\'QUARTER\\\' and mon.period_end_dt = {$G_PREV_QRTR_MONTH_END_DATE}\' );
+$G_HISTORY_SOFT_CLOSE_DT = sql( \'Rep_Mart\',\'select (case when MONTH( mon.Period_End_DT) IN (3,6,9,12) THEN isnull(qtr.Fred_Soft_Close_DT,mon.Period_End_DT) else mon.Period_End_DT end ) G_history_Soft_Close_Dt from dbo.TMP_REP_LANDED_PERIOD_LOOKUP mon inner join dbo.TMP_REP_LANDED_PERIOD_LOOKUP qtr on (mon.Period_End_DT between qtr.Period_Start_DT and qtr.Period_End_DT) where mon.Period_Type=\\\'MONTH\\\' and qtr.Period_Type=\\\'QUARTER\\\' and mon.period_end_dt = {$G_PREV_QRTR_MONTH_END_DATE}\' );
+#BAU-523 : End of code.
+print( \'Soft Close DT Condition started\'||$G_HISTORY_SOFT_CLOSE_DT);
+
+', "x" = '401', "y" = '-134')
+BEGIN_SCRIPT
+print(('Before while loop $G_PREV_QRTR_MONTH_END_DATE : ' || $G_PREV_QRTR_MONTH_END_DATE));$G_HISTORY_SOFT_CLOSE_DT = sql('Rep_Mart', 'select (case when MONTH( mon.Period_End_DT) IN (3,6,9,12) THEN isnull(qtr.Fred_Soft_Close_DT,mon.Period_End_DT) else mon.Period_End_DT end ) G_history_Soft_Close_Dt from dbo.TMP_REP_LANDED_PERIOD_LOOKUP mon inner join dbo.TMP_REP_LANDED_PERIOD_LOOKUP qtr on (mon.Period_End_DT between qtr.Period_Start_DT and qtr.Period_End_DT) where mon.Period_Type=\'MONTH\' and qtr.Period_Type=\'QUARTER\' and mon.period_end_dt = {$G_PREV_QRTR_MONTH_END_DATE}');print(('Soft Close DT Condition started' || $G_HISTORY_SOFT_CLOSE_DT));END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>413</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>629</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1025', "y" = '-365')
+CALL PLAN WF_REP_WRK_Build_Outw_Advice_Premium_Claims::'ef8107d1-5326-4832-8968-c221363ad951'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>394</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Increment_Month_End_Date', "ui_script_text" = '# ########################################################################################################
+# Script Name  : SCR_Increment_Month_End_Date
+# Created By   : Sudheer V
+# Date Created : 05/12/2012
+# Description  : This Script will increment the month end date for every month till it reaches the Open Month End DT
+# Modification Log
+# ================
+# Date              By            Vesrion         Description
+# 05/12/2012      Sudheer V         0.1          Initial version
+
+# ##########################################################################################################
+
+$G_PREV_QRTR_MONTH_END_DATE = add_months( $G_PREV_QRTR_MONTH_END_DATE , 1);
+print(\'after while loop $G_PREV_QRTR_MONTH_END_DATE : \'|| $G_PREV_QRTR_MONTH_END_DATE );', "x" = '1675', "y" = '-551')
+BEGIN_SCRIPT
+$G_PREV_QRTR_MONTH_END_DATE = add_months($G_PREV_QRTR_MONTH_END_DATE, 1);print(('after while loop $G_PREV_QRTR_MONTH_END_DATE : ' || $G_PREV_QRTR_MONTH_END_DATE));END
+END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>607</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "x" = '2010', "y" = '-253')
+CALL PLAN WF_REP_WRK_Load_Outw_Actuals::'0d330bfb-8704-41c6-b079-3112a69774e3'();
+END
+ELSE
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>360</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Print_Message', "ui_script_text" = '# ########################################################################################################
+# Script Name  : SCR_Print_Message
+# Created By   : Sudheer V
+# Date Created : 07/12/2012
+# Description  : This Script will truncate the data from the WRK tables
+#                 
+# Modification Log
+# ================
+# Date              By            Vesrion         Description
+# 07/12/2012      Sudheer V         0.1          Initial version
+
+# ##########################################################################################################
+
+
+Load_Message( $G_LOAD_ID ,\'$G_OUTW_ACTUALS_ADHOC_MODE=[$G_OUTW_ACTUALS_ADHOC_MODE]\');
+', "x" = '422', "y" = '-369')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, '$G_OUTW_ACTUALS_ADHOC_MODE=[$G_OUTW_ACTUALS_ADHOC_MODE]');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>597</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>508</CX><CY>112</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1545', "y" = '-370')
+CALL PLAN WF_REP_LOAD_ACTUARIAL_FACT::'1133846f-4a98-4e3d-9049-d1067ac7e7ee'();
+END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>769</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '3400', "y" = '-616')
+CALL PLAN WF_REP_FACT_Inw_Syndicate_Contract_Load::'a416c2e6-3140-4c91-9790-a827561556ee'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>288</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-191</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Load_End', "ui_script_text" = '# Mark the load as successfully completed
+Load_End($G_LOAD_ID);
+Load_Message($G_LOAD_ID,\'INFO - Load completed successfully (Load id=[$G_LOAD_ID])\');
+Load_Message_List($G_LOAD_ID);
+', "x" = '4432', "y" = '-631')
+BEGIN_SCRIPT
+load_end($G_LOAD_ID);load_message($G_LOAD_ID, 'INFO - Load completed successfully (Load id=[$G_LOAD_ID])');load_message_list($G_LOAD_ID);END
+END
+ AlGUIComment ("ObjectDesc" = 'Catching any error in the job', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>17</X><Y>0</Y></LOCATION><SIZE><CX>216</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-204</Y></LOCATION><SIZE><CX>446</CX><CY>86</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'Catch', "x" = '4816', "y" = '-629')
+CATCH (210101)
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>319</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Load_Failed', "ui_script_text" = '# Mark the load as failed in the load management table
+
+	begin
+		# Mark the load as failed in the load management table
+		Load_Failed($G_LOAD_ID);
+		Load_Message($G_LOAD_ID,\'---------------------------------------------------\');
+		Load_Message($G_LOAD_ID,\'ERROR: Job has failed. See the job log for details.\');
+		Load_Message($G_LOAD_ID,\'---------------------------------------------------\');
+	end
+	
+Load_Message_List($G_LOAD_ID);', "x" = '1331', "y" = '-184')
+BEGIN_SCRIPT
+BEGIN
+load_failed($G_LOAD_ID);load_message($G_LOAD_ID, '---------------------------------------------------');load_message($G_LOAD_ID, 'ERROR: Job has failed. See the job log for details.');load_message($G_LOAD_ID, '---------------------------------------------------');END
+load_message_list($G_LOAD_ID);END
+END
+
+END_TRY
+END
+ SET ("database_type" = 'Microsoft_SQL_Server', "job_GV_$G_DATA_SOURCE" = '\'FORECASTING\'', "job_GV_$G_DATE_DEPENDANT_JOB" = '\'JOB_REP_20_Publish_Dimensions\'', "job_GV_$G_DEPENDANT_JOB" = '\'JOB_KDR_15_Load_KDR_Derived_Tables\'', "job_GV_$G_HISTORY_MONTH_END_DT" = '\'1992-01-31 23:59:59.000\'', "job_GV_$G_INCREMENTAL_LOAD" = '\'N\'', "job_GV_$G_OUTW_ACTUALS_ADHOC_MODE" = '\'N\'', "job_GV_$G_SLEEP_INTERVAL" = '5000', "job_checkpoint_enabled" = 'no', "job_collect_statistics" = 'no', "job_collect_statistics_monitor" = 'no', "job_create_debug_package" = 'no', "job_enable_assemblers" = 'yes', "job_enable_audit" = 'yes', "job_enable_dataquality" = 'yes', "job_export_repo" = 'no', "job_export_reports" = 'no', "job_guid" = '44e113c2-d460-45cd-ba7e-2e012b3c0dc3', "job_isrecoverable" = 'no', "job_mode" = 'Multi-Process', "job_monitor_sample_rate" = '64000', "job_monitor_timer_rate" = '5', "job_name" = 'JOB_REP_100_Load_Actuarial_Fact', "job_print_version" = 'no', "job_testmode_enabled" = 'no', "job_trace_abapquery" = 'no', "job_trace_all" = 'no', "job_trace_ascomm" = 'no', "job_trace_assemblers" = 'no', "job_trace_audit" = 'no', "job_trace_dataflow" = 'yes', "job_trace_idoc_file" = 'no', "job_trace_memory_loader" = 'no', "job_trace_memory_reader" = 'no', "job_trace_optimized_dataflow" = 'no', "job_trace_parallel_execution" = 'no', "job_trace_rfc_function" = 'no', "job_trace_row" = 'no', "job_trace_script" = 'no', "job_trace_session" = 'yes', "job_trace_sql_only" = 'no', "job_trace_sqlfunctions" = 'no', "job_trace_sqlloaders" = 'no', "job_trace_sqlreaders" = 'no', "job_trace_sqltransforms" = 'no', "job_trace_stored_procedure" = 'no', "job_trace_table" = 'no', "job_trace_table_reader" = 'no', "job_trace_transform" = 'no', "job_trace_userfunction" = 'no', "job_trace_usertransform" = 'no', "job_trace_workflow" = 'yes', "job_type" = 'batch', "job_use_statistics" = 'yes', "locale_codepage" = '<default>', "locale_language" = '<default>', "locale_territory" = '<default>', "oracle_host_string" = 'LONANTRND1', "password" = '+0400000000120303000803E88C773FD5BFF943CFCFC3A8C263819BF8BB89080E62EF2057D938C499FA2D3F51D35704C7AE044F9D', "sql_server_database" = 'DI_LOCAL_REPOS_MSrivastava', "sql_server_dataserver" = 'LONANTRND1', "user" = 'DI_MSrivastava')

@@ -1,0 +1,460 @@
+#__AW_Repository_Version '14.2.11.0000';
+#__AW_Product_Version '14.2.11.2138';
+#__AW_ATL_Locale 'eng_gb.utf-8';
+ AlGUIComment ("ANNOTATION_0" = 'ALGUICOMMENT( x = \'210\', y = \'-1344\',ObjectDesc=\'Job_Name:	JOB_KDR_11_Build_Reference_And_KDR_For_Eclipse
+
+Modification Log
+==============
+Version	Date		Modified By	Comment
+-----------------------------------------------------------------------------------------------------------------------------------
+1.0.0	03/09/2009 	Steve Annetts	Initial version
+1.0.1	03/09/2009	Steve Osmond 	Added processing to check for valid unload sets in staging.
+1.0.2        12/02/2009	Dinesh Vimal	Updated SCR_Load_Start script with new logic
+1.0.3        12/04/2010	D Lloyd		Added new variable $G_KDR_BINDER_LOAD to load BAS_Underwriting_Division only when set to \\\'Y\\\' - when all components are part of the build then the default for this should be set to \\\'Y\\\'
+1.0.4	20/05/2010	Ravinder Dosanjh: Jira ECLR-211 Set global $G_LOAD_TYPE to be NULL instead of INITIAL - this will be set on the first full incremental run.
+
+1.0.5	02/08/2011	Steve Osmond :
+	+   Added new global $G_GENERATED_DATA_SOURCE_REPOS_ID int
+	+   Added new globals $G_HOLD_INW_CONTRACT_REPOS_ID int to support call to fn_Derive_Cession_PCT_YOA in DF_KDR_Build_Inw_Outw_Involvement_Applicable
+	+   Added new globals $G_HOLD_INW_CEDING_CUM Decimal(15,8) to support call to fn_Derive_Cession_PCT_YOA in DF_KDR_Build_Inw_Outw_Involvement_Applicable
+	+   Added new globals $G_HOLD_REMAINING_TO_CEDE Decimal(15,8) to support call to fn_Derive_Cession_PCT_YOA in DF_KDR_Build_Inw_Outw_Involvement_Applicable
+	+   Added new globals $G_HOLD_YOA int to support call to fn_Derive_Cession_PCT_YOA in DF_KDR_Build_Inw_Outw_Involvement_Applicable
+
+4.2.0	16/08/2011	Steve Osmond	+  Added new global $G_PERIOD_EARLY_RI_SWITCH_DT datetime
+1.0.7	25/01/2012	Simon Chung	JIRA FORE-546 Updated and added processing for Outward USM contracts DURG Allocation processing, including exception report processing and notification.
+					Job changes include additional global variables: $G_FLATFILE_DATA_PATH, $G_FLATFILE_DATA_FILENAME, $G_REPORT_OUTPUT_PREFIX	, $G_NOTIFICATION_EMAIL_RECIPIENT, $G_NOTIFICATION_EMAIL_SUBJECT_STRING, $G_NOTIFICATION_EMAIL_MESSAGE_STRING, $G_NOTIFICATION_EMAIL_SENT, $G_EXCEPTION_LOAD_ID, $G_EXCEPTION_JOB_STATUS
+			New WF WF_KDR_Report_Exceptions positioned within CND_Main_KDR_Load, after WF_KDR_Prepare_For_Next_Load
+			Where WF_KDR_Report_Exceptions contains all components required for exception report processing:
+				New: WF_KDR_Report_Exceptions
+				New: WF_KDR_Report_Exceptions_USM_DURG
+				 	NB. Contains scripts and conditional WF objects
+				 	New: DF_CSV_KDR_USM_Exception_Output_Flatfile
+
+1.0.8	08/02/2012	Simon Chung	JIRA FR-546 Updated "SCR_Set_Globals" for open quarters processing. Remove raise_exception() and introduce conditional processing for OutW USM Durg Allocation.
+					Added global variables: $G_FRED_PROCESSING_DO, $G_COUNT_OF_FRED_OPEN_QUARTERS to facilitate change.
+
+1.0.9	14/04/2012	Ramya S                  JIRA FORA-863 -To include $G_QTR_START_DT to the current open Forecasting period from period_lookup
+
+1.0.10	13/02/2013	Alex Sam		ITSM-132755 - Readded a missing object \\\'WF_KDR_Report_Exceptions\\\' within the object \\\'CND_Main_KDR_Load, after WF_KDR_Prepare_For_Next_Load\\\'.
+
+1.1.0	24/10/2013	Aruna N		ITSM-151264: Added two new variables $G_FC_LATEST_QUARTER_REPOS_ID and $G_PERIOD_SOFT_CLOSE_DT to select previous quarter\\\'s repos ID and previous
+					quarter\\\'s soft close date when there is no Open quarter.
+1.1.1	22/08/2014	Akshatha Makam	As part of EUI project added one new global variable $G_CBS_DATA_SOURCE_REPOS_ID
+1.1.2	11/09/2014	Soujanya B	Jira EUI-26: Create a new global variable $G_CURRENT_DATE as part the ITEM-09.
+1.1.3	31/12/2014	Aruna N		BAU-92: Modified the object \\\'SCR_Set_Globals\\\' by deriving the variable $G_QTR_START_DT based on Quarter\\\'s end date alone. Removed the dependency on Open
+					forecasting quarter else Qtr_Start_Dt remains blank when the quarter is closed.
+1.1.4	01/06/2015	Aravindh N	EUI-331 Added a new global variable $G_ECLIPSE_UPGRADE_DATE.
+
+1.1.5	30/07/2015	Aruna N		BAU-201: Adding two new variables to display the Inserted Date of a Policy/ PolicyLine as quarter end date during calander quarter ends, because the contracts entered
+					during Qtr end will be inserted to KDR the next day morning with sysdate as timestamp due to Eclipse batch delay which is incorrect.
+					Variables- $G_FC_QTR_END_DT and $G_FC_NEXT_QTR_START_DT
+1.1.6	22/11/2016	Sumeet K		BAU-423: Added a new global variable $G_CALC_PERIOD_END_DT used to derive period type based on current calculation month\\\'s end date. Initialised under 					SCR_Set_Globals
+1.1.7 	15/03/2017              Chandrakanth N       3PCR-Added Variable $G_MAX_GENERATED_ID
+1.1.8	23/08/2018    	Ashwini Birse	BAU-1377 :Added a script in sequence after the dataflow DF_KDR_WRK_Inw_Claim_Movement_Part1 in order to send an email notification to the intended receipients if there 						are any ClaimIDs  with more than one Manual Movement in a day for the current process period on the job rundate\',UI_DATA_XML=\'<UIDATA><MAINICON><LOCATION><X>-210</X><Y>1344</Y></LOCATION><SIZE><CX>0</CX><CY>0</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>3425</CX><CY>2459</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>\' )
+', "ActaName_1" = 'RDescription', "ActaName_2" = 'RSavedAfterCheckOut', "ActaName_3" = 'RDate_created', "ActaName_4" = 'RDate_modified', "ActaValue_1" = 'Loads 
+(i) Reference data from Eclipse into the MasterReferenceData database 
+(ii) the KDR the oldest unloaded data from Eclipse 
+(iii) stores the unloaded Eclipse table natural keys for the detection of deletes in the next load
+(iv) updates the load management table to indicate a successful load.', "ActaValue_2" = 'YES', "ActaValue_3" = 'Thu Aug 21 16:35:19 2014', "ActaValue_4" = 'Tue Apr  7 17:20:00 2020', "x" = '-1', "y" = '-1')
+CREATE SESSION JOB_KDR_11_Build_Reference_And_KDR_For_Eclipse::'b3a6b748-2c4f-4256-aa24-535a2ab40248'( )
+DECLARE
+     GLOBAL $G_LOAD_ID INT ;
+     GLOBAL $G_SYSDATE DATETIME(9) ;
+     GLOBAL $G_LOAD_TYPE VARCHAR(10) ;
+     GLOBAL $G_START_OF_TIME DATETIME(9) ;
+     GLOBAL $G_END_OF_TIME DATETIME(9) ;
+     GLOBAL $G_BATCH_FILE_PATH VARCHAR(255) ;
+     GLOBAL $G_TRUNCATE_UNLOAD VARCHAR(1) ;
+     GLOBAL $G_UNLOAD_EXECUTION_START_DT DATETIME(9) ;
+     GLOBAL $G_UNLOAD_ID INT ;
+     GLOBAL $G_LAST_UPDATED_BY VARCHAR(50) ;
+     GLOBAL $G_MARKET VARCHAR(50) ;
+     GLOBAL $G_RUN_UNLOAD_CLEANUP_WHEN_COMPLETE VARCHAR(1) ;
+     GLOBAL $G_METADATA_SOURCE_KEY INT ;
+     GLOBAL $G_MRD_ECLIPSE_DATA_SOURCE_KEY INT ;
+     GLOBAL $G_KDR_MRD_DATA_SOURCE_REPOS_ID INT ;
+     GLOBAL $G_KDR_ECLIPSE_DATA_SOURCE_REPOS_ID INT ;
+     GLOBAL $G_MARKET_REPOS_ID INT ;
+     GLOBAL $G_OUTW_ADMIN_STATUS VARCHAR(50) ;
+     GLOBAL $G_TIMEZONE_REPOS_ID INT ;
+     GLOBAL $G_CONTRACT_RECORD_SYNDICATE_CONTRACT_REPOS_ID INT ;
+     GLOBAL $G_CONTRACT_RECORD_LAYER_REPOS_ID INT ;
+     GLOBAL $G_CONTRACT_RECORD_DEC_REPOS_ID INT ;
+     GLOBAL $G_CONTRACT_RECORD_POLICY_REPOS_ID INT ;
+     GLOBAL $G_CONTRACT_RECORD_SECTION_REPOS_ID INT ;
+     GLOBAL $G_MRD_LOAD VARCHAR(1) ;
+     GLOBAL $G_KDR_LOAD VARCHAR(1) ;
+     GLOBAL $G_NUMBER_OF_VALIDATION_RUNS_TO_KEEP INT ;
+     GLOBAL $G_JOB_NAME VARCHAR(50) ;
+     GLOBAL $G_POLICY_START_INCEPTION_DT DATETIME(9) ;
+     GLOBAL $G_VALIDATION_COUNT INT ;
+     GLOBAL $G_DEPENDANT_JOB_STATUS VARCHAR(10) ;
+     GLOBAL $G_MAIN_KDR_TABLE_LOAD VARCHAR(1) ;
+     GLOBAL $G_KDR_BINDER_LOAD VARCHAR(1) ;
+     GLOBAL $G_GENERATED_DATA_SOURCE_REPOS_ID INT ;
+     GLOBAL $G_HOLD_INW_CONTRACT_REPOS_ID INT ;
+     GLOBAL $G_HOLD_INW_CEDING_CUM DECIMAL(15, 8) ;
+     GLOBAL $G_HOLD_REMAINING_TO_CEDE DECIMAL(15, 8) ;
+     GLOBAL $G_HOLD_YOA INT ;
+     GLOBAL $G_PERIOD_EARLY_RI_SWITCH_DT DATETIME(9) ;
+     GLOBAL $G_FC_CURRENT_QUARTER_REPOS_ID INT ;
+     GLOBAL $G_STATUS_TO_USE VARCHAR(50) ;
+     GLOBAL $G_COUNT_OF_NON_CLOSED_QUARTERS INT ;
+     GLOBAL $G_JOB_TERMINATION_TYPE VARCHAR(4) ;
+     GLOBAL $G_STATUS_OPEN VARCHAR(50) ;
+     GLOBAL $G_NON_CLOSED_QUARTER_END_DT DATETIME(9) ;
+     GLOBAL $G_SOFT_CLOSE_DT DATETIME(9) ;
+     GLOBAL $G_QTR_END_DT DATETIME(9) ;
+     GLOBAL $G_CURRENT_PERIOD VARCHAR(7) ;
+     GLOBAL $G_FLATFILE_DATA_PATH VARCHAR(255) ;
+     GLOBAL $G_FLATFILE_DATA_FILENAME VARCHAR(255) ;
+     GLOBAL $G_REPORT_OUTPUT_PREFIX VARCHAR(50) ;
+     GLOBAL $G_NOTIFICATION_EMAIL_RECIPIENT VARCHAR(255) ;
+     GLOBAL $G_NOTIFICATION_EMAIL_SUBJECT_STRING VARCHAR(255) ;
+     GLOBAL $G_NOTIFICATION_EMAIL_MESSAGE_STRING VARCHAR(255) ;
+     GLOBAL $G_NOTIFICATION_EMAIL_SENT VARCHAR(255) ;
+     GLOBAL $G_EXCEPTION_LOAD_ID INT ;
+     GLOBAL $G_EXCEPTION_JOB_STATUS VARCHAR(10) ;
+     GLOBAL $G_FRED_PROCESSING_DO VARCHAR(1) ;
+     GLOBAL $G_COUNT_OF_FRED_OPEN_QUARTERS INT ;
+     GLOBAL $G_QTR_START_DT DATETIME(9) ;
+     GLOBAL $G_FC_LATEST_QUARTER_REPOS_ID INT ;
+     GLOBAL $G_PERIOD_SOFT_CLOSE_DT DATETIME(9) ;
+     GLOBAL $G_CBS_DATA_SOURCE_REPOS_ID INT ;
+     GLOBAL $G_CURRENT_DATE DATETIME(9) ;
+     GLOBAL $G_ECLIPSE_UPGRADE_DATE DATETIME(9) ;
+     GLOBAL $G_FC_QTR_END_DT DATETIME(9) ;
+     GLOBAL $G_FC_NEXT_QTR_START_DT DATETIME(9) ;
+     GLOBAL $G_CALC_PERIOD_END_DT DATETIME(9) ;
+     GLOBAL $G_MAX_GENERATED_ID INT ;
+     GLOBAL $G_CHECK_CLAIMLINEID_COUNT INT ;
+     GLOBAL $G_CLAIMLINEID VARCHAR(1000) ;
+     GLOBAL $G_CURRENT_CLAIMLINEID_VALUE VARCHAR(1000) ;
+     GLOBAL $G_EMAIL_RECIPIENT VARCHAR(1000) ;
+     GLOBAL $G_CLAIMLINEID_INITIAL_CNT INT ;
+     GLOBAL $G_PREVIOUS_CLAIMLINEID_VALUE VARCHAR(1000) ;
+     GLOBAL $G_LBS_BROKER_REPOS_ID INT ;
+     GLOBAL $G_LBS_BROKER_CODE INT ;
+     GLOBAL $G_PRELOAD_CLAIMMOVEMENT_DONE INT ;
+     GLOBAL $G_SLEEP_INTERVAL INT ;
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>216</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-191</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'Try', "x" = '94', "y" = '-37')
+TRY
+BEGIN
+ AlGUIComment ("ObjectDesc" = 'Create a new entry in the load management table', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>258</X><Y>0</Y></LOCATION><SIZE><CX>303</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-186</Y></LOCATION><SIZE><CX>471</CX><CY>107</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Load_Start', "ui_script_text" = '# Function: Load_Start (1,2,3)
+# 1: Name of the project
+# 2: (DI) Name of dependant job
+# 3: Flag to indicate that the job should fail if the dependant job failed the last time it was run (Y|N)
+
+# Create a new load in the load management control table
+# Create a new load in the load management control table
+$G_LOAD_ID = Load_Start(\'KDR\',\'JOB_KDR_10_Land_And_Unload_Eclipse\',\'Y\',$G_DEPENDANT_JOB_STATUS);
+print(\'Load is running as load id [$G_LOAD_ID].\');
+
+# $G_DEPENDANT_JOB_STATUS is set in Load_Start() with a default of NULL.
+# If Load_Start is called with a dependant and \'Y\' as the flag then if the 
+# dependant has failed $G_DEPENDANT_JOB_STATUS will return FAILED. In this
+# case terminate this job with a raise_exception() call which will be caught by the
+# catch transform allowing the job to terminate gracefully. In Load_Failed the run of this
+# job in CTRL_Load_Management will be set to Failed.
+if ( $G_DEPENDANT_JOB_STATUS = \'FAILED\' )
+	begin
+		Load_Message( $G_LOAD_ID ,\'ERROR: Dependant job did not complete successfully. This job is terminated without starting.\');
+		raise_exception( \'ERROR: Dependant job did not complete successfully. This job is terminated without starting.\');
+	end
+else
+	Load_Message( $G_LOAD_ID ,\'KDR Build: Processing started.\');
+
+	', "x" = '273', "y" = '-35')
+BEGIN_SCRIPT
+$G_LOAD_ID = load_start('KDR', 'JOB_KDR_10_Land_And_Unload_Eclipse', 'Y', $G_DEPENDANT_JOB_STATUS);print('Load is running as load id [$G_LOAD_ID].');IF (($G_DEPENDANT_JOB_STATUS = 'FAILED') )
+BEGIN
+load_message($G_LOAD_ID, 'ERROR: Dependant job did not complete successfully. This job is terminated without starting.');raise_exception('ERROR: Dependant job did not complete successfully. This job is terminated without starting.');END
+ELSE
+load_message($G_LOAD_ID, 'KDR Build: Processing started.');END
+ AlGUIComment ("ObjectDesc" = 'Set global variables used in the job', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>81</X><Y>0</Y></LOCATION><SIZE><CX>319</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>265</CX><CY>108</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Set_Globals', "ui_script_text" = '# Set global variables
+$G_SYSDATE = to_date(sql(\'KDR\',\'select getdate()\'),\'YYYY-MM-DD HH24:MI:SS.FF\');
+$G_START_OF_TIME = to_date(\'1800-01-01 00:00:00\',\'YYYY-MM-DD HH24:MI:SS\');
+$G_END_OF_TIME = to_date(\'9999-12-31 23:59:59\',\'YYYY-MM-DD HH24:MI:SS\');
+# Getting date with out time stamp.
+$G_CURRENT_DATE = to_date(sql(\'KDR\',\'select getdate()\'),\'YYYY-MM-DD\');
+
+$G_JOB_NAME = job_name();
+
+# Uncomment / use as appropriate
+#$G_LOAD_TYPE = \'INITIAL\';
+#$G_FLATFILE_DATA_PATH = NULL;
+#$G_BATCH_FILE_PATH = NULL;
+
+# Retrieve the load id of the oldest unprocessed unload set
+# The conditional component following this script process and validates
+# the return values
+$G_UNLOAD_ID = fn_KDR_Start_Unload($G_UNLOAD_EXECUTION_START_DT);
+
+# Call function to clear any old records from DI_Validation
+# for this job run from this repository.
+fn_Maintain_DI_Validation( $G_JOB_NAME, $G_NUMBER_OF_VALIDATION_RUNS_TO_KEEP, $G_LOAD_ID );
+
+# Globals used by Treaty rule processing $G_POLICY_START_INCEPTION_DT and $G_VALIDATION_COUNT
+# $G_POLICY_START_INCEPTION_DT is set to the earliest inception date for a policy that we are interested in:
+$G_POLICY_START_INCEPTION_DT = to_date(\'1992-01-01 00:00:00\',\'YYYY-MM-DD HH24:MI:SS\');
+
+$G_ECLIPSE_UPGRADE_DATE = to_date(\'2015-04-01 00:00:00\',\'YYYY-MM-DD HH24:MI:SS\');
+
+# Count number of validation errors made
+$G_VALIDATION_COUNT = 0;
+
+#FORE-353 - Set defaults for the revised cession algorithm
+$G_HOLD_INW_CONTRACT_REPOS_ID =0;
+$G_HOLD_INW_CEDING_CUM  = 0.0;
+$G_HOLD_REMAINING_TO_CEDE  = 0.0;
+$G_HOLD_YOA  = 0;
+
+
+##############################################################################################################
+
+## This global variable declaration set (within hash lines), initiates variables required by JIRA 
+## "FORE-546 - USM DURG Split processing"
+## NB. Code copied and amended from "JOB_FRED_10..." to suit requirements.
+
+$G_STATUS_OPEN = \'OPEN\';
+$G_STATUS_TO_USE = $G_STATUS_OPEN;
+$G_FRED_PROCESSING_DO = \'Y\';
+
+## NB. Checks for FReD open quarters, as the AR DURG allocations if for usage initially in FReD.
+## Check there is only 1 quarter where fred_current_ind = Y.
+$G_COUNT_OF_FRED_OPEN_QUARTERS = NVL( sql(\'KDR\', \'select count(*) from DBO.period_lookup where fred_current_ind = \\\'Y\\\' and period_type = \\\'QUARTER\\\'\'), 0 );
+
+if ( $G_COUNT_OF_FRED_OPEN_QUARTERS <> 1 )
+ begin
+
+	Load_Message( $G_LOAD_ID,\'INFO : There is no open FReD quarter in KDR table Period_Lookup. Advice Ratio DURG Allocation table processing will be skipped.\');
+	$G_FRED_PROCESSING_DO = \'N\';
+
+ end
+else 
+ begin
+
+	Load_Message($G_LOAD_ID,\'Number of Quarters where QUARTER_STATUS = \' || $G_STATUS_TO_USE || \' : \' || $G_COUNT_OF_FRED_OPEN_QUARTERS);
+
+	## Continue once it has been confirmed there is only 1 open forecasting quarter in period_lookup
+	## Set $G_FC_CURRENT_QUARTER_REPOS_ID to point to the current open Forecasting period from period_lookup
+	$G_FC_CURRENT_QUARTER_REPOS_ID = sql(\'KDR\', \'select period_repos_id from Period_Lookup where forecasting_status = \\\'[$G_STATUS_TO_USE]\\\' and period_type = \\\'QUARTER\\\'\');
+
+
+	## FORE-546, (TAKEN FROM - FORA-633) - establish soft close date
+	# Initially check the status of Forecasting looking for the period end date associated with the only non closed quarter
+	$G_NON_CLOSED_QUARTER_END_DT = NVL( sql( \'Forecasting\', \'select quarter_end_date from DBO.quarter_Lookup where quarter_Status <> \\\'CLOSED\\\'\' ), $G_SYSDATE );
+	$G_SOFT_CLOSE_DT = NVL( sql( \'KDR\', \'select Period_Soft_Close_DT from DBO.Period_Lookup where Period_Type = \\\'QUARTER\\\' and period_end_dt = {$G_NON_CLOSED_QUARTER_END_DT}\' ), $G_SYSDATE );
+
+	#If we haven\'t breached the soft close date then use todays date
+	if ($G_SOFT_CLOSE_DT > $G_SYSDATE)
+	begin 
+		 load_message($G_LOAD_ID,\'Forecasting Soft Close Date ([$G_SOFT_CLOSE_DT]) not breached, landing records that are effective for [$G_SYSDATE].\');
+		 $G_SOFT_CLOSE_DT=$G_SYSDATE;
+	end
+	else load_message($G_LOAD_ID,\'Forecasting Soft Close Date ([$G_SOFT_CLOSE_DT]) breached, landing records that are effective for [$G_SOFT_CLOSE_DT].\');
+
+	# State the current period in the log
+	$G_CURRENT_PERIOD = sql(\'KDR\',\'SELECT period from period_lookup where fred_current_ind=\\\'Y\\\' and period_type=\\\'QUARTER\\\'\');
+
+	print(\'KDR FReD Prep load running for period [$G_CURRENT_PERIOD]\');
+	print(\'$G_SOFT_CLOSE_DT = [$G_SOFT_CLOSE_DT]\');
+
+	$G_QTR_END_DT = Get_Quarter_End_Date(SUBSTR(Convert_Month_Style_Period_to_Quarter_Style_Period($G_CURRENT_PERIOD),1,4)||lpad(SUBSTR(Convert_Month_Style_Period_to_Quarter_Style_Period($G_CURRENT_PERIOD),6,2),2,\'0\'));
+	print(\'$G_QTR_END_DT = [$G_QTR_END_DT]\');
+
+	# BAU-92: Quarter start date is derived based on Quarter\'s end date. Removed the dependency on Open forecasting quarter else Qtr_Start_Dt remains blank when the quarter is closed.
+	# -----------------------------------------------
+	# FORA-863 changes to include $G_QTR_START_DT to the current open Forecasting period from period_lookup
+	# $G_QTR_START_DT = sql(\'KDR\',\'select Period_Start_DT from PERIOD_LOOKUP where period_end_dt = \\\'[$G_QTR_END_DT]\\\' and Period_Type = \\\'QUARTER\\\' and forecasting_status = \\\'OPEN\\\'\');
+	
+	$G_QTR_START_DT = sql(\'KDR\',\'select Period_Start_DT from PERIOD_LOOKUP where period_end_dt = \\\'[$G_QTR_END_DT]\\\' and Period_Type = \\\'QUARTER\\\'\'); 
+	print(\'$G_QTR_START_DT = [$G_QTR_START_DT]\');
+	# -----------------------------------------------
+ end
+
+##############################################################################################################
+
+# ITSM-151264: Creating new variables to select previous quarter\'s repos ID and previous quarter\'s soft close date when there is no Open quarter.
+
+if ( $G_FC_CURRENT_QUARTER_REPOS_ID IS NULL )
+	begin
+		$G_FC_LATEST_QUARTER_REPOS_ID = sql(\'KDR\',\'select Period_Repos_ID-1 from PERIOD_LOOKUP where GETDATE() between Period_Start_DT and Period_End_DT and Period_Type=\\\'QUARTER\\\'\');
+		$G_PERIOD_SOFT_CLOSE_DT = sql(\'KDR\',\'select Period_Soft_Close_DT from PERIOD_LOOKUP where period_repos_id = \\\'[$G_FC_LATEST_QUARTER_REPOS_ID]\\\'\');
+		print(\'Considering Previus quarter Repos ID as there is no Open quarter, $G_FC_LATEST_QUARTER_REPOS_ID = [$G_FC_LATEST_QUARTER_REPOS_ID]\');
+	end
+else 
+	begin
+		$G_FC_LATEST_QUARTER_REPOS_ID = $G_FC_CURRENT_QUARTER_REPOS_ID ;
+		$G_PERIOD_SOFT_CLOSE_DT = $G_SOFT_CLOSE_DT ;
+	end
+
+
+# BAU-201: Adding two new variables to display the Inserted Date of a Policy/ PolicyLine as quarter end date during calander quarter ends, 
+# because the contracts entered during Qtr end will be inserted to KDR the next day morning with sysdate as timestamp due to Eclipse batch delay which is incorrect.
+
+$G_FC_QTR_END_DT = sql(\'KDR\',\'select dateadd(day, datediff(day, 0,convert(date,Period_End_DT)),\\\'22:00:00\\\') from Period_Lookup where Period_Type=\\\'QUARTER\\\' and Forecasting_Status=\\\'[$G_STATUS_TO_USE]\\\'\');
+print(\'$G_FC_QTR_END_DT = [$G_FC_QTR_END_DT]\');
+
+$G_FC_NEXT_QTR_START_DT = SQL(\'KDR\',\'select dateadd(day, datediff(day, 0,convert(date,Period_End_DT+1)),\\\'20:00:00\\\') from Period_Lookup where Period_Type=\\\'QUARTER\\\' and Forecasting_Status=\\\'[$G_STATUS_TO_USE]\\\'\');
+print(\'$G_FC_NEXT_QTR_START_DT = [$G_FC_NEXT_QTR_START_DT]\');
+
+#BAU-423: Added a new global variable $G_CALC_PERIOD_END_DT used to derive period type based on current calculation month\'s end date.
+
+$G_CALC_PERIOD_END_DT = SQL(\'KDR\',\'select period_end_dt from Period_Lookup where Calculation_Status=\\\'OPEN\\\'\');
+print(\'$G_CALC_PERIOD_END_DT = [$G_CALC_PERIOD_END_DT]\');
+
+
+#BREX-278: If the Placing broker is LBS then pick Producing Broker. This variable will hold Broker Code
+print(\'$G_LBS_BROKER_CODE = [$G_LBS_BROKER_CODE]\');
+$G_LBS_BROKER_REPOS_ID = SQL(\'KDR\',\'select Broker_Repos_ID from Broker where Broker_Code=[$G_LBS_BROKER_CODE] and Current_IND=\\\'Y\\\' and Deleted_IND=\\\'N\\\'\');
+print(\'$G_LBS_BROKER_REPOS_ID = [$G_LBS_BROKER_REPOS_ID]\'); ', "x" = '901', "y" = '-36')
+BEGIN_SCRIPT
+$G_SYSDATE = to_date(sql('KDR', 'select getdate()'), 'YYYY-MM-DD HH24:MI:SS.FF');$G_START_OF_TIME = to_date('1800-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS');$G_END_OF_TIME = to_date('9999-12-31 23:59:59', 'YYYY-MM-DD HH24:MI:SS');$G_CURRENT_DATE = to_date(sql('KDR', 'select getdate()'), 'YYYY-MM-DD');$G_JOB_NAME = job_name();$G_UNLOAD_ID = fn_kdr_start_unload($G_UNLOAD_EXECUTION_START_DT);fn_maintain_di_validation($G_JOB_NAME, $G_NUMBER_OF_VALIDATION_RUNS_TO_KEEP, $G_LOAD_ID);$G_POLICY_START_INCEPTION_DT = to_date('1992-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS');$G_ECLIPSE_UPGRADE_DATE = to_date('2015-04-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS');$G_VALIDATION_COUNT = 0;$G_HOLD_INW_CONTRACT_REPOS_ID = 0;$G_HOLD_INW_CEDING_CUM = 0.00000000000000e+00;$G_HOLD_REMAINING_TO_CEDE = 0.00000000000000e+00;$G_HOLD_YOA = 0;$G_STATUS_OPEN = 'OPEN';$G_STATUS_TO_USE = $G_STATUS_OPEN;$G_FRED_PROCESSING_DO = 'Y';$G_COUNT_OF_FRED_OPEN_QUARTERS = nvl(sql('KDR', 'select count(*) from DBO.period_lookup where fred_current_ind = \'Y\' and period_type = \'QUARTER\''), 0);IF (($G_COUNT_OF_FRED_OPEN_QUARTERS != 1) )
+BEGIN
+load_message($G_LOAD_ID, 'INFO : There is no open FReD quarter in KDR table Period_Lookup. Advice Ratio DURG Allocation table processing will be skipped.');$G_FRED_PROCESSING_DO = 'N';END
+ELSE
+BEGIN
+load_message($G_LOAD_ID, ((('Number of Quarters where QUARTER_STATUS = ' || $G_STATUS_TO_USE) || ' : ') || $G_COUNT_OF_FRED_OPEN_QUARTERS));$G_FC_CURRENT_QUARTER_REPOS_ID = sql('KDR', 'select period_repos_id from Period_Lookup where forecasting_status = \'[$G_STATUS_TO_USE]\' and period_type = \'QUARTER\'');$G_NON_CLOSED_QUARTER_END_DT = nvl(sql('Forecasting', 'select quarter_end_date from DBO.quarter_Lookup where quarter_Status <> \'CLOSED\''), $G_SYSDATE);$G_SOFT_CLOSE_DT = nvl(sql('KDR', 'select Period_Soft_Close_DT from DBO.Period_Lookup where Period_Type = \'QUARTER\' and period_end_dt = {$G_NON_CLOSED_QUARTER_END_DT}'), $G_SYSDATE);IF (($G_SOFT_CLOSE_DT > $G_SYSDATE) )
+BEGIN
+load_message($G_LOAD_ID, 'Forecasting Soft Close Date ([$G_SOFT_CLOSE_DT]) not breached, landing records that are effective for [$G_SYSDATE].');$G_SOFT_CLOSE_DT = $G_SYSDATE;END
+ELSE
+load_message($G_LOAD_ID, 'Forecasting Soft Close Date ([$G_SOFT_CLOSE_DT]) breached, landing records that are effective for [$G_SOFT_CLOSE_DT].');$G_CURRENT_PERIOD = sql('KDR', 'SELECT period from period_lookup where fred_current_ind=\'Y\' and period_type=\'QUARTER\'');print('KDR FReD Prep load running for period [$G_CURRENT_PERIOD]');print('$G_SOFT_CLOSE_DT = [$G_SOFT_CLOSE_DT]');$G_QTR_END_DT = get_quarter_end_date((substr(convert_month_style_period_to_quarter_style_period($G_CURRENT_PERIOD), 1, 4) || lpad(substr(convert_month_style_period_to_quarter_style_period($G_CURRENT_PERIOD), 6, 2), 2, '0')));print('$G_QTR_END_DT = [$G_QTR_END_DT]');$G_QTR_START_DT = sql('KDR', 'select Period_Start_DT from PERIOD_LOOKUP where period_end_dt = \'[$G_QTR_END_DT]\' and Period_Type = \'QUARTER\'');print('$G_QTR_START_DT = [$G_QTR_START_DT]');END
+IF (($G_FC_CURRENT_QUARTER_REPOS_ID IS  NULL ) )
+BEGIN
+$G_FC_LATEST_QUARTER_REPOS_ID = sql('KDR', 'select Period_Repos_ID-1 from PERIOD_LOOKUP where GETDATE() between Period_Start_DT and Period_End_DT and Period_Type=\'QUARTER\'');$G_PERIOD_SOFT_CLOSE_DT = sql('KDR', 'select Period_Soft_Close_DT from PERIOD_LOOKUP where period_repos_id = \'[$G_FC_LATEST_QUARTER_REPOS_ID]\'');print('Considering Previus quarter Repos ID as there is no Open quarter, $G_FC_LATEST_QUARTER_REPOS_ID = [$G_FC_LATEST_QUARTER_REPOS_ID]');END
+ELSE
+BEGIN
+$G_FC_LATEST_QUARTER_REPOS_ID = $G_FC_CURRENT_QUARTER_REPOS_ID;$G_PERIOD_SOFT_CLOSE_DT = $G_SOFT_CLOSE_DT;END
+$G_FC_QTR_END_DT = sql('KDR', 'select dateadd(day, datediff(day, 0,convert(date,Period_End_DT)),\'22:00:00\') from Period_Lookup where Period_Type=\'QUARTER\' and Forecasting_Status=\'[$G_STATUS_TO_USE]\'');print('$G_FC_QTR_END_DT = [$G_FC_QTR_END_DT]');$G_FC_NEXT_QTR_START_DT = sql('KDR', 'select dateadd(day, datediff(day, 0,convert(date,Period_End_DT+1)),\'20:00:00\') from Period_Lookup where Period_Type=\'QUARTER\' and Forecasting_Status=\'[$G_STATUS_TO_USE]\'');print('$G_FC_NEXT_QTR_START_DT = [$G_FC_NEXT_QTR_START_DT]');$G_CALC_PERIOD_END_DT = sql('KDR', 'select period_end_dt from Period_Lookup where Calculation_Status=\'OPEN\'');print('$G_CALC_PERIOD_END_DT = [$G_CALC_PERIOD_END_DT]');print('$G_LBS_BROKER_CODE = [$G_LBS_BROKER_CODE]');$G_LBS_BROKER_REPOS_ID = sql('KDR', 'select Broker_Repos_ID from Broker where Broker_Code=[$G_LBS_BROKER_CODE] and Current_IND=\'Y\' and Deleted_IND=\'N\'');print('$G_LBS_BROKER_REPOS_ID = [$G_LBS_BROKER_REPOS_ID]');END
+ AlGUIComment ("If_condition" = '$G_UNLOAD_ID <> 0', "ObjectDesc" = 'Only continue if there are unload sets to process', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>528</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>5</X><Y>-185</Y></LOCATION><SIZE><CX>218</CX><CY>117</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'CND_Unload_Sets_To_Process', "x" = '1291', "y" = '-313')
+IF (($G_UNLOAD_ID != 0) )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>453</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Pre_Unload_Process', "ui_script_text" = '# Unload set to process
+# log the Id and Data
+Load_Message( $G_LOAD_ID, \'Processing will start using unload set (load_id=[$G_UNLOAD_ID])\');
+Load_Message( $G_LOAD_ID, \'Effective start date of [$G_UNLOAD_EXECUTION_START_DT] will be used\');
+', "x" = '25', "y" = '-149')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Processing will start using unload set (load_id=[$G_UNLOAD_ID])');load_message($G_LOAD_ID, 'Effective start date of [$G_UNLOAD_EXECUTION_START_DT] will be used');END
+ AlGUIComment ("If_condition" = '$G_MRD_LOAD=\'Y\'', "ObjectDesc" = 'Check conditional to see if reference build should take place.', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>23</X><Y>0</Y></LOCATION><SIZE><CX>391</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-205</Y></LOCATION><SIZE><CX>300</CX><CY>142</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'CND_Load_Reference', "x" = '588', "y" = '-144')
+IF (($G_MRD_LOAD = 'Y') )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>332</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Pre_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Processing MRD build started\');
+', "x" = '41', "y" = '-149')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Processing MRD build started');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>675</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '794', "y" = '-337')
+CALL PLAN WF_MRD_Load_Eclipse_Reference_Data::'10519559-85f7-45bd-964c-19b81086a544'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>650</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "x" = '1344', "y" = '-519')
+CALL PLAN WF_MRD_Load_3PCR_Reference_Data::'5ca35397-463e-40a2-b964-6a28988a2e6d'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>347</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Post_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Processing MRD build completed\');', "x" = '1876', "y" = '-602')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Processing MRD build completed');END
+END
+ELSE
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>216</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Exit', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'$G_MRD_LOAD is set to N - MRD data load skipped\');
+
+', "x" = '784', "y" = '-487')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, '$G_MRD_LOAD is set to N - MRD data load skipped');END
+END
+ AlGUIComment ("If_condition" = '$G_KDR_LOAD=\'Y\'', "ObjectDesc" = 'Check conditional to see if KDR build should take place', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>60</X><Y>0</Y></LOCATION><SIZE><CX>297</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-205</Y></LOCATION><SIZE><CX>307</CX><CY>137</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'CND_Load_KDR', "x" = '1201', "y" = '-145')
+IF (($G_KDR_LOAD = 'Y') )
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>332</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Pre_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Processing KDR build started\');', "x" = '43', "y" = '-47')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Processing KDR build started');END
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>282</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "x" = '691', "y" = '-225')
+CALL PLAN WF_Load_KDR::'19b17c28-96bc-4ec5-a86f-9796277e47a0'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>347</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Post_Process', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'Processing KDR build completed\');', "x" = '1678', "y" = '-569')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Processing KDR build completed');END
+END
+ELSE
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>216</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Exit', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'$G_KDR_LOAD is set to N - KDR data load skipped\');
+', "x" = '809', "y" = '-502')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, '$G_KDR_LOAD is set to N - KDR data load skipped');END
+END
+ AlGUIComment ("ObjectDesc" = 'Update the control tables to register the job as complete and to remove the unloaded Eclipse data as it has now been processed.', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>138</X><Y>0</Y></LOCATION><SIZE><CX>469</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-195</Y></LOCATION><SIZE><CX>478</CX><CY>174</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Post_Unload_Process', "ui_script_text" = '
+Load_Message( $G_LOAD_ID, \'Processing of unload set (load_id=[$G_UNLOAD_ID]) completed\');
+
+#Only update the load management if a full load cycle has taken place
+if($G_MRD_LOAD = \'Y\' and $G_KDR_LOAD= \'Y\' and $G_MAIN_KDR_TABLE_LOAD=\'Y\')
+begin	
+	# Update the load management table to reflect the successful
+	# load of all unload records associated with $G_UNLOAD_ID
+	fn_KDR_End_Unload($G_LOAD_ID,$G_UNLOAD_ID);
+
+	#additionally if the cleanup flag is set
+	if ( $G_RUN_UNLOAD_CLEANUP_WHEN_COMPLETE = \'Y\')
+	begin
+		# Cleanup the Unload area
+		# This will remove the \'processed to 
+		# KDR\' set of data from the staging unload area
+		fn_KDR_Cleanup_Unload($G_LOAD_ID);	
+	end
+end
+', "x" = '1658', "y" = '-149')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'Processing of unload set (load_id=[$G_UNLOAD_ID]) completed');IF (((($G_MRD_LOAD = 'Y') AND
+   ($G_KDR_LOAD = 'Y')) AND
+   ($G_MAIN_KDR_TABLE_LOAD = 'Y')) )
+BEGIN
+fn_kdr_end_unload($G_LOAD_ID, $G_UNLOAD_ID);IF (($G_RUN_UNLOAD_CLEANUP_WHEN_COMPLETE = 'Y') )
+BEGIN
+fn_kdr_cleanup_unload($G_LOAD_ID);END
+END
+END
+END
+ELSE
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>216</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-183</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Exit', "ui_script_text" = 'Load_Message( $G_LOAD_ID, \'There are no Eclipse unload sets to process into the KDR - Execution will halt\');
+
+', "x" = '931', "y" = '-262')
+BEGIN_SCRIPT
+load_message($G_LOAD_ID, 'There are no Eclipse unload sets to process into the KDR - Execution will halt');END
+END
+ AlGUIComment ("ObjectDesc" = 'Mark the job as successfully completed in the load management table', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>25</X><Y>0</Y></LOCATION><SIZE><CX>288</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-184</Y></LOCATION><SIZE><CX>457</CX><CY>166</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Load_End', "ui_script_text" = '# Mark the load as successfully completed
+Load_End($G_LOAD_ID);
+Load_Message($G_LOAD_ID,\'Load completed successfully (Load id=[$G_LOAD_ID])\');
+Load_Message_List($G_LOAD_ID);', "x" = '235', "y" = '-753')
+BEGIN_SCRIPT
+load_end($G_LOAD_ID);load_message($G_LOAD_ID, 'Load completed successfully (Load id=[$G_LOAD_ID])');load_message_list($G_LOAD_ID);END
+END
+ AlGUIComment ("ObjectDesc" = 'Catch any errors in the job', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>235</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>44</X><Y>-189</Y></LOCATION><SIZE><CX>200</CX><CY>166</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'Catch_Error', "x" = '959', "y" = '-752')
+CATCH (210101)
+BEGIN
+ AlGUIComment ("ObjectDesc" = 'Mark this load as failed', "UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>288</CX><CY>-173</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-191</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>1</VISIBLE></DESCRIPTION></UIDATA>', "ui_display_name" = 'SCR_Load_Failed', "ui_script_text" = '# Mark the load as failed in the load management table
+Load_Failed($G_LOAD_ID);
+
+Load_Message($G_LOAD_ID,\'---------------------------------------------------\');
+Load_Message($G_LOAD_ID,\'ERROR: Job has failed. See the job log for details.\');
+Load_Message($G_LOAD_ID,\'---------------------------------------------------\');
+
+
+Load_Message_List($G_LOAD_ID);
+', "x" = '981', "y" = '-637')
+BEGIN_SCRIPT
+load_failed($G_LOAD_ID);load_message($G_LOAD_ID, '---------------------------------------------------');load_message($G_LOAD_ID, 'ERROR: Job has failed. See the job log for details.');load_message($G_LOAD_ID, '---------------------------------------------------');load_message_list($G_LOAD_ID);END
+END
+
+END_TRY
+END
+ SET ("database_type" = 'Microsoft_SQL_Server', "job_GV_$G_KDR_BINDER_LOAD" = '\'Y\'', "job_GV_$G_KDR_LOAD" = '\'Y\'', "job_GV_$G_LAST_UPDATED_BY" = '\'ETL\'', "job_GV_$G_LBS_BROKER_CODE" = '1966', "job_GV_$G_MAIN_KDR_TABLE_LOAD" = '\'Y\'', "job_GV_$G_MARKET" = '\'LONDON\'', "job_GV_$G_MAX_GENERATED_ID" = '-2147483648', "job_GV_$G_MRD_LOAD" = '\'Y\'', "job_GV_$G_NUMBER_OF_VALIDATION_RUNS_TO_KEEP" = '5', "job_GV_$G_Notification_Recipient_Email" = '\'\'', "job_GV_$G_OUTW_ADMIN_STATUS" = '\'ADMIN\'', "job_GV_$G_PRELOAD_CLAIMMOVEMENT_DONE" = '0', "job_GV_$G_RUN_UNLOAD_CLEANUP_WHEN_COMPLETE" = '\'Y\'', "job_GV_$G_SLEEP_INTERVAL" = '10', "job_GV_$G_TRUNCATE_UNLOAD" = '\'N\'', "job_checkpoint_enabled" = 'no', "job_collect_statistics" = 'no', "job_collect_statistics_monitor" = 'no', "job_create_debug_package" = 'no', "job_enable_assemblers" = 'yes', "job_enable_audit" = 'yes', "job_enable_dataquality" = 'yes', "job_export_repo" = 'no', "job_export_reports" = 'no', "job_guid" = 'b3a6b748-2c4f-4256-aa24-535a2ab40248', "job_isrecoverable" = 'no', "job_mode" = 'Multi-Process', "job_monitor_sample_rate" = '64000', "job_monitor_timer_rate" = '30', "job_name" = 'JOB_KDR_11_Build_Reference_And_KDR_For_Eclipse', "job_print_version" = 'no', "job_testmode_enabled" = 'no', "job_trace_abapquery" = 'no', "job_trace_all" = 'no', "job_trace_ascomm" = 'no', "job_trace_assemblers" = 'no', "job_trace_audit" = 'no', "job_trace_dataflow" = 'yes', "job_trace_idoc_file" = 'no', "job_trace_memory_loader" = 'no', "job_trace_memory_reader" = 'no', "job_trace_optimized_dataflow" = 'no', "job_trace_parallel_execution" = 'no', "job_trace_rfc_function" = 'no', "job_trace_row" = 'no', "job_trace_script" = 'no', "job_trace_session" = 'yes', "job_trace_sql_only" = 'no', "job_trace_sqlfunctions" = 'no', "job_trace_sqlloaders" = 'no', "job_trace_sqlreaders" = 'no', "job_trace_sqltransforms" = 'no', "job_trace_stored_procedure" = 'no', "job_trace_table" = 'no', "job_trace_table_reader" = 'no', "job_trace_transform" = 'no', "job_trace_userfunction" = 'no', "job_trace_usertransform" = 'no', "job_trace_workflow" = 'yes', "job_type" = 'batch', "job_use_statistics" = 'no', "locale_codepage" = '<default>', "locale_language" = '<default>', "locale_territory" = '<default>', "oracle_host_string" = 'LONANTRND10', "password" = '+0400000000120303000803E863058819B54FD7990DB690081F534D7300E02291BF8819D57A382ADE3EB1BCB18ED332730EE1EE00', "sql_server_database" = 'DI_LOCAL_REPOS_SAnnetts', "sql_server_dataserver" = 'LONANTRND10', "user" = 'DI_SANNETTS')
+ AlGUIComment ("ActaName_1" = 'RSavedAfterCheckOut', "ActaName_2" = 'RDate_created', "ActaName_3" = 'RDate_modified', "ActaValue_1" = 'YES', "ActaValue_2" = 'Tue Apr  7 21:35:29 2020', "ActaValue_3" = 'Thu Apr  9 20:52:32 2020', "x" = '-1', "y" = '-1')
+CREATE PLAN WF_Load_KDR::'19b17c28-96bc-4ec5-a86f-9796277e47a0'( )
+BEGIN
+PARALLEL
+BEGIN
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>403</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "x" = '727', "y" = '-334')
+CALL PLAN WF_Load_KDR_Master::'0354a38c-d9b5-49a5-aca1-50152a847dd4'();
+ AlGUIComment ("UI_DATA_XML" = '<UIDATA><MAINICON><LOCATION><X>0</X><Y>0</Y></LOCATION><SIZE><CX>653</CX><CY>-179</CY></SIZE></MAINICON><DESCRIPTION><LOCATION><X>0</X><Y>-190</Y></LOCATION><SIZE><CX>200</CX><CY>200</CY></SIZE><VISIBLE>0</VISIBLE></DESCRIPTION></UIDATA>', "x" = '888', "y" = '-738')
+CALL PLAN WF_Preload_Wrk_inw_claim_movement::'0280e3ce-7dd6-44d4-8d09-abe814ccbed8'();
+END
+END
+ SET ("run_once" = 'no', "unit_of_recovery" = 'no', "workflow_type" = 'Regular')
